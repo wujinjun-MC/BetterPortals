@@ -20,6 +20,7 @@ public class ProxyConfig {
     @Getter private InetSocketAddress address;
     @Getter private UUID encryptionKey; // Used so that portal data can't be intercepted on the network
     @Getter private int reconnectionDelay; // How long after being disconnected before attempting a reconnection (in ticks)
+    @Getter private boolean warnOnMissingSelection;
 
     @Inject
     public ProxyConfig(Logger logger) {
@@ -46,5 +47,7 @@ public class ProxyConfig {
             logger.warning("Failed to load encryption key from config file! Please make sure you set this to the key in the bungeecord config.");
             isEnabled = false; // Disable proxy connection - there's no valid encryption key so connection will just fail
         }
+
+        warnOnMissingSelection = section.getBoolean("warnOnMissingSelection");
     }
 }

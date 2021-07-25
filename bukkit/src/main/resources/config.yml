@@ -104,6 +104,11 @@ proxy:
   key: "" # A UUID used for encrypted communication with the proxy. You should set this to the UUID in the BetterPortals config on the bungee side.
   reconnectionDelay: 300 # Delay in ticks before attempting a reconnection to the proxy if disconnected (default 30 seconds) Set to -1 to disable.
 
+  # Whether to display a warning if a player's selection is missing upon switching between two servers which both have BetterPortals.
+  # This shouldn't happen, unless UUID forwarding is disabled, in which case it makes sense to disable this warning message.
+  # UUID forwarding is required for selection syncing between servers.
+  warnOnMissingSelection: true
+
 # Will randomly swap some blocks between the two ends of a nether portal when it's made, makes a cool effect.
 dimensionBlend:
   enable: false

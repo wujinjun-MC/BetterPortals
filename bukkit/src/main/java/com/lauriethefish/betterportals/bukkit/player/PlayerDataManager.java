@@ -2,6 +2,7 @@ package com.lauriethefish.betterportals.bukkit.player;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.lauriethefish.betterportals.bukkit.config.ProxyConfig;
 import com.lauriethefish.betterportals.bukkit.events.IEventRegistrar;
 import com.lauriethefish.betterportals.bukkit.net.requests.GetSelectionRequest;
 import com.lauriethefish.betterportals.bukkit.player.selection.IPlayerSelectionManager;
@@ -27,6 +28,7 @@ public class PlayerDataManager implements IPlayerDataManager, Listener   {
     private final Logger logger;
     private final IPlayerData.Factory playerDataFactory;
     private final Map<Player, IPlayerData> players = new HashMap<>();
+    private final ProxyConfig proxyConfig;
 
     private final Map<UUID, TeleportRequest> pendingTeleportOnJoin = new HashMap<>();
     private final Map<UUID, GetSelectionRequest.ExternalSelectionInfo> pendingSelectionOnJoin = new HashMap<>();
@@ -36,9 +38,10 @@ public class PlayerDataManager implements IPlayerDataManager, Listener   {
     private final Map<UUID, IPlayerSelectionManager> loggedOutPlayerSelections = new HashMap<>();
 
     @Inject
-    public PlayerDataManager(IEventRegistrar eventRegistrar, Logger logger, IPlayerData.Factory playerDataFactory) {
+    public PlayerDataManager(IEventRegistrar eventRegistrar, Logger logger, IPlayerData.Factory playerDataFactory, ProxyConfig proxyConfig) {
         this.logger = logger;
         this.playerDataFactory = playerDataFactory;
+        this.proxyConfig = proxyConfig;
 
         addExistingPlayers();
         eventRegistrar.register(this);
@@ -87,7 +90,15 @@ public class PlayerDataManager implements IPlayerDataManager, Listener   {
         if(player != null) {
             return players.get(player).getSelection().getDestSelection();
         }   else    {
-            return loggedOutPlayerSelections.get(uniqueId).getDestSelection();
+            IPlayerSelectionManager selection = loggedOutPlayerSelections.get(uniqueId);
+            if(selection == null) {
+                if(proxyConfig.isWarnOnMissingSelection()) {
+                    logger.warning("No selection found for player with unique ID %s. (selection check triggered by server switch, selection must be mirrored to the destination server). Is UUID forwarding disabled?", uniqueId);
+                }
+                return null;
+            }
+
+            return selection.getDestSelection();
         }
     }
 
