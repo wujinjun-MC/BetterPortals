@@ -164,6 +164,10 @@ chatMessages:
   startedReconnection: "Started reconnecting to the proxy. See console for details."
   changedName: "Successfully changed the portal name"
   currentName: "The name for this portal is: {name}"
+  allowsItems: "This portal allows item teleportation"
+  doesNotAllowItems: "This portal does not allow item teleportation"
+  changedAllowsItems: "Successfully set that the portal allows item teleportation"
+  changedDoesNotAllowItems: "Successfully set that the portal does not allow item teleportation"
   help: "Sub Commands"
 
   setPosA: "Set position A"

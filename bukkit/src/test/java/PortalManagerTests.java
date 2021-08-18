@@ -81,15 +81,15 @@ public class PortalManagerTests {
     public void testFindClosestComplex() {
         PortalPosition portalOrigin = new PortalPosition(new Location(overworld, 0, 0, 0), PortalDirection.EAST);
         PortalPosition portalDestination = new PortalPosition(new Location(nether, 0, 0, 0), PortalDirection.EAST);
-        IPortal portalA = portalFactory.create(portalOrigin, portalDestination, new Vector(2.0, 3.0, 0.0), true, UUID.randomUUID(), null, null);
+        IPortal portalA = portalFactory.create(portalOrigin, portalDestination, new Vector(2.0, 3.0, 0.0), true, UUID.randomUUID(), null, null, true);
 
         portalOrigin = new PortalPosition(new Location(overworld, 10, 0, 0), PortalDirection.EAST);
         portalDestination = new PortalPosition(new Location(nether, 80, 0, 0), PortalDirection.EAST);
-        IPortal portalB = portalFactory.create(portalOrigin, portalDestination, new Vector(2.0, 3.0, 0.0), true, UUID.randomUUID(), null, null);
+        IPortal portalB = portalFactory.create(portalOrigin, portalDestination, new Vector(2.0, 3.0, 0.0), true, UUID.randomUUID(), null, null, true);
 
         portalOrigin = new PortalPosition(new Location(overworld, 20, 0, 0), PortalDirection.EAST);
         portalDestination = new PortalPosition(new Location(nether, 160, 0, 0), PortalDirection.EAST);
-        IPortal portalC = portalFactory.create(portalOrigin, portalDestination, new Vector(2.0, 3.0, 0.0), true, UUID.randomUUID(), null, null);
+        IPortal portalC = portalFactory.create(portalOrigin, portalDestination, new Vector(2.0, 3.0, 0.0), true, UUID.randomUUID(), null, null, true);
 
         portalManager.registerPortal(portalA);
         portalManager.registerPortal(portalB);
@@ -106,7 +106,7 @@ public class PortalManagerTests {
     private IPortal createTestPortal() {
         PortalPosition portalOrigin = new PortalPosition(new Location(overworld, 0, 0, 0), PortalDirection.EAST);
         PortalPosition portalDestination = new PortalPosition(new Location(nether, 0, 0, 0), PortalDirection.EAST);
-        return portalFactory.create(portalOrigin, portalDestination, new Vector(2.0, 3.0, 0.0), true, UUID.randomUUID(), null, null);
+        return portalFactory.create(portalOrigin, portalDestination, new Vector(2.0, 3.0, 0.0), true, UUID.randomUUID(), null, null, true);
     }
 
     // Tests that findClosest works fine without predicates
@@ -114,15 +114,15 @@ public class PortalManagerTests {
     public void testFindClosestSimple() {
         PortalPosition portalOrigin = new PortalPosition(new Location(overworld, 0, 0, 0), PortalDirection.EAST);
         PortalPosition portalDestination = new PortalPosition(new Location(nether, 0, 0, 0), PortalDirection.EAST);
-        IPortal portalA = portalFactory.create(portalOrigin, portalDestination, new Vector(2.0, 3.0, 0.0), true, UUID.randomUUID(), null, null);
+        IPortal portalA = portalFactory.create(portalOrigin, portalDestination, new Vector(2.0, 3.0, 0.0), true, UUID.randomUUID(), null, null, true);
 
         portalOrigin = new PortalPosition(new Location(overworld, 10, 0, 0), PortalDirection.EAST);
         portalDestination = new PortalPosition(new Location(nether, 80, 0, 0), PortalDirection.EAST);
-        IPortal portalB = portalFactory.create(portalOrigin, portalDestination, new Vector(2.0, 3.0, 0.0), true, UUID.randomUUID(), null, null);
+        IPortal portalB = portalFactory.create(portalOrigin, portalDestination, new Vector(2.0, 3.0, 0.0), true, UUID.randomUUID(), null, null, true);
 
         portalOrigin = new PortalPosition(new Location(overworld, 20, 0, 0), PortalDirection.EAST);
         portalDestination = new PortalPosition(new Location(nether, 160, 0, 0), PortalDirection.EAST);
-        IPortal portalC = portalFactory.create(portalOrigin, portalDestination, new Vector(2.0, 3.0, 0.0), true, UUID.randomUUID(), null, null);
+        IPortal portalC = portalFactory.create(portalOrigin, portalDestination, new Vector(2.0, 3.0, 0.0), true, UUID.randomUUID(), null, null, true);
 
         portalManager.registerPortal(portalA);
         portalManager.registerPortal(portalB);

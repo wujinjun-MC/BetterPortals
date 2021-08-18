@@ -69,13 +69,25 @@ public interface IPortal extends BetterPortal {
      */
     boolean isRegistered();
 
+    /**
+     * @return If this portal allows items to be teleported
+     */
+    boolean allowsItemTeleportation();
+
+    /**
+     * Sets whether or not to allow item teleportation through this portal.
+     * @param allow Whether or not to allow item teleportation through this portal.
+     */
+    void setAllowsItemTeleportation(boolean allow);
+
     interface Factory {
         IPortal create(@Assisted("originPos") @NotNull PortalPosition originPos,
                        @Assisted("destPos") @NotNull PortalPosition destPos,
-                       Vector size, boolean isCustom,
+                       Vector size, @Assisted("isCustom") boolean isCustom,
                        @Assisted("id") UUID id,
                        @Nullable @Assisted("ownerId") UUID ownerId,
-                       @Nullable @Assisted("name") String name
-        );
+                       @Nullable @Assisted("name") String name,
+                       @Assisted("allowItemTeleportation") boolean allowItemTeleportation
+       );
     }
 }

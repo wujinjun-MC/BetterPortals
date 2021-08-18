@@ -33,7 +33,7 @@ public class PortalActivityManagerTests {
     private TestPortal createTestPortal() {
         PortalPosition portalOrigin = new PortalPosition(new Location(null, 0, 0, 0), PortalDirection.EAST);
         PortalPosition portalDestination = new PortalPosition(new Location(null, 0, 0, 0), PortalDirection.EAST);
-        return (TestPortal) portalFactory.create(portalOrigin, portalDestination, new Vector(2.0, 3.0, 0.0), true, UUID.randomUUID(), null, null);
+        return (TestPortal) portalFactory.create(portalOrigin, portalDestination, new Vector(2.0, 3.0, 0.0), true, UUID.randomUUID(), null, null, true);
     }
 
     // Tests that the portal update manager calls the regular update methods of portals correctly

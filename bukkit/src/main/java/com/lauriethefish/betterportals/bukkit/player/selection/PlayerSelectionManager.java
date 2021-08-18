@@ -69,13 +69,13 @@ public class PlayerSelectionManager implements IPlayerSelectionManager  {
         }
 
         IPortal portal = portalFactory.create(originSelection.getPortalPosition(), destSelection.getPortalPosition(),
-                                                            originSelection.getPortalSize(), true, UUID.randomUUID(), player.getUniqueId(), null);
+                                                            originSelection.getPortalSize(), true, UUID.randomUUID(), player.getUniqueId(), null, true);
         portalManager.registerPortal(portal);
 
         // Add another portal going back if we're in two way mode
         if(twoWay) {
             IPortal reversePortal = portalFactory.create(destSelection.getPortalPosition(), originSelection.getPortalPosition(),
-                    originSelection.getPortalSize(), true, UUID.randomUUID(), player.getUniqueId(), null);
+                    originSelection.getPortalSize(), true, UUID.randomUUID(), player.getUniqueId(), null, true);
             portalManager.registerPortal(reversePortal);
         }
         originSelection = null;
@@ -100,7 +100,7 @@ public class PlayerSelectionManager implements IPlayerSelectionManager  {
 
         // Currently you have to manually create a portal in the other direction
         IPortal portal = portalFactory.create(originSelection.getPortalPosition(), externalSelection.getPosition(),
-                    originSelection.getPortalSize(), true, UUID.randomUUID(), player.getUniqueId(), null);
+                    originSelection.getPortalSize(), true, UUID.randomUUID(), player.getUniqueId(), null, true);
         portalManager.registerPortal(portal);
     }
 }

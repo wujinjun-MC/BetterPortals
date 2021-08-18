@@ -9,6 +9,7 @@ import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.api.PortalPosition;
 import lombok.Getter;
 import org.bukkit.util.Vector;
+import org.checkerframework.checker.units.qual.A;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -31,10 +32,10 @@ public class TestPortal implements IPortal {
     @Inject
     public TestPortal(@Assisted("originPos") @NotNull PortalPosition originPos,
                       @Assisted("destPos") @NotNull PortalPosition destPos,
-                      @NotNull Vector size, @Assisted boolean isCustom,
+                      @NotNull Vector size, @Assisted("isCustom") boolean isCustom,
                       @NotNull @Assisted("id") UUID id,
                       @Nullable @Assisted("ownerId") UUID ownerId,
-                      @Nullable @Assisted("name") String name) {
+                      @Nullable @Assisted("name") String name, @Assisted("allowItemTeleportation") boolean allowItemTeleportation) {
         this.originPos = originPos;
         this.destPos = destPos;
         this.id = id;
@@ -124,5 +125,15 @@ public class TestPortal implements IPortal {
     @Override
     public boolean isRegistered() {
         return false;
+    }
+
+    @Override
+    public boolean allowsItemTeleportation() {
+        return false;
+    }
+
+    @Override
+    public void setAllowsItemTeleportation(boolean allow) {
+
     }
 }

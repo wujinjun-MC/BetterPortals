@@ -45,7 +45,7 @@ public class PortalPredicateTests {
         PortalPosition originPos = new PortalPosition(new Location(overworld, 0, 64, 0), PortalDirection.EAST);
         PortalPosition destPos = new PortalPosition(new Location(nether, 1000, 64, 0), PortalDirection.EAST);
 
-        portal = new TestPortal(originPos, destPos, new Vector(3.0, 3.0, 0.0), true, UUID.randomUUID(), null, null);
+        portal = new TestPortal(originPos, destPos, new Vector(3.0, 3.0, 0.0), true, UUID.randomUUID(), null, null, true);
     }
 
     @After

@@ -153,7 +153,8 @@ public class CustomPortalCommands {
                 portal.isCustom(),
                 portal.getId(),
                 portal.getOwnerId(),
-                name
+                name,
+                true
         );
 
         portalManager.registerPortal(replacement);
@@ -203,4 +204,43 @@ public class CustomPortalCommands {
         player.sendMessage(nameFormat);
         return true;
     }
+
+    @Command
+    @Path("betterportals/getallowitemteleportation")
+    @RequiresPermissions("betterportals.getallowitemteleportation")
+    @RequiresPlayer
+    @Aliases("getcanteleportitems")
+    @Description("Tells you whether or not the nearest portal within 20 blocks allows item teleportation")
+    public boolean getAllowItemTeleportation(Player player) throws CommandException {
+        IPortal portal = getClosestPortal(player);
+
+        if(portal.allowsItemTeleportation()) {
+            player.sendMessage(messageConfig.getChatMessage("allowsItems"));
+        }   else    {
+            player.sendMessage(messageConfig.getChatMessage("doesNotAllowItems"));
+        }
+
+        return true;
+    }
+
+    @Command
+    @Path("betterportals/setallowitemteleportation")
+    @RequiresPermissions("betterportals.setallowitemteleportation")
+    @RequiresPlayer
+    @Aliases("setcanteleportitems")
+    @Description("Sets whether or not the nearest portal within 20 blocks allows item teleportation")
+    @Argument(name = "allow")
+    public boolean setAllowItemTeleportation(Player player, boolean allowTeleportation) throws CommandException {
+        IPortal portal = getClosestPortal(player);
+
+        portal.setAllowsItemTeleportation(allowTeleportation);
+        if(allowTeleportation) {
+            player.sendMessage(messageConfig.getChatMessage("changedAllowsItems"));
+        }   else    {
+            player.sendMessage(messageConfig.getChatMessage("changedDoesNotAllowItems"));
+        }
+
+        return true;
+    }
+
 }
