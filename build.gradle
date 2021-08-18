@@ -21,7 +21,7 @@ allprojects {
     }
 
     repositories {
-        jcenter()
+        mavenCentral()
         maven { url 'https://jitpack.io' }
     }
 
@@ -30,17 +30,17 @@ allprojects {
     dependencies {
         implementation 'com.google.inject:guice:5.0.1'
         implementation 'com.google.inject.extensions:guice-assistedinject:5.0.1'
-        implementation 'org.jetbrains:annotations:20.1.0'
+        implementation 'org.jetbrains:annotations:22.0.0'
         implementation 'com.google.code.findbugs:jsr305:3.0.2'
 
-        compileOnly 'org.projectlombok:lombok:1.18.16'
+        compileOnly 'org.projectlombok:lombok:1.18.20'
         testImplementation 'org.projectlombok:lombok:1.18.16'
         annotationProcessor 'org.projectlombok:lombok:1.18.16'
         testAnnotationProcessor('org.projectlombok:lombok:1.18.16')
 
-        testCompileOnly 'junit:junit:4.12'
-        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
-        testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.3.1'
+        testCompileOnly 'junit:junit:4.13.2'
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+        testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.7.2'
     }
 }
 

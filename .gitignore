@@ -6,6 +6,7 @@ build/
 
 dependency-reduced-pom.xml
 .classpath
+.idea
 .factorypath
 .project
 
