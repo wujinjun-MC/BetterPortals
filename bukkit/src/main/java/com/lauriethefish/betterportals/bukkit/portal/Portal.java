@@ -37,7 +37,7 @@ public class Portal implements IPortal, ConfigurationSerializable {
     @Getter private final Vector size;
     @Getter private final boolean isCrossServer;
     @Getter private final boolean isCustom;
-    private boolean allowItemTeleportation;
+    private boolean allowNonPlayerTeleportation;
 
     @Getter private final PortalTransformations transformations;
     @Getter private final IViewableBlockArray viewableBlocks;
@@ -55,7 +55,7 @@ public class Portal implements IPortal, ConfigurationSerializable {
                   Logger logger, PortalTransformationsFactory transformationsFactory,
                   @Assisted("originPos") PortalPosition originPos, @Assisted("destPos") PortalPosition destPos,
                   @Assisted Vector size, @Assisted("isCustom") boolean isCustom,
-                  @Assisted("id") UUID id, @Nullable @Assisted("ownerId") UUID ownerId, @Nullable @Assisted("name") String name, @Assisted("allowItemTeleportation") boolean allowItemTeleportation) {
+                  @Assisted("id") UUID id, @Nullable @Assisted("ownerId") UUID ownerId, @Nullable @Assisted("name") String name, @Assisted("allowNonPlayerTeleportation") boolean allowNonPlayerTeleportation) {
         this.portalManager = portalManager;
         this.logger = logger;
         this.originPos = originPos;
@@ -63,7 +63,7 @@ public class Portal implements IPortal, ConfigurationSerializable {
         this.size = size;
         this.isCrossServer = destPos.isExternal();
         this.isCustom = isCustom;
-        this.allowItemTeleportation = allowItemTeleportation;
+        this.allowNonPlayerTeleportation = allowNonPlayerTeleportation;
         // We do not need to get the destination entities if viewing entities through portals is disabled, or if entity support is disabled
         this.entityList = entityListFactory.create(this, !isCrossServer && miscConfig.isEntitySupportEnabled());
         this.entityTeleportationManager = teleportManagerFactory.create(this);
@@ -161,13 +161,13 @@ public class Portal implements IPortal, ConfigurationSerializable {
     }
 
     @Override
-    public boolean allowsItemTeleportation() {
-        return allowItemTeleportation;
+    public boolean allowsNonPlayerTeleportation() {
+        return allowNonPlayerTeleportation;
     }
 
     @Override
-    public void setAllowsItemTeleportation(boolean allow) {
-        allowItemTeleportation = allow;
+    public void setAllowsNonPlayerTeleportation(boolean allow) {
+        allowNonPlayerTeleportation = allow;
     }
 
     private boolean isStillValid() {
@@ -188,7 +188,7 @@ public class Portal implements IPortal, ConfigurationSerializable {
         result.put("size", size);
         result.put("anchored", isCustom);
         result.put("id", id.toString());
-        result.put("allowsItemTeleportation", allowsItemTeleportation());
+        result.put("allowsNonPlayerTeleportation", allowsNonPlayerTeleportation());
         if(ownerId != null) {result.put("owner", ownerId.toString());}
         if(name != null) {result.put("name", name);}
 
@@ -214,7 +214,7 @@ public class Portal implements IPortal, ConfigurationSerializable {
                 id,
                 ownerId,
                 (String) map.get("name"),
-                (boolean) map.getOrDefault("allowsItemTeleportation", true)
+                (boolean) map.getOrDefault("allowsNonPlayerTeleportation", true)
         );
     }
 }

@@ -35,7 +35,7 @@ public class TestPortal implements IPortal {
                       @NotNull Vector size, @Assisted("isCustom") boolean isCustom,
                       @NotNull @Assisted("id") UUID id,
                       @Nullable @Assisted("ownerId") UUID ownerId,
-                      @Nullable @Assisted("name") String name, @Assisted("allowItemTeleportation") boolean allowItemTeleportation) {
+                      @Nullable @Assisted("name") String name, @Assisted("allowNonPlayerTeleportation") boolean allowNonPlayerTeleportation) {
         this.originPos = originPos;
         this.destPos = destPos;
         this.id = id;
@@ -128,12 +128,10 @@ public class TestPortal implements IPortal {
     }
 
     @Override
-    public boolean allowsItemTeleportation() {
+    public boolean allowsNonPlayerTeleportation() {
         return false;
     }
 
     @Override
-    public void setAllowsItemTeleportation(boolean allow) {
-
-    }
+    public void setAllowsNonPlayerTeleportation(boolean allow) { }
 }

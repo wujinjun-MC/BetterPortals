@@ -206,15 +206,15 @@ public class CustomPortalCommands {
     }
 
     @Command
-    @Path("betterportals/getallowitemteleportation")
-    @RequiresPermissions("betterportals.getallowitemteleportation")
+    @Path("betterportals/getallowNonPlayerTeleportation")
+    @RequiresPermissions("betterportals.getallowNonPlayerTeleportation")
     @RequiresPlayer
-    @Aliases("getcanteleportitems")
+    @Aliases("getcanteleportmobs")
     @Description("Tells you whether or not the nearest portal within 20 blocks allows item teleportation")
-    public boolean getAllowItemTeleportation(Player player) throws CommandException {
+    public boolean getAllowNonPlayerTeleportation(Player player) throws CommandException {
         IPortal portal = getClosestPortal(player);
 
-        if(portal.allowsItemTeleportation()) {
+        if(portal.allowsNonPlayerTeleportation()) {
             player.sendMessage(messageConfig.getChatMessage("allowsItems"));
         }   else    {
             player.sendMessage(messageConfig.getChatMessage("doesNotAllowItems"));
@@ -224,16 +224,16 @@ public class CustomPortalCommands {
     }
 
     @Command
-    @Path("betterportals/setallowitemteleportation")
-    @RequiresPermissions("betterportals.setallowitemteleportation")
+    @Path("betterportals/setAllowNonPlayerTeleportation")
+    @RequiresPermissions("betterportals.setAllowNonPlayerTeleportation")
     @RequiresPlayer
-    @Aliases("setcanteleportitems")
+    @Aliases("setcanteleportmobs")
     @Description("Sets whether or not the nearest portal within 20 blocks allows item teleportation")
     @Argument(name = "allow")
-    public boolean setAllowItemTeleportation(Player player, boolean allowTeleportation) throws CommandException {
+    public boolean setAllowNonPlayerTeleportation(Player player, boolean allowTeleportation) throws CommandException {
         IPortal portal = getClosestPortal(player);
 
-        portal.setAllowsItemTeleportation(allowTeleportation);
+        portal.setAllowsNonPlayerTeleportation(allowTeleportation);
         if(allowTeleportation) {
             player.sendMessage(messageConfig.getChatMessage("changedAllowsItems"));
         }   else    {

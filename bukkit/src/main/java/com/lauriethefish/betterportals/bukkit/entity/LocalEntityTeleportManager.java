@@ -34,7 +34,7 @@ public class LocalEntityTeleportManager implements IEntityTeleportManager {
 
         // Check each entity at the origin to see if it teleported
         for(Entity entity : portal.getEntityList().getOriginEntities()) {
-            if(entity instanceof Item && !portal.allowsItemTeleportation()) {continue;}
+            if(!(entity instanceof Player) && !portal.allowsNonPlayerTeleportation()) {continue;}
 
             Location lastPosition = lastEntityPositions.get(entity);
             Location currentPosition = entity.getLocation();
