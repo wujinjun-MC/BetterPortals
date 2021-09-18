@@ -24,19 +24,33 @@ public class ServerSwitch implements Listener {
 
     @EventHandler
     public void onServerSwitch(ServerSwitchEvent event) {
-        if(event.getFrom() == null) {return;}
+        logger.finer("Found server switch event for user %s", event.getPlayer().getUniqueId());
+        if(event.getFrom() == null) {
+            logger.finer("From server is null, skipping");
+            return;
+        }
 
         IClientHandler from = portalServer.getServer(event.getFrom().getName());
         IClientHandler to = portalServer.getServer(event.getPlayer().getServer().getInfo().getName());
 
-        if(from == null || to == null) {return;}
+        if(from == null) {
+            logger.finer("From server was unregistered for server switch event, skipping");
+            return;
+        }
 
+        if(to == null) {
+            logger.finer("To server was unregistered for server switch event, skipping");
+            return;
+        }
+
+        logger.finer("Sending previous server put request");
         PreviousServerPutRequest request = new PreviousServerPutRequest();
         request.setPlayerId(event.getPlayer().getUniqueId());
         request.setPreviousServer(event.getFrom().getName());
 
         to.sendRequest(request, (response) -> {
             try {
+                logger.finer("Sent and received response");
                 response.checkForErrors();
             }   catch(RequestException ex) {
                 logger.warning("Failed to set previous server for player %s", event.getPlayer().getUniqueId());
