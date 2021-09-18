@@ -12,7 +12,5 @@ Contributions are welcome, big or small!
 ## Current TODO List
 These are things that would be especially useful as contributions.
 
-- An API for other plugins.
-- Sending `PacketPlayOutTileEntityData` to fix sign text not showing through portals.
 - Any bug fixes.
 - Redis support instead of the current system for cross-server portals, since I'm aware that it's kind of janky.
