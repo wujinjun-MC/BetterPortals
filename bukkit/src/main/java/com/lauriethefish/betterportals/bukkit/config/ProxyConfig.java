@@ -21,6 +21,7 @@ public class ProxyConfig {
     @Getter private UUID encryptionKey; // Used so that portal data can't be intercepted on the network
     @Getter private int reconnectionDelay; // How long after being disconnected before attempting a reconnection (in ticks)
     @Getter private boolean warnOnMissingSelection;
+    @Getter public String overrideServerName;
 
     @Inject
     public ProxyConfig(Logger logger) {
@@ -39,6 +40,8 @@ public class ProxyConfig {
         address = new InetSocketAddress(rawAddress, port);
 
         reconnectionDelay = section.getInt("reconnectionDelay");
+
+        overrideServerName = section.getString("overrideServerName");
 
         try {
             encryptionKey = UUID.fromString(Objects.requireNonNull(section.getString("key"), "Encryption key missing"));

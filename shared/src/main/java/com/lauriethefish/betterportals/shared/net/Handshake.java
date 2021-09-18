@@ -17,4 +17,5 @@ public class Handshake implements Serializable {
     private String pluginVersion;
     private String gameVersion;
     private int serverPort;
+    private String overrideServerName;
 }

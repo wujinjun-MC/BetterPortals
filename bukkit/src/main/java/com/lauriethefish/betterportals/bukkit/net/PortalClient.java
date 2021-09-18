@@ -172,6 +172,7 @@ public class PortalClient implements IPortalClient {
         handshake.setPluginVersion(pl.getDescription().getVersion());
         handshake.setServerPort(Bukkit.getPort());
         handshake.setGameVersion(VersionUtil.getCurrentVersion());
+        handshake.setOverrideServerName(proxyConfig.getOverrideServerName());
         objectStream.writeObject(handshake);
 
         HandshakeResponse response = (HandshakeResponse) objectStream.readObject();
