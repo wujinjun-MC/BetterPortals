@@ -91,8 +91,23 @@ public class ClientHandler implements IClientHandler {
 
         InetSocketAddress statedServerAddress = new InetSocketAddress(socket.getInetAddress(), handshake.getServerPort());
 
-        // Find the bungeecord server that the connector is
-        ServerInfo serverInfo = findServer(statedServerAddress);
+        // Find the bungeecord server that the connector is connecting from
+        ServerInfo serverInfo = null;
+        String statedServerName = handshake.getOverrideServerName();
+        if(statedServerName != null) {
+            logger.finer("Using manually stated server name %s", statedServerName);
+            serverInfo = pl.getProxy().getServerInfo(statedServerName);
+
+            if(serverInfo == null) {
+                logger.warning("Server name %s was stated by a client, but no listed server existed with that name!", statedServerName);
+            }
+        }
+
+        if(serverInfo == null) {
+            logger.fine("Finding server info from socket address and port");
+            serverInfo = findServer(statedServerAddress);
+        }
+
         if(serverInfo == null) {
             logger.warning("A server tried to register that didn't exist in bungeecord");
             result = HandshakeResponse.Result.SERVER_NOT_REGISTERED;
