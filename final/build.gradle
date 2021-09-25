@@ -20,6 +20,7 @@ shadowJar {
     configurations = [project.configurations.implementation]
 
     relocate 'org.bstats', 'com.lauriethefish.bstats'
+    archiveFileName = 'BetterPortals.jar'
 
     // Unfortunately manually excluding GSON here (it's included with spigot) isn't really possible so we manually relocate these separately
     relocate 'com.google.thirdparty', 'com.lauriethefish.google.thirdparty'
