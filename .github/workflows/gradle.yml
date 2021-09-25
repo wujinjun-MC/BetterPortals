@@ -20,7 +20,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: artifact
-          path: final/build/libs/*all.jar # This only uploads the shaded jars, can be changed to "*.jar" if required
+          path: final/build/libs/BetterPortals.jar
       - name: Publish JAR to webhook
         uses: tsickert/discord-webhook@v3.2.0
         with:
@@ -29,4 +29,4 @@ jobs:
           content: "${{ steps.get_sha.outputs.SHORT_SHA }} - `${{ github.event.head_commit.message }}`"
           username: "BetterPortals developer builds"
           avatar-url: "https://i.imgur.com/4l67APG.png"
-          filename: final/build/libs/*all.jar
+          filename: final/build/libs/BetterPortals.jar
