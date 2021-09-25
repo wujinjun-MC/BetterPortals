@@ -21,12 +21,16 @@ jobs:
         with:
           name: artifact
           path: final/build/libs/BetterPortals.jar
+      - name: Get short sha
+        id: get_sha
+        run: |
+          echo "::set-output name=SHORT_SHA::$(git rev-parse HEAD | cut -c 1-8)"
       - name: Publish JAR to webhook
         uses: tsickert/discord-webhook@v3.2.0
         with:
           # Url is github secret, so it doesn't get leaked
           webhook-url: ${{ secrets.DISCORD_WEBHOOK_URL }}
           content: "${{ steps.get_sha.outputs.SHORT_SHA }} - `${{ github.event.head_commit.message }}`"
-          username: "BetterPortals developer builds"
+          username: "BetterPortals Dev Builds"
           avatar-url: "https://i.imgur.com/4l67APG.png"
           filename: final/build/libs/BetterPortals.jar
