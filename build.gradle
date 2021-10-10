@@ -39,7 +39,7 @@ allprojects {
         testAnnotationProcessor('org.projectlombok:lombok:1.18.16')
 
         testCompileOnly 'junit:junit:4.13.2'
-        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
         testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.8.1'
     }
 }
