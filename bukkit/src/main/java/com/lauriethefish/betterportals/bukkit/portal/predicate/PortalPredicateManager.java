@@ -3,6 +3,7 @@ package com.lauriethefish.betterportals.bukkit.portal.predicate;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.lauriethefish.betterportals.api.PortalPredicate;
+import com.lauriethefish.betterportals.bukkit.player.IPlayerDataManager;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import org.bukkit.entity.Player;
@@ -21,12 +22,13 @@ public class PortalPredicateManager implements IPortalPredicateManager  {
 
     // Add the default predicates for activation distance and view permissions
     @Inject
-    public PortalPredicateManager(Logger logger, ActivationDistance activationDistance, CrossServerDestinationChecker crossServerDestinationChecker) {
+    public PortalPredicateManager(Logger logger,  IPlayerDataManager playerDataManager, ActivationDistance activationDistance, CrossServerDestinationChecker crossServerDestinationChecker) {
         this.logger = logger;
 
         addActivationPredicate(activationDistance);
         addActivationPredicate(crossServerDestinationChecker);
         addViewPredicate(new PermissionsChecker("betterportals.see"));
+        addViewPredicate(new PlayerPreferenceChecker(playerDataManager, "seeThroughPortal"));
         addTeleportPredicate(new PermissionsChecker("betterportals.use"));
     }
 
