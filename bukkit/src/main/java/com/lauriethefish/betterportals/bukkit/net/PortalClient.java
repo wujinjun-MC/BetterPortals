@@ -105,7 +105,7 @@ public class PortalClient implements IPortalClient {
     private void run() throws IOException, GeneralSecurityException, ClassNotFoundException {
         socket = new Socket();
         socket.connect(proxyConfig.getAddress());
-
+        socket.setKeepAlive(proxyConfig.isKeepAlive());
 
         logger.fine("Hello from client thread");
         objectStream = encryptedObjectStreamFactory.create(socket.getInputStream(), socket.getOutputStream());
