@@ -139,6 +139,8 @@ chatMessages:
   horizontalIssues: "Warning: horizontal portals with different origin/destination directions can cause issues with block rotations - not all blocks can be rotated in every direction"
   noName: "This portal has no name"
   nameNetherPortal: "You can't set the name of a nether portal"
+  seeThroughPortalDisabled: "All nether portals will now look like vanilla portals to you!"
+  seeThroughPortalEnabled: "All eligible nether portals will now show you what's on the other side."
 
   # Printed if a player lights a portal in an unlinked world
   # To disable, just remove all the text inside the quotes
