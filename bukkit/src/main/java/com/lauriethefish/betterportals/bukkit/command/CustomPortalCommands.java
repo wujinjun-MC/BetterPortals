@@ -14,7 +14,6 @@ import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
 
 @Singleton
 public class CustomPortalCommands {
@@ -257,13 +256,19 @@ public class CustomPortalCommands {
     @Argument(name = "seeThroughPortal", defaultValue = "true")
     public boolean setSeeThroughPortal(Player player, boolean seeThroughPortal) {
 
+        IPlayerData playerData = playerDataManager.getPlayerData(player);
+
         if (seeThroughPortal) {
-            Objects.requireNonNull(playerDataManager.getPlayerData(player)).getPermanentData().set("seeThroughPortal", true);
+            assert playerData != null;
+            playerData.getPermanentData().set("seeThroughPortal", true);
+            playerData.savePermanentData();
             player.sendMessage(messageConfig.getChatMessage("seeThroughPortalEnabled"));
         }
 
         else {
-            Objects.requireNonNull(playerDataManager.getPlayerData(player)).getPermanentData().set("seeThroughPortal", false);
+            assert playerData != null;
+            playerData.getPermanentData().set("seeThroughPortal", false);
+            playerData.savePermanentData();
             player.sendMessage(messageConfig.getChatMessage("seeThroughPortalDisabled"));
         }
 
