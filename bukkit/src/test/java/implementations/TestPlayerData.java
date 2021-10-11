@@ -6,6 +6,7 @@ import com.lauriethefish.betterportals.bukkit.player.IPlayerData;
 import com.lauriethefish.betterportals.bukkit.player.selection.IPlayerSelectionManager;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import lombok.Getter;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,6 +29,12 @@ public class TestPlayerData implements IPlayerData {
 
     @Override
     public @NotNull IPlayerSelectionManager getSelection() {return null;}
+
+    @Override
+    public void savePermanentData() { }
+
+    @Override
+    public @NotNull YamlConfiguration getPermanentData() { return null;}
 
     @Override
     public void setSelection(@NotNull IPlayerSelectionManager selection) { }
