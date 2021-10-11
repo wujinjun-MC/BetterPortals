@@ -2,6 +2,7 @@ package com.lauriethefish.betterportals.bukkit.player;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import com.lauriethefish.betterportals.bukkit.BetterPortals;
 import com.lauriethefish.betterportals.bukkit.player.selection.IPlayerSelectionManager;
 import com.lauriethefish.betterportals.bukkit.player.view.IPlayerPortalView;
 import com.lauriethefish.betterportals.bukkit.player.view.PlayerPortalViewFactory;
@@ -14,9 +15,12 @@ import com.lauriethefish.betterportals.bukkit.util.performance.OperationTimer;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -25,8 +29,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerData implements IPlayerData  {
     @Getter private final Player player;
+    @Getter private final YamlConfiguration permanentData;
     @Getter @Setter private IPlayerSelectionManager selection;
 
+    private final BetterPortals pl;
     private final Logger logger;
     private final IPortalManager portalManager;
     private final IPortalPredicateManager portalPredicateManager;
@@ -39,15 +45,18 @@ public class PlayerData implements IPlayerData  {
     private final Map<IPortal, IPlayerPortalView> portalViews = new ConcurrentHashMap<>();
 
     @Inject
-    public PlayerData(@Assisted Player player, IPlayerSelectionManager selection, IPortalManager portalManager, IPortalPredicateManager portalPredicateManager, IPerformanceWatcher performanceWatcher, Logger logger, IPortalActivityManager portalActivityManager, PlayerPortalViewFactory playerPortalViewFactory) {
+    public PlayerData(@Assisted Player player, IPlayerSelectionManager selection, IPortalManager portalManager, IPortalPredicateManager portalPredicateManager, IPerformanceWatcher performanceWatcher, BetterPortals pl, Logger logger, IPortalActivityManager portalActivityManager, PlayerPortalViewFactory playerPortalViewFactory) {
         this.player = player;
         this.selection = selection;
         this.portalManager = portalManager;
         this.portalPredicateManager = portalPredicateManager;
         this.performanceWatcher = performanceWatcher;
+        this.pl = pl;
         this.logger = logger;
         this.portalActivityManager = portalActivityManager;
         this.playerPortalViewFactory = playerPortalViewFactory;
+
+        permanentData = loadPermanentDataYml();
     }
 
     @Override
@@ -120,5 +129,31 @@ public class PlayerData implements IPlayerData  {
 
     private void setNotViewing(IPortal portal) {
         portalViews.remove(portal).onDeactivate();
+    }
+
+    private YamlConfiguration loadPermanentDataYml() {
+
+        File dataFolder = new File(pl.getDataFolder(), "playerData");
+
+        if (!dataFolder.exists()) //noinspection ResultOfMethodCallIgnored
+            dataFolder.mkdirs();
+
+        File permanentDataFile = new File(dataFolder, player.getUniqueId() + ".yml");
+
+        try {
+            if (!permanentDataFile.exists()) //noinspection ResultOfMethodCallIgnored
+                permanentDataFile.createNewFile();
+
+            YamlConfiguration permanentDataYml = YamlConfiguration.loadConfiguration(permanentDataFile);
+            permanentDataYml.addDefault("seeThroughPortal", true);
+            permanentDataYml.options().copyDefaults(true);
+            permanentDataYml.save(permanentDataFile);
+            return permanentDataYml;
+
+        } catch (IOException ex) {
+            logger.severe(ex.getMessage());
+        }
+        return null; //Should have sent an error anyway.
+
     }
 }
