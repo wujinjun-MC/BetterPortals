@@ -7,11 +7,13 @@ import com.lauriethefish.betterportals.bukkit.command.framework.CommandTree;
 import com.lauriethefish.betterportals.bukkit.command.framework.annotations.*;
 import com.lauriethefish.betterportals.bukkit.config.MessageConfig;
 import com.lauriethefish.betterportals.bukkit.player.IPlayerData;
+import com.lauriethefish.betterportals.bukkit.player.IPlayerDataManager;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.portal.IPortalManager;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
 
 @Singleton
 public class CustomPortalCommands {
@@ -21,12 +23,14 @@ public class CustomPortalCommands {
     private final IPortalManager portalManager;
     private final MessageConfig messageConfig;
     private final IPortal.Factory portalFactory;
+    private final IPlayerDataManager playerDataManager;
 
     @Inject
-    public CustomPortalCommands(CommandTree commandTree, IPortalManager portalManager, MessageConfig messageConfig, IPortal.Factory portalFactory) {
+    public CustomPortalCommands(CommandTree commandTree, IPortalManager portalManager, MessageConfig messageConfig, IPortal.Factory portalFactory, IPlayerDataManager playerDataManager) {
         this.portalManager = portalManager;
         this.messageConfig = messageConfig;
         this.portalFactory = portalFactory;
+        this.playerDataManager = playerDataManager;
 
         commandTree.registerCommands(this);
     }
@@ -238,6 +242,33 @@ public class CustomPortalCommands {
             player.sendMessage(messageConfig.getChatMessage("changedAllowsItems"));
         }   else    {
             player.sendMessage(messageConfig.getChatMessage("changedDoesNotAllowItems"));
+        }
+
+        return true;
+    }
+
+    @Command
+    @Path("betterportals/setSeeThroughPortal")
+    @RequiresPermissions("betterportals.see")
+    @RequiresPlayer
+    @Aliases("seethroughportal")
+    @Description("Sets whether or not a player is able to see what's on the other side of a portal.")
+    @Argument(name = "seeThroughPortal", defaultValue = "true")
+    public boolean setSeeThroughPortal(Player player, boolean seeThroughPortal) {
+
+        IPlayerData playerData = playerDataManager.getPlayerData(player);
+
+        assert playerData != null;
+        if (seeThroughPortal) {
+            playerData.getPermanentData().set("seeThroughPortal", true);
+            playerData.savePermanentData();
+            player.sendMessage(messageConfig.getChatMessage("seeThroughPortalEnabled"));
+        }
+
+        else {
+            playerData.getPermanentData().set("seeThroughPortal", false);
+            playerData.savePermanentData();
+            player.sendMessage(messageConfig.getChatMessage("seeThroughPortalDisabled"));
         }
 
         return true;
