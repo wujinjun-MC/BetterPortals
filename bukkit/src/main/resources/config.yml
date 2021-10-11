@@ -109,6 +109,8 @@ proxy:
   # UUID forwarding is required for selection syncing between servers.
   warnOnMissingSelection: true
 
+  keepAlive: true # Whether or not to enable keepAlive on the socket
+
 # Will randomly swap some blocks between the two ends of a nether portal when it's made, makes a cool effect.
 dimensionBlend:
   enable: false

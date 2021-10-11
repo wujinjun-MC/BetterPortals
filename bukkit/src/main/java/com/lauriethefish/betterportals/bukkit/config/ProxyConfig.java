@@ -22,6 +22,7 @@ public class ProxyConfig {
     @Getter private int reconnectionDelay; // How long after being disconnected before attempting a reconnection (in ticks)
     @Getter private boolean warnOnMissingSelection;
     @Getter public String overrideServerName;
+    @Getter public boolean keepAlive; // Whether or not the socket used will have keepAlive enabled
 
     @Inject
     public ProxyConfig(Logger logger) {
@@ -52,5 +53,6 @@ public class ProxyConfig {
         }
 
         warnOnMissingSelection = section.getBoolean("warnOnMissingSelection");
+        keepAlive = section.getBoolean("keepAlive", true);
     }
 }
