@@ -9,7 +9,7 @@ allprojects {
     targetCompatibility = 1.8
 
     group = "com.lauriethefish.betterportals"
-    version = '0.9.0'
+    version = '0.10.0'
 
     // Optional, just for showing name
     afterEvaluate {
@@ -33,10 +33,10 @@ allprojects {
         implementation 'org.jetbrains:annotations:22.0.0'
         implementation 'com.google.code.findbugs:jsr305:3.0.2'
 
-        compileOnly 'org.projectlombok:lombok:1.18.22'
+        compileOnly 'org.projectlombok:lombok:1.18.20'
         testImplementation 'org.projectlombok:lombok:1.18.22'
-        annotationProcessor 'org.projectlombok:lombok:1.18.16'
-        testAnnotationProcessor('org.projectlombok:lombok:1.18.16')
+        annotationProcessor 'org.projectlombok:lombok:1.18.20'
+        testAnnotationProcessor('org.projectlombok:lombok:1.18.20')
 
         testCompileOnly 'junit:junit:4.13.2'
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
