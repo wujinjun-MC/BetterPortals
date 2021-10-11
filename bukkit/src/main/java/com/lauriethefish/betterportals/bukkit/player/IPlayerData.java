@@ -26,6 +26,11 @@ public interface IPlayerData {
     @NotNull YamlConfiguration getPermanentData();
 
     /**
+     * Saves the player data after changes, if any.
+     */
+    void savePermanentData();
+
+    /**
      * @return The player's current portal selection
      */
     @NotNull IPlayerSelectionManager getSelection();

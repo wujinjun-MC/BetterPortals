@@ -258,15 +258,14 @@ public class CustomPortalCommands {
 
         IPlayerData playerData = playerDataManager.getPlayerData(player);
 
+        assert playerData != null;
         if (seeThroughPortal) {
-            assert playerData != null;
             playerData.getPermanentData().set("seeThroughPortal", true);
             playerData.savePermanentData();
             player.sendMessage(messageConfig.getChatMessage("seeThroughPortalEnabled"));
         }
 
         else {
-            assert playerData != null;
             playerData.getPermanentData().set("seeThroughPortal", false);
             playerData.savePermanentData();
             player.sendMessage(messageConfig.getChatMessage("seeThroughPortalDisabled"));

@@ -123,6 +123,31 @@ public class PlayerData implements IPlayerData  {
         portalViews.clear();
     }
 
+    @Override
+    public void savePermanentData() {
+
+        File dataFolder = new File(pl.getDataFolder(), "playerData");
+
+        if (!dataFolder.exists()) //noinspection ResultOfMethodCallIgnored
+            dataFolder.mkdirs();
+
+        File permanentDataFile = new File(dataFolder, player.getUniqueId() + ".yml");
+
+        try {
+            if (!permanentDataFile.exists()) //noinspection ResultOfMethodCallIgnored
+                permanentDataFile.createNewFile();
+
+            permanentData.options().copyHeader(true);
+            permanentData.save(permanentDataFile);
+
+        } catch (IOException ex) {
+            logger.severe("Unable to save " + player.getName() + "'s permanent player data! \n" +
+                    ex.getMessage()); //Do nothing, as we cannot save.
+        }
+
+
+    }
+
     private void setViewing(IPortal portal) {
         portalViews.put(portal, playerPortalViewFactory.create(player, portal));
     }
@@ -144,16 +169,24 @@ public class PlayerData implements IPlayerData  {
             if (!permanentDataFile.exists()) //noinspection ResultOfMethodCallIgnored
                 permanentDataFile.createNewFile();
 
-            YamlConfiguration permanentDataYml = YamlConfiguration.loadConfiguration(permanentDataFile);
-            permanentDataYml.addDefault("seeThroughPortal", true);
-            permanentDataYml.options().copyDefaults(true);
+            YamlConfiguration permanentDataYml = createDefaultDataFile(permanentDataFile);
             permanentDataYml.save(permanentDataFile);
             return permanentDataYml;
 
         } catch (IOException ex) {
-            logger.severe(ex.getMessage());
-        }
-        return null; //Should have sent an error anyway.
+            logger.severe("Unable to load " + player.getName() + "'s permanent player data! " +
+                    "Default data will be used. \n" + ex.getMessage());
 
+            return createDefaultDataFile(permanentDataFile); //We don't save anything, and this is kept in memory.
+
+        }
+
+    }
+
+    private YamlConfiguration createDefaultDataFile(File permanentDataFile) {
+        YamlConfiguration permanentDataYml = YamlConfiguration.loadConfiguration(permanentDataFile);
+        permanentDataYml.addDefault("seeThroughPortal", true);
+        permanentDataYml.options().copyDefaults(true);
+        return permanentDataYml;
     }
 }
