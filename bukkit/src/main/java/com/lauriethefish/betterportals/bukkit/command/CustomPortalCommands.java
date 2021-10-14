@@ -248,14 +248,13 @@ public class CustomPortalCommands {
     }
 
     @Command
-    @Path("betterportals/setSeeThroughPortal")
+    @Path("betterportals/setseethroughportal")
     @RequiresPermissions("betterportals.see")
     @RequiresPlayer
-    @Aliases("seethroughportal")
-    @Description("Sets whether or not a player is able to see what's on the other side of a portal.")
-    @Argument(name = "seeThroughPortal")
+    @Aliases("setenablebpview")
+    @Description("Sets whether or not the current player is able to see what's on the other side of a portal.")
+    @Argument(name = "seethroughportal")
     public boolean setSeeThroughPortal(Player player, boolean seeThroughPortal) {
-
         IPlayerData playerData = playerDataManager.getPlayerData(player);
 
         assert playerData != null;
@@ -273,5 +272,21 @@ public class CustomPortalCommands {
 
         return true;
     }
+
+    @Command
+    @Path("betterportals/toggleseethroughportal")
+    @RequiresPermissions("BetterPortals.see")
+    @RequiresPlayer
+    @Aliases("togglevanillaview")
+    @Description("Toggles whether or not the current player is able to see what's on the other side of a portal.")
+    public boolean toggleSeeThroughPortal(Player player) {
+        IPlayerData playerData = playerDataManager.getPlayerData(player);
+        assert playerData != null;
+
+        setSeeThroughPortal(player, !playerData.getPermanentData().getBoolean("seeThroughPortal"));
+
+        return true;
+    }
+
 
 }
