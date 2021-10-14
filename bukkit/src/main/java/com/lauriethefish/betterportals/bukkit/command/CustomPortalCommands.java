@@ -253,7 +253,7 @@ public class CustomPortalCommands {
     @RequiresPlayer
     @Aliases("seethroughportal")
     @Description("Sets whether or not a player is able to see what's on the other side of a portal.")
-    @Argument(name = "seeThroughPortal", defaultValue = "true")
+    @Argument(name = "seeThroughPortal")
     public boolean setSeeThroughPortal(Player player, boolean seeThroughPortal) {
 
         IPlayerData playerData = playerDataManager.getPlayerData(player);
