@@ -1,4 +1,4 @@
-package com.lauriethefish.betterportals.bukkit.util.nms;
+package com.lauriethefish.betterportals.bukkit.nms;
 
 import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import org.bukkit.Bukkit;

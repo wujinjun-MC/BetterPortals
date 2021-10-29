@@ -1,4 +1,4 @@
-package com.lauriethefish.betterportals.bukkit.util.nms;
+package com.lauriethefish.betterportals.bukkit.nms;
 
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.BlockPosition;

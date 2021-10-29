@@ -1,4 +1,4 @@
-package com.lauriethefish.betterportals.bukkit.util.nms;
+package com.lauriethefish.betterportals.bukkit.nms;
 
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
@@ -14,7 +14,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.sql.Ref;
 
 public class EntityUtil {
     private static final Method GET_HANDLE;

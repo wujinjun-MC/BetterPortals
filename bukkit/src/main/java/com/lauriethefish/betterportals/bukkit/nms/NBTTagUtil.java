@@ -1,11 +1,11 @@
-package com.lauriethefish.betterportals.bukkit.util.nms;
+package com.lauriethefish.betterportals.bukkit.nms;
 
 import com.lauriethefish.betterportals.bukkit.util.VersionUtil;
 import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import static com.lauriethefish.betterportals.bukkit.util.nms.MinecraftReflectionUtil.findCraftBukkitClass;
+import static com.lauriethefish.betterportals.bukkit.nms.MinecraftReflectionUtil.findCraftBukkitClass;
 import static com.lauriethefish.betterportals.shared.util.ReflectionUtil.newInstance;
 import static com.lauriethefish.betterportals.shared.util.ReflectionUtil.runMethod;
 

@@ -2,7 +2,7 @@ package com.lauriethefish.betterportals.bukkit.entity.faking;
 
 import com.lauriethefish.betterportals.bukkit.math.Matrix;
 import com.lauriethefish.betterportals.bukkit.math.PortalTransformations;
-import com.lauriethefish.betterportals.bukkit.util.nms.EntityUtil;
+import com.lauriethefish.betterportals.bukkit.nms.EntityUtil;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;

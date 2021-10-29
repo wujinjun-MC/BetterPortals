@@ -1,7 +1,7 @@
 package com.lauriethefish.betterportals.bukkit.entity.faking;
 
 import com.comphenix.protocol.wrappers.EnumWrappers;
-import com.lauriethefish.betterportals.bukkit.util.nms.AnimationType;
+import com.lauriethefish.betterportals.bukkit.nms.AnimationType;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
