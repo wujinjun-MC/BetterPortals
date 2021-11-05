@@ -7,6 +7,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -24,6 +25,11 @@ public class ReflectionUtil {
         public ReflectionException(String message, Throwable cause) {
             super(message, cause);
         }
+
+        public ReflectionException(String message) {
+            super(message);
+        }
+
     }
 
     private static class MethodInfo {
@@ -39,7 +45,7 @@ public class ReflectionUtil {
 
         @Override
         public int hashCode() {
-            return Objects.hash(klass, name, args);
+            return Objects.hash(klass, name, Arrays.hashCode(args));
         }
     }
 
@@ -82,6 +88,58 @@ public class ReflectionUtil {
         }   catch(ReflectiveOperationException ex) {
             throw new ReflectionException("Failed to fetch class", ex);
         }
+    }
+
+    /**
+     * Finds a method in the given class with the given parameter types.
+     * This method will be set to be accessible.
+     * @param parentClass Class to search for the method in
+     * @param paramTypes Types of the parameters of the method
+     * @return A method with the given parameter types
+     * @throws ReflectionException If multiple matches with the given parameter types exist in the parent class, or if the parent class has no such method
+     */
+    public static @NotNull Method findMethod(@NotNull Class<?> parentClass, Class<?>... paramTypes) {
+        Method result = null;
+        for(Method method : parentClass.getDeclaredMethods()) {
+            if(Arrays.equals(method.getParameterTypes(), paramTypes)) {
+                if(result != null) {
+                    throw new ReflectionException("Multiple matches found for method");
+                }
+                result = method;
+            }
+        }
+
+        if(result == null) {
+            throw new ReflectionException("No match found for method");
+        }
+        result.setAccessible(true);
+        return result;
+    }
+
+    /**
+     * Finds a field in the given class with the given type.
+     * This field will be set to be accessible.
+     * @param parentClass Class to search for the field in
+     * @param type The type of the field
+     * @return A field with the given type
+     * @throws ReflectionException If multiple matches with the given type exist in the parent class, or if the parent class has no such field
+     */
+    public static @NotNull Field findField(@NotNull Class<?> parentClass, Class<?> type) {
+        Field result = null;
+        for(Field field : parentClass.getDeclaredFields()) {
+            if(field.getType().equals(type)) {
+                if(result != null) {
+                    throw new ReflectionException("Multiple matches found for method");
+                }
+                result = field;
+            }
+        }
+
+        if(result == null) {
+            throw new ReflectionException("No match found for method");
+        }
+        result.setAccessible(true);
+        return result;
     }
 
     /**
