@@ -15,13 +15,23 @@ jobs:
           java-version: 16.0.2
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
+      - name: Cache gradle data
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
       - name: Build with Gradle
         run: ./gradlew clean build
       - uses: actions/upload-artifact@v2
         with:
           name: artifact
-          path: final/build/libs/BetterPortals.jar
+          path: final/build/libs/BetterPortals-final-0.10.0.jar
       - name: Get short sha
+        if: ${{ github.ref == 'refs/heads/master' }}
         id: get_sha
         run: |
           echo "::set-output name=SHORT_SHA::$(git rev-parse HEAD | cut -c 1-8)"
@@ -34,4 +44,6 @@ jobs:
           content: "`${{ steps.get_sha.outputs.SHORT_SHA }}` - `${{ github.event.head_commit.message }}`"
           username: "BetterPortals Dev Builds"
           avatar-url: "https://i.imgur.com/4l67APG.png"
-          filename: final/build/libs/BetterPortals.jar
+          filename: final/build/libs/BetterPortals-final-0.10.0.jar
+      - name: Stop gradle daemons
+        run: gradle -stop
