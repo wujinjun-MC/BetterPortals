@@ -275,7 +275,7 @@ public class FloodFillViewableBlockArray implements IViewableBlockArray    {
         performanceWatcher.putTimeTaken(firstUpdate ? "Initial viewable block update" : "Incremental viewable block update", timer);
         performanceWatcher.putTimeTaken("Viewable block update", timer);
         firstUpdate = false;
-        logger.finer("Viewable block array update took: %.3f ms. Block count: %d. Viewable count: %d", timer.getTimeTakenMillis(), nonObscuredStates.size(), viewableStates.size());
+        logger.finest("Viewable block array update took: %.3f ms. Block count: %d. Viewable count: %d", timer.getTimeTakenMillis(), nonObscuredStates.size(), viewableStates.size());
     }
 
     @Override

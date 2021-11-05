@@ -96,7 +96,7 @@ public class PlayerBlockView implements IPlayerBlockView   {
     public void finishUpdate(boolean refresh) {
         if(didDeactivate) {return;} // Avoid resetting block states while they're being updated asynchronously
         if(refresh) {
-            logger.finer("Refreshing already sent blocks!");
+            logger.finest("Refreshing already sent blocks!");
         }
         statesLock.lock();
 
