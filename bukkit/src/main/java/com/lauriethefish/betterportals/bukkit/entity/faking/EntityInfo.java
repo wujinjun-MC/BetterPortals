@@ -3,12 +3,16 @@ package com.lauriethefish.betterportals.bukkit.entity.faking;
 import com.lauriethefish.betterportals.bukkit.math.Matrix;
 import com.lauriethefish.betterportals.bukkit.math.PortalTransformations;
 import com.lauriethefish.betterportals.bukkit.nms.EntityUtil;
+import com.lauriethefish.betterportals.bukkit.nms.NMSEntityTracker;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
 import java.util.Random;
+import java.util.UUID;
 
 /**
  * We wrap the actual entity to make sending the packets more ergonomic.
@@ -21,6 +25,7 @@ public class EntityInfo {
     private final Entity entity;
     // This is separate from the actual ID, since otherwise we will have issues when two entity IDs collide if an entity is visible and a copy of it is visible
     private final int entityId;
+    private final UUID entityUniqueId;
 
     private final Matrix translation;
     private final Matrix rotation;
@@ -34,6 +39,10 @@ public class EntityInfo {
         this.entity = entity;
         this.entityId = entityIdGenerator.nextInt() & Integer.MAX_VALUE;
 
+        // If the entity is a player, then we need to use the actual UUID in order to get the skin correct
+        // This means that the same player cannot be on screen multiple times, i.e. mirrors will not work for players
+        // TODO: Implement this in non-NMS tracking method
+        this.entityUniqueId = UUID.randomUUID();
         this.translation = transformations.getDestinationToOrigin();
         this.rotation = transformations.getRotateToOrigin();
     }
@@ -45,6 +54,7 @@ public class EntityInfo {
     public EntityInfo(@NotNull Entity entity) {
         this.entity = entity;
         this.entityId = entity.getEntityId();
+        this.entityUniqueId = entity.getUniqueId();
 
         this.translation = Matrix.makeIdentity();
         this.rotation = Matrix.makeIdentity();
@@ -56,7 +66,7 @@ public class EntityInfo {
      */
     public Location findRenderedLocation() {
         Location actualPos = entity.getLocation();
-        Location atOrigin = translation.transform(actualPos.toVector()).toLocation(actualPos.getWorld());
+        Location atOrigin = translation.transform(actualPos.toVector()).toLocation(Objects.requireNonNull(actualPos.getWorld()));
 
         atOrigin.setDirection(rotation.transform(EntityUtil.getActualEntityDirection(entity)));
         return atOrigin;
