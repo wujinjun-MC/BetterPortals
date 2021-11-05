@@ -1,15 +1,12 @@
 package com.lauriethefish.betterportals.bukkit.entity.faking;
 
 import com.google.inject.Inject;
-import com.lauriethefish.betterportals.bukkit.events.IEventRegistrar;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 

@@ -2,7 +2,6 @@ package com.lauriethefish.betterportals.bukkit.config;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.google.inject.name.Named;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import lombok.Getter;
 import org.bukkit.configuration.file.FileConfiguration;

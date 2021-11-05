@@ -1,12 +1,12 @@
 package com.lauriethefish.betterportals.bukkit.events;
 
 import com.google.inject.Inject;
+import com.lauriethefish.betterportals.api.PortalDirection;
 import com.lauriethefish.betterportals.bukkit.config.MessageConfig;
 import com.lauriethefish.betterportals.bukkit.config.PortalSpawnConfig;
 import com.lauriethefish.betterportals.bukkit.math.MathUtil;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.portal.IPortalManager;
-import com.lauriethefish.betterportals.api.PortalDirection;
 import com.lauriethefish.betterportals.bukkit.portal.spawning.IPortalSpawner;
 import com.lauriethefish.betterportals.bukkit.portal.spawning.PortalSpawnPosition;
 import com.lauriethefish.betterportals.bukkit.util.VersionUtil;

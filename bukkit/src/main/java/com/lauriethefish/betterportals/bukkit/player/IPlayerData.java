@@ -2,7 +2,6 @@ package com.lauriethefish.betterportals.bukkit.player;
 
 import com.lauriethefish.betterportals.bukkit.player.selection.IPlayerSelectionManager;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
-import lombok.Getter;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;

@@ -2,7 +2,10 @@ package com.lauriethefish.betterportals.bukkit.block;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
-import com.lauriethefish.betterportals.bukkit.block.external.*;
+import com.lauriethefish.betterportals.bukkit.block.external.BlockChangeWatcher;
+import com.lauriethefish.betterportals.bukkit.block.external.ExternalBlockWatcherManager;
+import com.lauriethefish.betterportals.bukkit.block.external.IBlockChangeWatcher;
+import com.lauriethefish.betterportals.bukkit.block.external.IExternalBlockWatcherManager;
 import com.lauriethefish.betterportals.bukkit.player.view.ViewFactory;
 import com.lauriethefish.betterportals.bukkit.player.view.block.IPlayerBlockView;
 import com.lauriethefish.betterportals.bukkit.player.view.block.PlayerBlockView;

@@ -1,7 +1,7 @@
 package com.lauriethefish.betterportals.bukkit.entity.faking;
 
-import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.nms.AnimationType;
+import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;

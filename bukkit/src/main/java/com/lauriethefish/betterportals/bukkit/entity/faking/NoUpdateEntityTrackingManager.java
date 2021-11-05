@@ -1,6 +1,5 @@
 package com.lauriethefish.betterportals.bukkit.entity.faking;
 
-import com.lauriethefish.betterportals.bukkit.events.IEventRegistrar;
 import com.lauriethefish.betterportals.bukkit.nms.AnimationType;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 

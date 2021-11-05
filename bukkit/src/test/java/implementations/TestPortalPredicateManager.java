@@ -1,8 +1,8 @@
 package implementations;
 
+import com.lauriethefish.betterportals.api.PortalPredicate;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.portal.predicate.IPortalPredicateManager;
-import com.lauriethefish.betterportals.api.PortalPredicate;
 import lombok.Getter;
 import org.bukkit.entity.Player;
 

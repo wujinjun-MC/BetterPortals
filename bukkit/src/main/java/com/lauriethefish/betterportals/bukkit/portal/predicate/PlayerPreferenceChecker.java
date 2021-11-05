@@ -4,7 +4,6 @@ import com.lauriethefish.betterportals.api.BetterPortal;
 import com.lauriethefish.betterportals.api.PortalPredicate;
 import com.lauriethefish.betterportals.bukkit.player.IPlayerData;
 import com.lauriethefish.betterportals.bukkit.player.IPlayerDataManager;
-import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;

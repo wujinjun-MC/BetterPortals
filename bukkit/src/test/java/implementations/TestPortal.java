@@ -2,14 +2,13 @@ package implementations;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import com.lauriethefish.betterportals.api.PortalPosition;
 import com.lauriethefish.betterportals.bukkit.block.IViewableBlockArray;
 import com.lauriethefish.betterportals.bukkit.entity.IPortalEntityList;
 import com.lauriethefish.betterportals.bukkit.math.PortalTransformations;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
-import com.lauriethefish.betterportals.api.PortalPosition;
 import lombok.Getter;
 import org.bukkit.util.Vector;
-import org.checkerframework.checker.units.qual.A;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;

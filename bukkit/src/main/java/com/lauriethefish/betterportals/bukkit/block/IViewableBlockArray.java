@@ -1,8 +1,8 @@
 package com.lauriethefish.betterportals.bukkit.block;
 
 import com.comphenix.protocol.events.PacketContainer;
-import com.lauriethefish.betterportals.bukkit.config.RenderConfig;
 import com.lauriethefish.betterportals.api.IntVector;
+import com.lauriethefish.betterportals.bukkit.config.RenderConfig;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;

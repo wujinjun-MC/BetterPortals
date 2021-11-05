@@ -1,11 +1,11 @@
 package com.lauriethefish.betterportals.bukkit.portal.storage;
 
 import com.google.inject.Inject;
+import com.lauriethefish.betterportals.api.PortalPosition;
 import com.lauriethefish.betterportals.bukkit.config.MiscConfig;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.portal.IPortalManager;
 import com.lauriethefish.betterportals.bukkit.portal.Portal;
-import com.lauriethefish.betterportals.api.PortalPosition;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;

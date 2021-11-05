@@ -1,9 +1,9 @@
 package com.lauriethefish.betterportals.bukkit.player.selection;
 
 import com.google.inject.Inject;
-import com.lauriethefish.betterportals.bukkit.math.MathUtil;
 import com.lauriethefish.betterportals.api.PortalDirection;
 import com.lauriethefish.betterportals.api.PortalPosition;
+import com.lauriethefish.betterportals.bukkit.math.MathUtil;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import lombok.Getter;
 import org.bukkit.Location;
