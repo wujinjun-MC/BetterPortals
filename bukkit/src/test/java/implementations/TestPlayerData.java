@@ -48,4 +48,9 @@ public class TestPlayerData implements IPlayerData {
     public void onPluginDisable() {
 
     }
+
+    @Override
+    public void onLogout() {
+
+    }
 }
