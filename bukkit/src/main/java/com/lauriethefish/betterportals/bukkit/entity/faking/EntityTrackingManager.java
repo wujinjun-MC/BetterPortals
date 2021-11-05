@@ -1,55 +1,44 @@
 package com.lauriethefish.betterportals.bukkit.entity.faking;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import com.lauriethefish.betterportals.bukkit.events.IEventRegistrar;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
-import com.lauriethefish.betterportals.bukkit.nms.AnimationType;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.event.player.PlayerAnimationEvent;
-import org.bukkit.event.player.PlayerAnimationType;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 
-@Singleton
-public class EntityTrackingManager implements IEntityTrackingManager, Listener {
-    private final Logger logger;
+/**
+ * Handles updating, creating and removing {@link EntityTracker}s based on when a player is viewing an entity, and sending animations based on events.
+ */
+public abstract class EntityTrackingManager {
     private final IEntityTracker.Factory entityTrackerFactory;
-    private final Map<IPortal, Map<Entity, IEntityTracker>> trackersByPortal = new HashMap<>(); // Used for separating trackers based on portal
-    private final Map<Entity, Collection<IEntityTracker>> trackersByEntity = new HashMap<>(); // Used for calling events when the tracked entities perform animations
-
-    /**
-     * Bukkit doesn't allow us to get the hand used from {@link PlayerAnimationEvent}, so we get it from {@link PlayerInteractEvent} then store it for later.
-     */
-    private final Map<Entity, EquipmentSlot> lastHandUsed = new HashMap<>();
+    protected final Map<IPortal, Map<Entity, IEntityTracker>> trackersByPortal = new HashMap<>(); // Used for separating trackers based on portal
+    protected final Logger logger;
 
     @Inject
-    public EntityTrackingManager(Logger logger, IEventRegistrar eventRegistrar, IEntityTracker.Factory entityTrackerFactory) {
+    public EntityTrackingManager(Logger logger, IEntityTracker.Factory entityTrackerFactory) {
         this.logger = logger;
         this.entityTrackerFactory = entityTrackerFactory;
-        eventRegistrar.register(this);
     }
 
-    @Override
+    /**
+     * Replicates <code>entity</code> to <code>player</code>, as though it were projected through the portal.
+     * @param entity Entity to replicate
+     * @param portal Portal to replicate through
+     * @param player Player to show the replicated entity to
+     */
     public void setTracking(Entity entity, IPortal portal, Player player) {
         // Get the tracker from the map, adding a new one if necessary
         Map<Entity, IEntityTracker> portalMap = trackersByPortal.computeIfAbsent(portal, k -> new HashMap<>());
         IEntityTracker tracker = portalMap.computeIfAbsent(entity, k -> {
             IEntityTracker newTracker = entityTrackerFactory.create(entity, portal);
-            trackersByEntity.computeIfAbsent(entity, l -> new ArrayList<>()).add(newTracker);
+            newTrackerAdded(newTracker);
 
             return newTracker;
         });
@@ -57,7 +46,25 @@ public class EntityTrackingManager implements IEntityTrackingManager, Listener {
         tracker.addTracking(player);
     }
 
-    @Override
+    /**
+     * Called when a new entity tracker is added
+     * @param tracker Tracker that has just been added
+     */
+    protected void newTrackerAdded(IEntityTracker tracker) { }
+
+    /**
+     * Called when a tracker has no players and is about to be removed
+     * @param tracker Tracker that no longer has any viewing players
+     */
+    protected void trackerHasNoPlayers(IEntityTracker tracker) { }
+
+    /**
+     * Removes the replicated entity from <code>player</code>'s view, and stops sending update packets.
+     * @param entity Entity to no longer be replicated
+     * @param portal Portal that the entity was replicated through
+     * @param player Player to stop replicating the entity for
+     * @param sendPackets Whether or not to actually hide the entity for the player
+     */
     public void setNoLongerTracking(Entity entity, IPortal portal, Player player, boolean sendPackets) {
         Map<Entity, IEntityTracker> portalMap = trackersByPortal.get(portal);
 
@@ -70,12 +77,7 @@ public class EntityTrackingManager implements IEntityTrackingManager, Listener {
 
         // If no players are tracking this entity, remove it from the map
         if(tracker.getTrackingPlayerCount() == 0) {
-            // Make sure to remove the per-entity map if it is empty
-            Collection<IEntityTracker> entityList = trackersByEntity.get(entity);
-            entityList.remove(tracker);
-            if(entityList.size() == 0) {
-                trackersByEntity.remove(entity);
-            }
+            trackerHasNoPlayers(tracker);
 
             portalMap.remove(entity);
             if(portalMap.isEmpty()) {
@@ -85,74 +87,18 @@ public class EntityTrackingManager implements IEntityTrackingManager, Listener {
     }
 
     /**
-     * Performs <code>action</code> to each tracker of <code>entity</code>.
-     * @param entity Entity to check for trackers
-     * @param action Action to perform on the trackers
+     * Updates all currently replicated entities
      */
-    private void forEachTracker(Entity entity, Consumer<IEntityTracker> action) {
-        Collection<IEntityTracker> trackers = trackersByEntity.get(entity);
-        if(trackers == null) {return;}
-
-        trackers.forEach(action);
-    }
-
-    /**
-     * Handles making entities turn red upon being hit
-     */
-    @EventHandler
-    public void onEntityDamage(EntityDamageEvent event) {
-        forEachTracker(event.getEntity(), tracker -> tracker.onAnimation(AnimationType.DAMAGE));
-    }
-
-    /**
-     * Handles moving the tracker's hand when the entity moves their hand
-     */
-    @EventHandler
-    public void onPlayerAnimation(PlayerAnimationEvent event) {
-        if(event.getAnimationType() != PlayerAnimationType.ARM_SWING) {return;}
-
-        EquipmentSlot hand = lastHandUsed.get(event.getPlayer());
-        if(hand == null) {return;}
-
-        AnimationType type = hand == EquipmentSlot.HAND ? AnimationType.MAIN_HAND : AnimationType.OFF_HAND;
-        forEachTracker(event.getPlayer(), tracker -> tracker.onAnimation(type));
-    }
-
-    @EventHandler
-    public void onEntityPickupItem(EntityPickupItemEvent event) {
-        Entity entity = event.getEntity();
-
-        forEachTracker(entity, (tracker) -> {
-            Map<Entity, IEntityTracker> portalTrackers = trackersByPortal.get(tracker.getPortal());
-            IEntityTracker pickedUp = portalTrackers.get(event.getItem());
-
-            if(pickedUp != null) {
-                logger.fine("Sending pickup packet");
-                tracker.onPickup(pickedUp.getEntityInfo());
-            }   else    {
-                logger.fine("Not sending pickup packet - the item isn't viewable");
-            }
-        });
-    }
-
-    /**
-     * Workaround for missing API
-     * @see EntityTrackingManager#lastHandUsed
-     */
-    @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent event) {
-        EquipmentSlot hand = event.getHand();
-        if(hand != null) {
-            lastHandUsed.put(event.getPlayer(), hand);
-        }
-    }
-
-    @Override
     public void update() {
         trackersByPortal.values().forEach((map) -> map.values().forEach(IEntityTracker::update));
     }
 
-    @Override
+    /**
+     * Returns the tracker of <code>entity</code> on <code>portal</code>, or null if there is none.
+     * @param portal The portal to check for trackers
+     * @param entity The entity being tracked
+     * @return The tracker of the entity, or null if there is none.
+     */
     public @Nullable IEntityTracker getTracker(IPortal portal, Entity entity) {
         Map<Entity, IEntityTracker> portalTrackers = trackersByPortal.get(portal);
         if(portalTrackers == null) {return null;}
