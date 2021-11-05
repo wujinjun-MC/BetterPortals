@@ -1,10 +1,12 @@
 plugins {
     id 'com.github.johnrengelman.shadow' version '7.1.0'
+    id "xyz.jpenilla.special-gradle" version "1.0.0-SNAPSHOT"
 }
 
-repositories {
-    gradlePluginPortal()
-    mavenCentral()
+specialGradle {
+    minecraftVersion.set("1.17")
+    specialSourceVersion.set("1.10.0")
+    jar.archiveFileName = "BetterPortals.jar"
 }
 
 dependencies {
@@ -14,13 +16,12 @@ dependencies {
     implementation project(':api')
 }
 
-tasks.build.dependsOn tasks.shadowJar
+tasks.build.dependsOn tasks.productionMappedJar
 shadowJar {
     project.configurations.implementation.canBeResolved = true
     configurations = [project.configurations.implementation]
 
     relocate 'org.bstats', 'com.lauriethefish.bstats'
-    archiveFileName = 'BetterPortals.jar'
 
     // Unfortunately manually excluding GSON here (it's included with spigot) isn't really possible so we manually relocate these separately
     relocate 'com.google.thirdparty', 'com.lauriethefish.google.thirdparty'
