@@ -158,8 +158,11 @@ public class PlayerDataManager implements IPlayerDataManager, Listener   {
         loggedOutPlayerSelections.put(event.getPlayer().getUniqueId(), players.get(event.getPlayer()).getSelection());
 
         logger.fine("Unregistering player data on leave for player: %s", event.getPlayer().getUniqueId());
-        if(players.remove(event.getPlayer()) == null) { // Remove the registered data, printing a warning if there wasn't one
+        IPlayerData removedPlayer = players.remove(event.getPlayer());
+        if(removedPlayer == null) { // Remove the registered data, printing a warning if there wasn't one
             logger.warning("Player left who had unregistered player data. This shouldn't happen");
+        }   else    {
+            removedPlayer.onLogout();
         }
     }
 }

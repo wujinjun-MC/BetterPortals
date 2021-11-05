@@ -77,8 +77,8 @@ public class PlayerPortalView implements IPlayerPortalView  {
     }
 
     @Override
-    public void onDeactivate() {
-        boolean shouldSendPackets = shouldSendPackets();
+    public void onDeactivate(boolean loggingOut) {
+        boolean shouldSendPackets = shouldSendPackets() && !loggingOut;
 
         blockView.onDeactivate(shouldSendPackets);
         if(entityView != null) {

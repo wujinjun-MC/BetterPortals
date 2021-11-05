@@ -115,13 +115,23 @@ public class PlayerData implements IPlayerData  {
         performanceWatcher.putTimeTaken("Individual player data update", timer);
     }
 
-    @Override
-    public void onPluginDisable() {
+    private void deactivateViews(boolean loggingOut) {
         for(IPlayerPortalView view : portalViews.values()) {
-            view.onDeactivate();
+            view.onDeactivate(loggingOut);
         }
         portalViews.clear();
     }
+
+    @Override
+    public void onPluginDisable() {
+        deactivateViews(false);
+    }
+
+    @Override
+    public void onLogout() {
+        deactivateViews(true);
+    }
+
 
     @Override
     public void savePermanentData() {
@@ -153,7 +163,7 @@ public class PlayerData implements IPlayerData  {
     }
 
     private void setNotViewing(IPortal portal) {
-        portalViews.remove(portal).onDeactivate();
+        portalViews.remove(portal).onDeactivate(false);
     }
 
     private YamlConfiguration loadPermanentDataYml() {

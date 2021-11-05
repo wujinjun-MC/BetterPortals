@@ -51,6 +51,11 @@ public interface IPlayerData {
      */
     void onPluginDisable();
 
+    /**
+     * Called when the player logs out
+     */
+    void onLogout();
+
     interface Factory {
         IPlayerData create(Player player);
     }

@@ -6,5 +6,5 @@ public interface IPlayerPortalView {
 
     // Should reset the view through the portal back to the normal world
     // Previous position is needed as some things don't need to be reset when switching worlds/moving far enough away
-    void onDeactivate();
+    void onDeactivate(boolean loggingOut);
 }
