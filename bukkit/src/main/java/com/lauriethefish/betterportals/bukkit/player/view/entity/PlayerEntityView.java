@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.lauriethefish.betterportals.bukkit.entity.faking.EntityInfo;
 import com.lauriethefish.betterportals.bukkit.entity.faking.IEntityPacketManipulator;
-import com.lauriethefish.betterportals.bukkit.entity.faking.IEntityTrackingManager;
+import com.lauriethefish.betterportals.bukkit.entity.faking.EntityTrackingManager;
 import com.lauriethefish.betterportals.bukkit.math.PlaneIntersectionChecker;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.shared.logging.Logger;
@@ -22,12 +22,12 @@ public class PlayerEntityView implements IPlayerEntityView  {
     private final IPortal portal;
     private final Player player;
     private final IEntityPacketManipulator packetManipulator;
-    private final IEntityTrackingManager trackingManager;
+    private final EntityTrackingManager trackingManager;
     private final Map<Entity, EntityInfo> hiddenEntities = new HashMap<>();
     private final Set<Entity> replicatedEntities = new HashSet<>();
 
     @Inject
-    public PlayerEntityView(@Assisted IPortal portal, @Assisted Player player, IEntityPacketManipulator packetManipulator, Logger logger, IEntityTrackingManager trackingManager) {
+    public PlayerEntityView(@Assisted IPortal portal, @Assisted Player player, IEntityPacketManipulator packetManipulator, Logger logger, EntityTrackingManager trackingManager) {
         this.portal = portal;
         this.player = player;
         this.packetManipulator = packetManipulator;

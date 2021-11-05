@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.lauriethefish.betterportals.bukkit.ICrashHandler;
 import com.lauriethefish.betterportals.bukkit.block.external.IExternalBlockWatcherManager;
-import com.lauriethefish.betterportals.bukkit.entity.faking.IEntityTrackingManager;
+import com.lauriethefish.betterportals.bukkit.entity.faking.EntityTrackingManager;
 import com.lauriethefish.betterportals.bukkit.net.ClientRequestHandler;
 import com.lauriethefish.betterportals.bukkit.player.IPlayerData;
 import com.lauriethefish.betterportals.bukkit.player.PlayerDataManager;
@@ -23,13 +23,13 @@ public class MainUpdate implements Runnable {
     private final PlayerDataManager playerDataManager;
     private final IPortalActivityManager activityManager;
     private final IPerformanceWatcher performanceWatcher;
-    private final IEntityTrackingManager entityTrackingManager;
+    private final EntityTrackingManager entityTrackingManager;
     private final ICrashHandler errorHandler;
     private final ClientRequestHandler requestHandler;
     private final IExternalBlockWatcherManager blockWatcherManager;
 
     @Inject
-    public MainUpdate(JavaPlugin pl, PlayerDataManager playerDataManager, IPortalActivityManager activityManager, IPerformanceWatcher performanceWatcher, IEntityTrackingManager entityTrackingManager, ICrashHandler errorHandler, ClientRequestHandler requestHandler, IExternalBlockWatcherManager blockWatcherManager) {
+    public MainUpdate(JavaPlugin pl, PlayerDataManager playerDataManager, IPortalActivityManager activityManager, IPerformanceWatcher performanceWatcher, EntityTrackingManager entityTrackingManager, ICrashHandler errorHandler, ClientRequestHandler requestHandler, IExternalBlockWatcherManager blockWatcherManager) {
         this.pl = pl;
         this.playerDataManager = playerDataManager;
         this.activityManager = activityManager;

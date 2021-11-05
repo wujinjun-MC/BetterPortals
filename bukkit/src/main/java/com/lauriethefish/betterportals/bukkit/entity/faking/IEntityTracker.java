@@ -40,17 +40,18 @@ public interface IEntityTracker {
 
     /**
      * Sends packets to update the movement, equipment, etc. of the entity.
+     * Called whenever the {@link EventEntityTrackingManager} updates.
      */
     void update();
 
     /**
-     * Called whenever the {@link IEntityTrackingManager} gets an event fired that requires an animation to be shown.
+     * Called whenever the {@link EventEntityTrackingManager} gets an event fired that requires an animation to be shown.
      * @param animationType The animation to show
      */
     void onAnimation(@NotNull AnimationType animationType);
 
     /**
-     * Called whenever the {@link IEntityTrackingManager} detects that an item that is also tracked was picked up.
+     * Called whenever the {@link EventEntityTrackingManager} detects that an item that is also tracked was picked up.
      * @param pickedUp The info of the entity that got picked up
      */
     void onPickup(@NotNull EntityInfo pickedUp);
