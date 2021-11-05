@@ -1,5 +1,6 @@
 package com.lauriethefish.betterportals.bukkit.math;
 
+import com.comphenix.protocol.wrappers.Pair;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
@@ -8,6 +9,7 @@ import org.bukkit.util.Vector;
  */
 public class MathUtil {
     public static final double EPSILON = 0.0001;
+    private static final double TWO_PI = 2 * Math.PI;
 
     /**
      * Rounds each coordinate of <code>vec</code>.
@@ -134,5 +136,41 @@ public class MathUtil {
      */
     public static Location max(Location a, Location b) {
         return max(a.toVector(), b.toVector()).toLocation(a.getWorld());
+    }
+
+    /**
+     * Gets a direction vector representing these values of yaw and pitch, in degrees.
+     * @param yaw Yaw in degrees
+     * @param pitch Pitch in degrees
+     * @return Direction vector representing yaw and pitch
+     */
+    public static Vector getDirection(float yaw, float pitch) {
+        float rotX = (float) Math.toRadians(yaw);
+        float rotY = (float) Math.toRadians(pitch);
+
+        double xz = Math.cos(rotY);
+        return new Vector(
+                -xz * Math.sin(rotX),
+                -Math.sin(rotY),
+                xz * Math.cos(rotX)
+        );
+    }
+
+    /**
+     * Converts a direction vector into yaw and pitch values
+     * @param dir Direction vector to convert
+     * @return A pair of the yaw and pitch. Pitch is first, yaw is second
+     */
+    public static Pair<Float, Float> getYawAndPitch(Vector dir) {
+        if(dir.getX() == 0.0 && dir.getZ() == 0.0) {
+            return new Pair<>(0.0f, (dir.getY() > 0.0) ? -90.0f : 90.0f);
+        }
+        double theta = Math.atan2(-dir.getX(), dir.getZ());
+        float yaw = (float) Math.toDegrees((theta + TWO_PI) % TWO_PI);
+
+        double xz = Math.sqrt(dir.getX() * dir.getX() + dir.getZ() * dir.getZ());
+        float pitch = (float) Math.toDegrees(Math.atan(-dir.getY() / xz));
+
+        return new Pair<>(pitch, yaw);
     }
 }
