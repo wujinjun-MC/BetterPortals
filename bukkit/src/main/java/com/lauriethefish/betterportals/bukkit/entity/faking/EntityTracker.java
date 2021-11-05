@@ -23,7 +23,7 @@ public class EntityTracker implements IEntityTracker    {
     @Getter private final EntityInfo entityInfo;
     @Getter private final IPortal portal;
     private final IEntityPacketManipulator packetManipulator;
-    private final IEntityTrackingManager entityTrackingManager;
+    private final EntityTrackingManager entityTrackingManager;
 
     private final Set<Player> trackingPlayers = new HashSet<>();
 
@@ -35,7 +35,7 @@ public class EntityTracker implements IEntityTracker    {
     private List<Entity> lastMounts;
 
     @Inject
-    public EntityTracker(@Assisted Entity entity, @Assisted IPortal portal, IEntityPacketManipulator packetManipulator, Logger logger, IEntityTrackingManager entityTrackingManager) {
+    public EntityTracker(@Assisted Entity entity, @Assisted IPortal portal, IEntityPacketManipulator packetManipulator, Logger logger, EntityTrackingManager entityTrackingManager) {
         // Non-living entities don't have equipment
         this.equipmentWatcher = entity instanceof LivingEntity ? new EntityEquipmentWatcher((LivingEntity) entity) : null;
         this.entity = entity;
