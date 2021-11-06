@@ -15,7 +15,6 @@ import com.lauriethefish.betterportals.bukkit.math.PlaneIntersectionChecker;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.tasks.BlockUpdateFinisher;
 import com.lauriethefish.betterportals.bukkit.util.MaterialUtil;
-import com.lauriethefish.betterportals.bukkit.util.performance.IPerformanceWatcher;
 import com.lauriethefish.betterportals.bukkit.util.performance.OperationTimer;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import org.bukkit.Material;
@@ -38,7 +37,6 @@ public class PlayerBlockView implements IPlayerBlockView   {
     private final ReentrantLock statesLock = new ReentrantLock(true);
     private final Logger logger;
     private final BlockUpdateFinisher updateFinisher;
-    private final IPerformanceWatcher performanceWatcher;
     private final boolean shouldHidePortalBlocks;
 
     // Stored here since we can't access the Bukkit API from another thread
@@ -50,14 +48,13 @@ public class PlayerBlockView implements IPlayerBlockView   {
     @Inject
     public PlayerBlockView(@Assisted Player player, @Assisted IPortal portal,
                            IMultiBlockChangeManager.Factory multiBlockChangeManagerFactory, IPlayerBlockStates.Factory blockStatesFactory,
-                           Logger logger, BlockUpdateFinisher updateFinisher, IPerformanceWatcher performanceWatcher, RenderConfig renderConfig) {
+                           Logger logger, BlockUpdateFinisher updateFinisher, RenderConfig renderConfig) {
         this.player = player;
         this.portal = portal;
         this.multiBlockChangeManagerFactory = multiBlockChangeManagerFactory;
         this.blockStates = blockStatesFactory.create(player);
         this.logger = logger;
         this.updateFinisher = updateFinisher;
-        this.performanceWatcher = performanceWatcher;
         this.shouldHidePortalBlocks = portal.isNetherPortal() && renderConfig.isPortalBlocksHidden();
     }
 
@@ -151,7 +148,6 @@ public class PlayerBlockView implements IPlayerBlockView   {
                 throw new RuntimeException(ex);
             }
 
-            performanceWatcher.putTimeTaken("Player block update (threaded)", timer);
             logger.finest("Performed viewable block process. Time taken: %fms", timer.getTimeTakenMillis());
         }   finally     {
             statesLock.unlock();

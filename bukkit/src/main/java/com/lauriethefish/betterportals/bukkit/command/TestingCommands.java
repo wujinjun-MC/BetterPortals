@@ -12,7 +12,6 @@ import com.lauriethefish.betterportals.bukkit.net.requests.TestForwardedRequest;
 import com.lauriethefish.betterportals.bukkit.nms.BlockDataUtil;
 import com.lauriethefish.betterportals.bukkit.portal.spawning.NewPortalChecker;
 import com.lauriethefish.betterportals.bukkit.util.MaterialUtil;
-import com.lauriethefish.betterportals.bukkit.util.performance.IPerformanceWatcher;
 import com.lauriethefish.betterportals.bukkit.util.performance.Operation;
 import com.lauriethefish.betterportals.bukkit.util.performance.OperationTimer;
 import com.lauriethefish.betterportals.shared.net.RequestException;
@@ -30,37 +29,16 @@ import java.util.Map;
 
 @Singleton
 public class TestingCommands {
-    private final IPerformanceWatcher performanceWatcher;
     private final NewPortalChecker spawnChecker;
     private final IEntityPacketManipulator entityPacketManipulator;
     private final IPortalClient portalClient;
     private List<Integer> storedData;
 
     @Inject
-    public TestingCommands(IPerformanceWatcher performanceWatcher, NewPortalChecker spawnChecker, IEntityPacketManipulator entityPacketManipulator, IPortalClient portalClient) {
-        this.performanceWatcher = performanceWatcher;
+    public TestingCommands(NewPortalChecker spawnChecker, IEntityPacketManipulator entityPacketManipulator, IPortalClient portalClient) {
         this.spawnChecker = spawnChecker;
         this.entityPacketManipulator = entityPacketManipulator;
         this.portalClient = portalClient;
-    }
-
-    @Command
-    @Path("betterportals/test/performance")
-    @Aliases("speed")
-    public boolean printPerformanceInfo(CommandSender sender) {
-        sender.sendMessage("Performance Metrics");
-        sender.sendMessage("-------------------------------------------------");
-        for(Map.Entry<String, Operation> entry : performanceWatcher.getTimedOperations().entrySet()) {
-            Operation operation = entry.getValue();
-
-            sender.sendMessage(String.format("%s: Average time: %.03fms, Highest time: %.03fms, Lowest time: %.03fms",
-                    entry.getKey(),
-                    operation.getAverageTime().getNano() / 1_000_000d,
-                    operation.getHighestTime().getNano() / 1_000_000d,
-                    operation.getLowestTime().getNano() / 1_000_000d
-            ));
-        }
-        return true;
     }
 
     @Command

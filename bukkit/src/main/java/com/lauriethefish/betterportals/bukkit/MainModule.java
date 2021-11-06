@@ -10,8 +10,6 @@ import com.lauriethefish.betterportals.bukkit.player.PlayerModule;
 import com.lauriethefish.betterportals.bukkit.portal.PortalModule;
 import com.lauriethefish.betterportals.bukkit.tasks.BlockUpdateFinisher;
 import com.lauriethefish.betterportals.bukkit.tasks.ThreadedBlockUpdateFinisher;
-import com.lauriethefish.betterportals.bukkit.util.performance.IPerformanceWatcher;
-import com.lauriethefish.betterportals.bukkit.util.performance.PerformanceWatcher;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import com.lauriethefish.betterportals.shared.logging.OverrideLogger;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -30,7 +28,6 @@ public class MainModule extends AbstractModule {
         bind(Logger.class).toInstance(new OverrideLogger(pl.getLogger()));
 
         bind(BlockUpdateFinisher.class).to(ThreadedBlockUpdateFinisher.class);
-        bind(IPerformanceWatcher.class).to(PerformanceWatcher.class);
         bind(ICrashHandler.class).to(CrashHandler.class);
 
         bind(MetricsManager.class).asEagerSingleton();

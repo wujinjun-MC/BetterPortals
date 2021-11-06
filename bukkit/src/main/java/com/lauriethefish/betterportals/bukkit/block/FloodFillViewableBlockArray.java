@@ -15,7 +15,6 @@ import com.lauriethefish.betterportals.bukkit.math.Matrix;
 import com.lauriethefish.betterportals.bukkit.nms.BlockDataUtil;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.util.MaterialUtil;
-import com.lauriethefish.betterportals.bukkit.util.performance.IPerformanceWatcher;
 import com.lauriethefish.betterportals.bukkit.util.performance.OperationTimer;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import lombok.Getter;
@@ -40,7 +39,6 @@ import java.util.concurrent.ConcurrentMap;
 public class FloodFillViewableBlockArray implements IViewableBlockArray    {
     private final Logger logger;
     private final RenderConfig renderConfig;
-    private final IPerformanceWatcher performanceWatcher;
     private final IBlockRotator blockRotator;
     private final BlockDataFetcherFactory dataFetcherFactory;
     private IBlockDataFetcher dataFetcher;
@@ -63,11 +61,10 @@ public class FloodFillViewableBlockArray implements IViewableBlockArray    {
     private boolean firstUpdate;
 
     @Inject
-    public FloodFillViewableBlockArray(@Assisted IPortal portal, Logger logger, RenderConfig renderConfig, IPerformanceWatcher performanceWatcher, IBlockRotator blockRotator, BlockDataFetcherFactory dataFetcherFactory) {
+    public FloodFillViewableBlockArray(@Assisted IPortal portal, Logger logger, RenderConfig renderConfig, IBlockRotator blockRotator, BlockDataFetcherFactory dataFetcherFactory) {
         this.portal = portal;
         this.logger = logger;
         this.renderConfig = renderConfig;
-        this.performanceWatcher = performanceWatcher;
         this.blockRotator = blockRotator;
         this.centerPos = new IntVector(portal.getOriginPos().getVector());
         this.rotateDestToOrigin = portal.getTransformations().getRotateToOrigin();
@@ -272,8 +269,6 @@ public class FloodFillViewableBlockArray implements IViewableBlockArray    {
         }   else    {
             checkForChanges();
         }
-        performanceWatcher.putTimeTaken(firstUpdate ? "Initial viewable block update" : "Incremental viewable block update", timer);
-        performanceWatcher.putTimeTaken("Viewable block update", timer);
         firstUpdate = false;
         logger.finest("Viewable block array update took: %.3f ms. Block count: %d. Viewable count: %d", timer.getTimeTakenMillis(), nonObscuredStates.size(), viewableStates.size());
     }

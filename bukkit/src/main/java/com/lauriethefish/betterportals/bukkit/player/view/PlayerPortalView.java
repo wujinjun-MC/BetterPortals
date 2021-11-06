@@ -7,8 +7,6 @@ import com.lauriethefish.betterportals.bukkit.config.RenderConfig;
 import com.lauriethefish.betterportals.bukkit.player.view.block.IPlayerBlockView;
 import com.lauriethefish.betterportals.bukkit.player.view.entity.IPlayerEntityView;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
-import com.lauriethefish.betterportals.bukkit.util.performance.IPerformanceWatcher;
-import com.lauriethefish.betterportals.bukkit.util.performance.OperationTimer;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -19,7 +17,6 @@ public class PlayerPortalView implements IPlayerPortalView  {
     private final Player player;
     private final Logger logger;
     private final RenderConfig renderConfig;
-    private final IPerformanceWatcher performanceWatcher;
 
     private final IPlayerBlockView blockView;
     private final IPlayerEntityView entityView;
@@ -28,11 +25,10 @@ public class PlayerPortalView implements IPlayerPortalView  {
     private int ticksSinceStarted = 0;
 
     @Inject
-    public PlayerPortalView(@Assisted Player player, @Assisted IPortal viewedPortal, ViewFactory viewFactory, Logger logger, RenderConfig renderConfig, IPerformanceWatcher performanceWatcher, MiscConfig miscConfig) {
+    public PlayerPortalView(@Assisted Player player, @Assisted IPortal viewedPortal, ViewFactory viewFactory, Logger logger, RenderConfig renderConfig, MiscConfig miscConfig) {
         this.player = player;
         this.logger = logger;
         this.renderConfig = renderConfig;
-        this.performanceWatcher = performanceWatcher;
 
         this.blockView = viewFactory.createBlockView(player, viewedPortal);
         if(!miscConfig.isEntitySupportEnabled()) {
@@ -56,7 +52,6 @@ public class PlayerPortalView implements IPlayerPortalView  {
 
     @Override
     public void update() {
-        OperationTimer timer = new OperationTimer();
         boolean moved = !player.getLocation().equals(previousPosition);
 
         // We refresh the block view every N ticks so that if the client doesn't change some of the blocks, they will be resent
@@ -72,7 +67,6 @@ public class PlayerPortalView implements IPlayerPortalView  {
         }
 
         ticksSinceStarted++;
-        performanceWatcher.putTimeTaken("Player portal view update", timer);
         previousPosition = player.getLocation();
     }
 

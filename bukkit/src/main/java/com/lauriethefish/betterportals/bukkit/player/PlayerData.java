@@ -10,7 +10,6 @@ import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.portal.IPortalActivityManager;
 import com.lauriethefish.betterportals.bukkit.portal.IPortalManager;
 import com.lauriethefish.betterportals.bukkit.portal.predicate.IPortalPredicateManager;
-import com.lauriethefish.betterportals.bukkit.util.performance.IPerformanceWatcher;
 import com.lauriethefish.betterportals.bukkit.util.performance.OperationTimer;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import lombok.Getter;
@@ -37,7 +36,6 @@ public class PlayerData implements IPlayerData  {
     private final IPortalManager portalManager;
     private final IPortalPredicateManager portalPredicateManager;
     private final IPortalActivityManager portalActivityManager;
-    private final IPerformanceWatcher performanceWatcher;
 
     private final PlayerPortalViewFactory playerPortalViewFactory;
 
@@ -45,12 +43,11 @@ public class PlayerData implements IPlayerData  {
     private final Map<IPortal, IPlayerPortalView> portalViews = new ConcurrentHashMap<>();
 
     @Inject
-    public PlayerData(@Assisted Player player, IPlayerSelectionManager selection, IPortalManager portalManager, IPortalPredicateManager portalPredicateManager, IPerformanceWatcher performanceWatcher, BetterPortals pl, Logger logger, IPortalActivityManager portalActivityManager, PlayerPortalViewFactory playerPortalViewFactory) {
+    public PlayerData(@Assisted Player player, IPlayerSelectionManager selection, IPortalManager portalManager, IPortalPredicateManager portalPredicateManager, BetterPortals pl, Logger logger, IPortalActivityManager portalActivityManager, PlayerPortalViewFactory playerPortalViewFactory) {
         this.player = player;
         this.selection = selection;
         this.portalManager = portalManager;
         this.portalPredicateManager = portalPredicateManager;
-        this.performanceWatcher = performanceWatcher;
         this.pl = pl;
         this.logger = logger;
         this.portalActivityManager = portalActivityManager;
@@ -111,8 +108,6 @@ public class PlayerData implements IPlayerData  {
 
         Collection<IPortal> nowViewablePortals = updateViewablePortals();
         updatePortalViews(nowViewablePortals);
-
-        performanceWatcher.putTimeTaken("Individual player data update", timer);
     }
 
     private void deactivateViews(boolean loggingOut) {
