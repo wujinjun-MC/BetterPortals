@@ -14,3 +14,5 @@ dependency-reduced-pom.xml
 !gradlew
 !gradlew.bat
 !gradle/
+
+lombok.config
