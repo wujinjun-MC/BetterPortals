@@ -33,7 +33,7 @@ allprojects {
         implementation 'org.jetbrains:annotations:23.0.0'
         implementation 'com.google.code.findbugs:jsr305:3.0.2'
 
-        compileOnly 'org.projectlombok:lombok:1.18.20'
+        compileOnly 'org.projectlombok:lombok:1.18.22'
         testImplementation 'org.projectlombok:lombok:1.18.22'
         annotationProcessor 'org.projectlombok:lombok:1.18.20'
         testAnnotationProcessor('org.projectlombok:lombok:1.18.20')
