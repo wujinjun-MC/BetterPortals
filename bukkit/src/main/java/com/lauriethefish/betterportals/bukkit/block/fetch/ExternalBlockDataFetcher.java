@@ -6,7 +6,6 @@ import com.lauriethefish.betterportals.bukkit.net.IPortalClient;
 import com.lauriethefish.betterportals.bukkit.net.requests.GetBlockDataChangesRequest;
 import com.lauriethefish.betterportals.bukkit.nms.BlockDataUtil;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
-import com.lauriethefish.betterportals.bukkit.util.performance.OperationTimer;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import com.lauriethefish.betterportals.shared.net.RequestException;
 import org.bukkit.block.data.BlockData;
@@ -56,8 +55,6 @@ public class ExternalBlockDataFetcher implements IBlockDataFetcher  {
         portalClient.sendRequestToServer(request, destServerName, (response) -> {
             hasPreviousRequestFinished = true;
             try {
-                OperationTimer timer = new OperationTimer();
-
                 logger.finer("Received response to get block data request");
                 Map<IntVector, Integer> serializedChanges = (Map<IntVector, Integer>) response.getResult();
 
