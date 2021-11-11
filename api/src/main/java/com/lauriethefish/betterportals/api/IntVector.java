@@ -17,7 +17,7 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
-public class IntVector implements Cloneable, Serializable {
+public final class IntVector implements Cloneable, Serializable {
     private static final long serialVersionUID = 1;
 
     private int x;
