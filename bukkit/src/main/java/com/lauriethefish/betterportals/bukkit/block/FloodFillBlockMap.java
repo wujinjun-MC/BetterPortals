@@ -20,7 +20,10 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-public abstract class FloodFillViewableBlockArray implements IViewableBlockArray {
+/**
+ * Abstract viewable block map that is intended to have the update functions perform a flood fill to find which blocks are viewable.
+ */
+public abstract class FloodFillBlockMap implements IBlockMap {
     protected final Logger logger;
     protected final RenderConfig renderConfig;
 
@@ -44,7 +47,7 @@ public abstract class FloodFillViewableBlockArray implements IViewableBlockArray
     protected final PortalDirection destDirection;
     protected boolean firstUpdate;
 
-    public FloodFillViewableBlockArray(IPortal portal, Logger logger, RenderConfig renderConfig) {
+    public FloodFillBlockMap(IPortal portal, Logger logger, RenderConfig renderConfig) {
         this.portal = portal;
         this.logger = logger;
         this.renderConfig = renderConfig;

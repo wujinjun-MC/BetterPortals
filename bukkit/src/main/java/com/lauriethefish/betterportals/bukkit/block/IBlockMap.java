@@ -14,7 +14,7 @@ import java.util.List;
  * Implements skipping of blocks that are fully covered by opaque blocks.
  * Implements skipping of blocks that are the same at the origin and destination.
  */
-public interface IViewableBlockArray {
+public interface IBlockMap {
     /**
      * Updates the block array, and with the interval defined in {@link RenderConfig}
      * The first time this is called, it takes quite a bit longer than afterwards
@@ -51,11 +51,11 @@ public interface IViewableBlockArray {
     /**
      * Clears the currently rendered array to save memory.
      * Called on portal deactivation.
-     * Next time {@link IViewableBlockArray#update(int)} is called, another initial update will be done, which takes longer.
+     * Next time {@link IBlockMap#update(int)} is called, another initial update will be done, which takes longer.
      */
     void reset();
 
     interface Factory {
-        IViewableBlockArray create(IPortal portal);
+        IBlockMap create(IPortal portal);
     }
 }

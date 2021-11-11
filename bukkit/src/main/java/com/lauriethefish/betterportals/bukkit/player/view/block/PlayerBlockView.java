@@ -6,7 +6,7 @@ import com.comphenix.protocol.wrappers.WrappedBlockData;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.lauriethefish.betterportals.api.PortalDirection;
-import com.lauriethefish.betterportals.bukkit.block.IViewableBlockArray;
+import com.lauriethefish.betterportals.bukkit.block.IBlockMap;
 import com.lauriethefish.betterportals.bukkit.block.IViewableBlockInfo;
 import com.lauriethefish.betterportals.bukkit.block.IMultiBlockChangeManager;
 import com.lauriethefish.betterportals.bukkit.config.RenderConfig;
@@ -103,7 +103,7 @@ public class PlayerBlockView implements IPlayerBlockView   {
 
             OperationTimer timer = new OperationTimer();
 
-            IViewableBlockArray viewableBlockArray = portal.getViewableBlocks();
+            IBlockMap viewableBlockArray = portal.getViewableBlocks();
             List<IViewableBlockInfo> viewableStates = viewableBlockArray.getViewableStates();
             for (IViewableBlockInfo blockInfo : viewableStates) {
                 Vector position = blockInfo.getOriginPos().getCenterPos();

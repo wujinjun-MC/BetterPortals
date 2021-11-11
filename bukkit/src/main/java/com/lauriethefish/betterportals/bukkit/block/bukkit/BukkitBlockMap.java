@@ -5,7 +5,7 @@ import com.comphenix.protocol.wrappers.WrappedBlockData;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.lauriethefish.betterportals.api.IntVector;
-import com.lauriethefish.betterportals.bukkit.block.FloodFillViewableBlockArray;
+import com.lauriethefish.betterportals.bukkit.block.FloodFillBlockMap;
 import com.lauriethefish.betterportals.bukkit.block.IViewableBlockInfo;
 import com.lauriethefish.betterportals.bukkit.block.fetch.BlockDataFetcherFactory;
 import com.lauriethefish.betterportals.bukkit.block.fetch.IBlockDataFetcher;
@@ -26,10 +26,11 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * After lots of testing, a flood-fill appears to be the most efficient way to find the blocks around the destination that aren't obscured.
- * <br>If you want, you can try to optimise more, but I'm not sure how to make this much better with the requirements it has.
+ * A bukkit implementation of a flood fill block map.
+ * Works across versions, so is used as a fall-back from the NMS version.
+ * TODO: Fallback is yet to be implemented
  */
-public class BukkitViewableBlockArray extends FloodFillViewableBlockArray {
+public class BukkitBlockMap extends FloodFillBlockMap {
     private final IBlockRotator blockRotator;
     private final BlockDataFetcherFactory dataFetcherFactory;
     private final Matrix rotateDestToOrigin;
@@ -38,7 +39,7 @@ public class BukkitViewableBlockArray extends FloodFillViewableBlockArray {
     private final World originWorld;
 
     @Inject
-    public BukkitViewableBlockArray(@Assisted IPortal portal, Logger logger, RenderConfig renderConfig, IBlockRotator blockRotator, BlockDataFetcherFactory dataFetcherFactory) {
+    public BukkitBlockMap(@Assisted IPortal portal, Logger logger, RenderConfig renderConfig, IBlockRotator blockRotator, BlockDataFetcherFactory dataFetcherFactory) {
         super(portal, logger, renderConfig);
         this.blockRotator = blockRotator;
         this.dataFetcherFactory = dataFetcherFactory;
@@ -54,7 +55,7 @@ public class BukkitViewableBlockArray extends FloodFillViewableBlockArray {
     /**
      * Starts a flood fill from <code>start</code> out to the edges of the viewed portal area.
      * The fill stops when it reaches occluding blocks, as we don't need to render other blocks behind these.
-     * The origin data is also fetched, and this is placed in {@link BukkitViewableBlockArray#viewableStates}.
+     * The origin data is also fetched, and this is placed in {@link BukkitBlockMap#viewableStates}.
      * <br>Some notes:
      * - There used to be a check to see if the origin and destination states are the same, but this added too much complexity when checking for changes, so I decided to remove it.
      * - That unfortunately reduces the performance of the threaded bit slightly, but I think it's worth it for the gains here.

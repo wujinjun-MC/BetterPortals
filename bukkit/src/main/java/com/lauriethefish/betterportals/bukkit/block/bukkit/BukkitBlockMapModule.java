@@ -3,15 +3,15 @@ package com.lauriethefish.betterportals.bukkit.block.bukkit;
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.lauriethefish.betterportals.bukkit.block.IMultiBlockChangeManager;
-import com.lauriethefish.betterportals.bukkit.block.IViewableBlockArray;
+import com.lauriethefish.betterportals.bukkit.block.IBlockMap;
 import com.lauriethefish.betterportals.bukkit.util.VersionUtil;
 
 public class BukkitBlockMapModule extends AbstractModule {
 
     protected void configure() {
         install(new FactoryModuleBuilder()
-                .implement(IViewableBlockArray.class, BukkitViewableBlockArray.class)
-                .build(IViewableBlockArray.Factory.class)
+                .implement(IBlockMap.class, BukkitBlockMap.class)
+                .build(IBlockMap.Factory.class)
         );
 
         install(new FactoryModuleBuilder()

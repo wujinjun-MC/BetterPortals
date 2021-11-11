@@ -3,7 +3,7 @@ package implementations;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.lauriethefish.betterportals.api.PortalPosition;
-import com.lauriethefish.betterportals.bukkit.block.IViewableBlockArray;
+import com.lauriethefish.betterportals.bukkit.block.IBlockMap;
 import com.lauriethefish.betterportals.bukkit.entity.IPortalEntityList;
 import com.lauriethefish.betterportals.bukkit.math.PortalTransformations;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
@@ -102,7 +102,7 @@ public class TestPortal implements IPortal {
     }
 
     @Override
-    public @NotNull IViewableBlockArray getViewableBlocks() {
+    public @NotNull IBlockMap getViewableBlocks() {
         return null;
     }
 

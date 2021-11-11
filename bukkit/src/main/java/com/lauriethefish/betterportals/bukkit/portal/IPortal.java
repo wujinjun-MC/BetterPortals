@@ -3,7 +3,7 @@ package com.lauriethefish.betterportals.bukkit.portal;
 import com.google.inject.assistedinject.Assisted;
 import com.lauriethefish.betterportals.api.BetterPortal;
 import com.lauriethefish.betterportals.api.PortalPosition;
-import com.lauriethefish.betterportals.bukkit.block.IViewableBlockArray;
+import com.lauriethefish.betterportals.bukkit.block.IBlockMap;
 import com.lauriethefish.betterportals.bukkit.entity.IPortalEntityList;
 import com.lauriethefish.betterportals.bukkit.math.PortalTransformations;
 import org.bukkit.util.Vector;
@@ -50,7 +50,7 @@ public interface IPortal extends BetterPortal {
     /**
      * @return The current viewable block array of the portal. Used for rendering
      */
-    @NotNull IViewableBlockArray getViewableBlocks();
+    @NotNull IBlockMap getViewableBlocks();
 
     /**
      * @return The lists of entities nearby this portal at the origin and destination

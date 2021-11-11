@@ -3,7 +3,7 @@ package com.lauriethefish.betterportals.bukkit.portal;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.lauriethefish.betterportals.api.PortalPosition;
-import com.lauriethefish.betterportals.bukkit.block.IViewableBlockArray;
+import com.lauriethefish.betterportals.bukkit.block.IBlockMap;
 import com.lauriethefish.betterportals.bukkit.chunk.chunkloading.PortalChunkLoader;
 import com.lauriethefish.betterportals.bukkit.config.MiscConfig;
 import com.lauriethefish.betterportals.bukkit.entity.IEntityTeleportManager;
@@ -40,7 +40,7 @@ public class Portal implements IPortal, ConfigurationSerializable {
     private boolean allowNonPlayerTeleportation;
 
     @Getter private final PortalTransformations transformations;
-    @Getter private final IViewableBlockArray viewableBlocks;
+    @Getter private final IBlockMap viewableBlocks;
 
     @Getter private final IPortalEntityList entityList;
     @Getter private final IEntityTeleportManager entityTeleportationManager;
@@ -50,7 +50,7 @@ public class Portal implements IPortal, ConfigurationSerializable {
     private int ticksSinceViewActivated = -1;
 
     @Inject
-    public Portal(IPortalManager portalManager, PortalEntityListFactory entityListFactory, IViewableBlockArray.Factory viewableBlockArrayFactory,
+    public Portal(IPortalManager portalManager, PortalEntityListFactory entityListFactory, IBlockMap.Factory viewableBlockArrayFactory,
                   IEntityTeleportManager.Factory teleportManagerFactory, PortalChunkLoader chunkLoader, MiscConfig miscConfig,
                   Logger logger, PortalTransformationsFactory transformationsFactory,
                   @Assisted("originPos") PortalPosition originPos, @Assisted("destPos") PortalPosition destPos,
