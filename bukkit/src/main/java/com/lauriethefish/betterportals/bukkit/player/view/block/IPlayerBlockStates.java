@@ -1,6 +1,6 @@
 package com.lauriethefish.betterportals.bukkit.player.view.block;
 
-import com.lauriethefish.betterportals.bukkit.block.ViewableBlockInfo;
+import com.lauriethefish.betterportals.bukkit.block.IViewableBlockInfo;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
@@ -13,10 +13,10 @@ public interface IPlayerBlockStates {
 
     // Note: these methods just update the array, they won't actually send any packets
     // Returns if the block was not viewable last tick, AKA whether or not an update packet is needed
-    boolean setViewable(Vector position, ViewableBlockInfo block);
+    boolean setViewable(Vector position, IViewableBlockInfo block);
 
     // Returns if the block was viewable last tick, AKA whether or not an update packet is needed
-    boolean setNonViewable(Vector position, ViewableBlockInfo block);
+    boolean setNonViewable(Vector position, IViewableBlockInfo block);
 
     interface Factory {
         IPlayerBlockStates create(Player player);

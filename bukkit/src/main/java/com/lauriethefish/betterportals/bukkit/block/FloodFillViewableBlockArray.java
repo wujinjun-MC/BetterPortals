@@ -2,76 +2,55 @@ package com.lauriethefish.betterportals.bukkit.block;
 
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
-import com.google.inject.Inject;
-import com.google.inject.assistedinject.Assisted;
 import com.lauriethefish.betterportals.api.IntVector;
 import com.lauriethefish.betterportals.api.PortalDirection;
-import com.lauriethefish.betterportals.bukkit.block.fetch.BlockDataFetcherFactory;
-import com.lauriethefish.betterportals.bukkit.block.fetch.IBlockDataFetcher;
-import com.lauriethefish.betterportals.bukkit.block.rotation.IBlockRotator;
 import com.lauriethefish.betterportals.bukkit.config.RenderConfig;
 import com.lauriethefish.betterportals.bukkit.math.MathUtil;
 import com.lauriethefish.betterportals.bukkit.math.Matrix;
-import com.lauriethefish.betterportals.bukkit.nms.BlockDataUtil;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.util.MaterialUtil;
 import com.lauriethefish.betterportals.bukkit.util.performance.OperationTimer;
 import com.lauriethefish.betterportals.shared.logging.Logger;
-import lombok.Getter;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.ReentrantLock;
 
-/**
- * After lots of testing, a flood-fill appears to be the most efficient way to find the blocks around the destination that aren't obscured.
- * <br>If you want, you can try to optimise more, but I'm not sure how to make this much better with the requirements it has.
- */
-public class FloodFillViewableBlockArray implements IViewableBlockArray    {
-    private final Logger logger;
-    private final RenderConfig renderConfig;
-    private final IBlockRotator blockRotator;
-    private final BlockDataFetcherFactory dataFetcherFactory;
-    private IBlockDataFetcher dataFetcher;
+public abstract class FloodFillViewableBlockArray implements IViewableBlockArray {
+    protected final Logger logger;
+    protected final RenderConfig renderConfig;
 
-    private ConcurrentMap<IntVector, ViewableBlockInfo> nonObscuredStates;
-    @Getter private ConcurrentMap<IntVector, ViewableBlockInfo> viewableStates;
+    protected final ConcurrentHashMap<IntVector, PacketContainer> originTileStates = new ConcurrentHashMap<>();
+    protected final ConcurrentHashMap<IntVector, PacketContainer> destTileStates = new ConcurrentHashMap<>();
 
-    private final ConcurrentMap<IntVector, PacketContainer> originTileStates = new ConcurrentHashMap<>();
-    private final ConcurrentMap<IntVector, PacketContainer> destTileStates = new ConcurrentHashMap<>();
+    protected List<IViewableBlockInfo> viewableStates = new ArrayList<>();
+    protected List<IViewableBlockInfo> queuedViewableStates = new ArrayList<>();
+    protected final ReentrantLock queuedViewableStatesLock = new ReentrantLock();
 
-    private final IPortal portal;
-    private final Matrix rotateDestToOrigin;
-    private final Matrix rotateOriginToDest;
-    private final IntVector portalOriginPos;
-    private final IntVector portalDestPos;
+    protected List<IViewableBlockInfo> nonObscuredStates = new ArrayList<>();
 
-    private final IntVector centerPos;
-    private final World originWorld;
-    private final PortalDirection destDirection;
-    private boolean firstUpdate;
+    protected boolean[] alreadyReachedMap;
 
-    @Inject
-    public FloodFillViewableBlockArray(@Assisted IPortal portal, Logger logger, RenderConfig renderConfig, IBlockRotator blockRotator, BlockDataFetcherFactory dataFetcherFactory) {
+    protected final IPortal portal;
+    protected final Matrix rotateOriginToDest;
+    protected final IntVector portalOriginPos;
+    protected final IntVector portalDestPos;
+
+    protected final IntVector centerPos;
+    protected final PortalDirection destDirection;
+    protected boolean firstUpdate;
+
+    public FloodFillViewableBlockArray(IPortal portal, Logger logger, RenderConfig renderConfig) {
         this.portal = portal;
         this.logger = logger;
         this.renderConfig = renderConfig;
-        this.blockRotator = blockRotator;
         this.centerPos = new IntVector(portal.getOriginPos().getVector());
-        this.rotateDestToOrigin = portal.getTransformations().getRotateToOrigin();
         this.rotateOriginToDest = portal.getTransformations().getRotateToDestination();
-        this.originWorld = portal.getOriginPos().getWorld();
         this.destDirection = portal.getDestPos().getDirection();
-        this.dataFetcherFactory = dataFetcherFactory;
         this.portalOriginPos = new IntVector(portal.getOriginPos().getVector());
         this.portalDestPos = roundBasedOnDirection(portal);
         logger.fine("Origin pos: %s, Dest pos: %s", portalOriginPos, portalDestPos);
@@ -90,187 +69,95 @@ public class FloodFillViewableBlockArray implements IViewableBlockArray    {
         return new IntVector(destPosCenter);
     }
 
-    private boolean isInLine(IntVector relPos) {
+    protected boolean isInLine(IntVector relPos) {
         return destDirection.swapVector(relPos).getZ() == 0;
+    }
+
+    protected final int getArrayMapIndex(IntVector relPos) {
+        return ((relPos.getX() + (int) renderConfig.getMaxXZ()) + (relPos.getZ() + (int) renderConfig.getMaxXZ()) * renderConfig.getZMultip() + (relPos.getY() + (int) renderConfig.getMaxY()) * renderConfig.getYMultip());
     }
 
     /**
      * Starts a flood fill from <code>start</code> out to the edges of the viewed portal area.
      * The fill stops when it reaches occluding blocks, as we don't need to render other blocks behind these.
-     * The origin data is also fetched, and this is placed in {@link FloodFillViewableBlockArray#viewableStates}.
-     * <br>Some notes:
-     * - There used to be a check to see if the origin and destination states are the same, but this added too much complexity when checking for changes, so I decided to remove it.
-     * - That unfortunately reduces the performance of the threaded bit slightly, but I think it's worth it for the gains here.
-     * @param start Start position of the flood fill, at the origin
+     * The origin data is also fetched, and this is placed in the viewable states
+     * @param originPos Start position of the flood fill, at the origin (non-relative)
      */
-    private void searchFromBlock(IntVector start) {
-        WrappedBlockData backgroundData = renderConfig.getBackgroundBlockData();
-        if(backgroundData == null) {
-            backgroundData = MaterialUtil.PORTAL_EDGE_DATA; // Use the default if not overridden in the config
-        }
-
-        List<IntVector> stack = new ArrayList<>(renderConfig.getTotalArrayLength());
-
-        logger.fine("Starting at %s", start.subtract(centerPos));
-        stack.add(start.subtract(centerPos));
-        while(stack.size() > 0) {
-            IntVector originRelPos = stack.remove(stack.size() - 1);
-            IntVector originPos = originRelPos.add(portalOriginPos);
-            IntVector destRelPos = rotateOriginToDest.transform(originRelPos);
-            IntVector destPos = destRelPos.add(portalDestPos);
-
-            BlockData destData = dataFetcher.getData(destPos);
-            boolean isOccluding = destData.getMaterial().isOccluding();
-
-            Block originBlock = originPos.getBlock(originWorld);
-            BlockData originData = originBlock.getBlockData();
-
-            if(!portal.isCrossServer() && MaterialUtil.isTileEntity(destData.getMaterial())) {
-                logger.finer("Adding tile state to map . . .");
-                Block destBlock = destPos.getBlock(portal.getDestPos().getWorld());
-
-                PacketContainer updatePacket = BlockDataUtil.getUpdatePacket(destBlock.getState());
-                if(updatePacket != null) {
-                    BlockDataUtil.setTileEntityPosition(updatePacket, originPos);
-
-                    destTileStates.put(originPos, updatePacket);
-                }
-            }
-
-            if(MaterialUtil.isTileEntity(originBlock.getType()))  {
-                logger.finer("Adding tile state to map . . .");
-                PacketContainer updatePacket = BlockDataUtil.getUpdatePacket(originBlock.getState());
-                if(updatePacket != null) {
-                    originTileStates.put(originPos, updatePacket);
-                }
-            }
-
-            ViewableBlockInfo blockInfo = new ViewableBlockInfo(originData, destData);
-            boolean isEdge = renderConfig.isOutsideBounds(originRelPos);
-            if(isEdge && !isOccluding) {
-                blockInfo.setRenderedDestData(backgroundData);
-            }   else    {
-                blockInfo.setRenderedDestData(WrappedBlockData.createData(blockRotator.rotateByMatrix(rotateDestToOrigin, destData)));
-            }
-            nonObscuredStates.put(originPos, blockInfo);
-
-            boolean canSkip = destData.equals(originData) && firstUpdate && !isEdge;
-            boolean isInLine = isInLine(destRelPos);
-            if (!isInLine && !canSkip) {
-                viewableStates.put(originPos, blockInfo);
-            }
-
-            // Stop when we reach the edge or an occluding block, since we don't want to show blocks outside the view area
-            if ((isOccluding && !isInLine) || isEdge) {continue;}
-
-            // Continue for any surrounding blocks that haven't been checked yet
-            for(IntVector offset : renderConfig.getSurroundingOffsets()) {
-                IntVector offsetPos = originRelPos.add(offset);
-                if (!nonObscuredStates.containsKey(offsetPos.add(portalOriginPos))) {
-                    stack.add(offsetPos);
-                }
-            }
-        }
-    }
+    protected abstract void searchFromBlock(IntVector originPos);
 
     /**
      * Checks the origin and destination blocks for changes.
      * At the origin, we only need to check the actually viewable blocks, since there is no need to re-flood-fill.
      * At the destination, we must check all blocks that were reached by the flood-fill, then do a re-flood-fill for any that have changed to add blocks in a newly revealed cavern, for instance.
      */
-    private void checkForChanges() {
-        for(Map.Entry<IntVector, ViewableBlockInfo> entry : nonObscuredStates.entrySet()) {
-            ViewableBlockInfo blockInfo = entry.getValue();
+    protected abstract void checkForChanges();
 
-            IntVector destPos = rotateOriginToDest.transform(entry.getKey().subtract(portalOriginPos)).add(portalDestPos); // Avoid directly using the matrix to fix floating point precision issues
-            BlockData newDestData = dataFetcher.getData(destPos);
-
-            if(!newDestData.equals(blockInfo.getBaseDestData())) {
-                logger.finer("Destination block change");
-                searchFromBlock(entry.getKey());
-            }
-
-            if(!portal.isCrossServer()) {
-                if (MaterialUtil.isTileEntity(newDestData.getMaterial())) {
-                    logger.finer("Adding tile state to map . . .");
-                    Block destBlock = destPos.getBlock(portal.getDestPos().getWorld());
-
-                    PacketContainer updatePacket = BlockDataUtil.getUpdatePacket(destBlock.getState());
-                    if(updatePacket != null) {
-                        BlockDataUtil.setTileEntityPosition(updatePacket, entry.getKey());
-
-                        destTileStates.put(entry.getKey(), updatePacket);
-                    }
-                }
-            }
-
-            Block originBlock = entry.getKey().getBlock(originWorld);
-            BlockData newOriginData = originBlock.getBlockData();
-            if(MaterialUtil.isTileEntity(originBlock.getType()))  {
-                logger.finer("Adding tile state to map . . .");
-                PacketContainer updatePacket = BlockDataUtil.getUpdatePacket(originBlock.getState());
-                if(updatePacket != null) {
-                    originTileStates.put(entry.getKey(), updatePacket);
-                }
-            }
-
-            if(!newOriginData.equals(blockInfo.getBaseOriginData())) {
-                logger.finer("Origin block change");
-                blockInfo.setOriginData(newOriginData);
-                if(!newOriginData.equals(newDestData) && !portal.getOriginPos().isInLine(entry.getKey())) {
-                    viewableStates.put(entry.getKey(), entry.getValue());
-                }
-            }
+    protected final WrappedBlockData getBackgroundData() {
+        WrappedBlockData backgroundData = renderConfig.getBackgroundBlockData();
+        if(backgroundData == null) {
+            backgroundData = MaterialUtil.PORTAL_EDGE_DATA; // Use the default if not overridden in the config
         }
 
-        updateTileStateMap(originTileStates, originWorld, false);
-        if(!portal.isCrossServer()) {
-            updateTileStateMap(destTileStates, portal.getDestPos().getWorld(), true);
-        }
-    }
-
-    private void updateTileStateMap(ConcurrentMap<IntVector, PacketContainer> map, World world, boolean isDestination) {
-        for(Map.Entry<IntVector, PacketContainer> entry : map.entrySet()) {
-            IntVector position;
-            if(isDestination) {
-                IntVector portalRelativePos = entry.getKey().subtract(portalOriginPos);
-                position = rotateOriginToDest.transform(portalRelativePos).add(portalDestPos);
-            }   else    {
-                position = entry.getKey();
-            }
-
-            Block block = position.getBlock(world);
-            BlockState state = block.getState();
-            if(!MaterialUtil.isTileEntity(state.getType())) {
-                logger.finer("Removing tile state from map . . . %b", isDestination);
-                map.remove(entry.getKey());
-            }
-        }
+        return backgroundData;
     }
 
     @Override
     public void update(int ticksSinceActivated) {
         if(ticksSinceActivated % renderConfig.getBlockUpdateInterval() != 0) {return;}
 
-        if(dataFetcher == null) {
-            dataFetcher = dataFetcherFactory.create(portal);
-        }
-        dataFetcher.update();
+        updateInternal();
+    }
 
-        // If fetching external blocks has not yet finished, we can't do the flood-fill.
-        if(!dataFetcher.isReady()) {
-            logger.fine("Not updating portal, data was not yet been fetched");
-            return;
-        }
+    protected void updateInternal() {
+        // TODO: Figure out deadlocking problem with very large render distances
+
 
         OperationTimer timer = new OperationTimer();
         if(firstUpdate) {
-            searchFromBlock(centerPos);
+            queuedViewableStatesLock.lock();
+            try {
+                searchFromBlock(centerPos);
+            }   finally {
+                queuedViewableStatesLock.unlock();
+            }
         }   else    {
             checkForChanges();
         }
         firstUpdate = false;
-        logger.finest("Viewable block array update took: %.3f ms. Block count: %d. Viewable count: %d", timer.getTimeTakenMillis(), nonObscuredStates.size(), viewableStates.size());
+        logger.fine("Viewable block array update took: %.3f ms. Block count: %d. Viewable count: %d", timer.getTimeTakenMillis(), nonObscuredStates.size(), viewableStates.size());
+    }
+
+    @Override
+    public void reset() {
+        logger.finer("Clearing block array to save memory");
+
+        // In practise there should be no block update ongoing when this happens, but to be on the safe side
+        queuedViewableStatesLock.lock();
+        try {
+            queuedViewableStates = new ArrayList<>();
+        }   finally {
+            queuedViewableStatesLock.unlock();
+        }
+        viewableStates = new ArrayList<>();
+        nonObscuredStates = new ArrayList<>();
+        originTileStates.clear();
+        destTileStates.clear();
+        firstUpdate = true;
+        alreadyReachedMap = new boolean[renderConfig.getTotalArrayLength()];
+    }
+
+    @Override
+    public List<IViewableBlockInfo> getViewableStates() {
+        if(queuedViewableStatesLock.tryLock()) {
+            try {
+                viewableStates.addAll(queuedViewableStates);
+                queuedViewableStates.clear();
+            }   finally {
+                queuedViewableStatesLock.unlock();
+            }
+        }
+
+        return viewableStates;
     }
 
     @Override
@@ -281,16 +168,5 @@ public class FloodFillViewableBlockArray implements IViewableBlockArray    {
     @Override
     public @Nullable PacketContainer getDestinationTileEntityPacket(@NotNull IntVector position) {
         return destTileStates.get(position);
-    }
-
-    @Override
-    public void reset() {
-        logger.finer("Clearing block array to save memory");
-        nonObscuredStates = new ConcurrentHashMap<>();
-        viewableStates = new ConcurrentHashMap<>();
-        originTileStates.clear();
-        destTileStates.clear();
-        firstUpdate = true;
-        dataFetcher = null;
     }
 }

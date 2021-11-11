@@ -148,15 +148,17 @@ public class Matrix implements Serializable {
     }
 
     /**
-     * Transforms <code>in</code> by this matrix.
+     * Transforms coordinates by this matrix and returns a transformed IntVector
      * This will avoid floating point precision errors by moving the vector to the center of the block before transformation.
-     * @param in Vector to transform
+     * @param x X coordinate
+     * @param y Y coordinate
+     * @param z Z coordinate
      * @return Transformed vector
      */
-    public IntVector transform(IntVector in) {
+    public IntVector transform(int x, int y, int z) {
         float[] result = new float[4];
         for(int i = 0; i < 4; i++) {
-            result[i] = (float) ((in.getX()) * m[i][0] + (in.getY()) * m[i][1] + (in.getZ()) * m[i][2] + m[i][3]);
+            result[i] = (float) (x * m[i][0] + y * m[i][1] + z * m[i][2] + m[i][3]);
         }
 
         return new IntVector(
@@ -164,5 +166,15 @@ public class Matrix implements Serializable {
             Math.round(result[1] / result[3]),
             Math.round(result[2] / result[3])
         );
+    }
+
+    /**
+     * Transforms <code>in</code> by this matrix.
+     * This will avoid floating point precision errors by moving the vector to the center of the block before transformation.
+     * @param in Vector to transform
+     * @return Transformed vector
+     */
+    public IntVector transform(IntVector in) {
+        return transform(in.getX(), in.getY(), in.getZ());
     }
 }

@@ -2,8 +2,8 @@ package com.lauriethefish.betterportals.bukkit.player.view.block;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.lauriethefish.betterportals.bukkit.block.ViewableBlockInfo;
-import com.lauriethefish.betterportals.bukkit.block.multiblockchange.IMultiBlockChangeManager;
+import com.lauriethefish.betterportals.bukkit.block.IViewableBlockInfo;
+import com.lauriethefish.betterportals.bukkit.block.IMultiBlockChangeManager;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -16,7 +16,7 @@ public class PlayerBlockStates implements IPlayerBlockStates {
     private final IMultiBlockChangeManager.Factory multiBlockChangeManagerFactory;
     private final Logger logger;
 
-    private final Map<Vector, ViewableBlockInfo> viewedStates = new HashMap<>();
+    private final Map<Vector, IViewableBlockInfo> viewedStates = new HashMap<>();
 
     @Inject
     public PlayerBlockStates(@Assisted Player player, IMultiBlockChangeManager.Factory multiBlockChangeManagerFactory, Logger logger) {
@@ -31,8 +31,8 @@ public class PlayerBlockStates implements IPlayerBlockStates {
         IMultiBlockChangeManager multiBlockChangeManager = multiBlockChangeManagerFactory.create(player);
 
         logger.finer("Resetting %d blocks", viewedStates.size());
-        for(Map.Entry<Vector, ViewableBlockInfo> entry : viewedStates.entrySet()) {
-            multiBlockChangeManager.addChange(entry.getKey(), entry.getValue().getOriginData());
+        for(Map.Entry<Vector, IViewableBlockInfo> entry : viewedStates.entrySet()) {
+            multiBlockChangeManager.addChangeOrigin(entry.getKey(), entry.getValue());
         }
         multiBlockChangeManager.sendChanges();
 
@@ -40,12 +40,12 @@ public class PlayerBlockStates implements IPlayerBlockStates {
     }
 
     @Override
-    public boolean setViewable(Vector position, ViewableBlockInfo block) {
+    public boolean setViewable(Vector position, IViewableBlockInfo block) {
         return viewedStates.put(position, block) == null;
     }
 
     @Override
-    public boolean setNonViewable(Vector position, ViewableBlockInfo block) {
+    public boolean setNonViewable(Vector position, IViewableBlockInfo block) {
         return viewedStates.remove(position, block);
     }
 }

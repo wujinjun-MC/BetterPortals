@@ -5,11 +5,10 @@ import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
-import com.lauriethefish.betterportals.api.IntVector;
 import com.lauriethefish.betterportals.api.PortalDirection;
 import com.lauriethefish.betterportals.bukkit.block.IViewableBlockArray;
-import com.lauriethefish.betterportals.bukkit.block.ViewableBlockInfo;
-import com.lauriethefish.betterportals.bukkit.block.multiblockchange.IMultiBlockChangeManager;
+import com.lauriethefish.betterportals.bukkit.block.IViewableBlockInfo;
+import com.lauriethefish.betterportals.bukkit.block.IMultiBlockChangeManager;
 import com.lauriethefish.betterportals.bukkit.config.RenderConfig;
 import com.lauriethefish.betterportals.bukkit.math.PlaneIntersectionChecker;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
@@ -24,7 +23,6 @@ import org.bukkit.util.Vector;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class PlayerBlockView implements IPlayerBlockView   {
@@ -106,30 +104,30 @@ public class PlayerBlockView implements IPlayerBlockView   {
             OperationTimer timer = new OperationTimer();
 
             IViewableBlockArray viewableBlockArray = portal.getViewableBlocks();
-            for (Map.Entry<IntVector, ViewableBlockInfo> entry : viewableBlockArray.getViewableStates().entrySet()) {
-                Vector position = entry.getKey().getCenterPos();
+            List<IViewableBlockInfo> viewableStates = viewableBlockArray.getViewableStates();
+            for (IViewableBlockInfo blockInfo : viewableStates) {
+                Vector position = blockInfo.getOriginPos().getCenterPos();
 
-                ViewableBlockInfo block = entry.getValue();
                 boolean visible = intersectionChecker.checkIfIntersects(position);
 
                 // If visible/non-visible, change to the new state
                 // However, don't bother resending the packet again if the block has already been changed
                 // (unless we're refreshing the sent blocks)
                 if (visible) {
-                    if (blockStates.setViewable(position, block) || refresh) {
-                        multiBlockChangeManager.addChange(position, block.getDestData());
+                    if (blockStates.setViewable(position, blockInfo) || refresh) {
+                        multiBlockChangeManager.addChangeDestination(position, blockInfo);
 
-                        PacketContainer nbtUpdatePacket = viewableBlockArray.getDestinationTileEntityPacket(entry.getKey());
+                        PacketContainer nbtUpdatePacket = viewableBlockArray.getDestinationTileEntityPacket(blockInfo.getOriginPos());
                         if (nbtUpdatePacket != null) {
                             queuedTileEntityUpdates.add(nbtUpdatePacket);
                             logger.fine("Queueing tile state update at destination");
                         }
                     }
                 } else {
-                    if (blockStates.setNonViewable(position, block)) {
-                        multiBlockChangeManager.addChange(position, block.getOriginData());
+                    if (blockStates.setNonViewable(position, blockInfo)) {
+                        multiBlockChangeManager.addChangeOrigin(position, blockInfo);
 
-                        PacketContainer nbtUpdatePacket = viewableBlockArray.getOriginTileEntityPacket(entry.getKey());
+                        PacketContainer nbtUpdatePacket = viewableBlockArray.getOriginTileEntityPacket(blockInfo.getOriginPos());
                         if (nbtUpdatePacket != null) {
                             queuedTileEntityUpdates.add(nbtUpdatePacket);
                             logger.fine("Queueing tile state update at origin");

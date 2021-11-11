@@ -1,4 +1,4 @@
-package com.lauriethefish.betterportals.bukkit.block.multiblockchange;
+package com.lauriethefish.betterportals.bukkit.block.bukkit;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -7,6 +7,8 @@ import com.comphenix.protocol.wrappers.MultiBlockChangeInfo;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import com.lauriethefish.betterportals.bukkit.block.IMultiBlockChangeManager;
+import com.lauriethefish.betterportals.bukkit.block.IViewableBlockInfo;
 import com.lauriethefish.betterportals.bukkit.chunk.chunkpos.ChunkPosition;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import org.bukkit.entity.Player;
@@ -16,7 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MultiBlockChangeManager_Old implements IMultiBlockChangeManager   {
+public class MultiBlockChangeManager_Old implements IMultiBlockChangeManager {
     private final Player player;
     private final Logger logger;
     private final HashMap<ChunkPosition, Map<Vector, WrappedBlockData>> changes = new HashMap<>();
@@ -33,6 +35,16 @@ public class MultiBlockChangeManager_Old implements IMultiBlockChangeManager   {
 
         Map<Vector, WrappedBlockData> existingList = changes.computeIfAbsent(chunkPos, k -> new HashMap<>());
         existingList.put(position, newData);
+    }
+
+    @Override
+    public void addChangeOrigin(Vector position, IViewableBlockInfo newData) {
+        addChange(position, ((BukkitBlockInfo) newData).getOriginData());
+    }
+
+    @Override
+    public void addChangeDestination(Vector position, IViewableBlockInfo newData) {
+        addChange(position, ((BukkitBlockInfo) newData).getRenderedDestData());
     }
 
     @Override

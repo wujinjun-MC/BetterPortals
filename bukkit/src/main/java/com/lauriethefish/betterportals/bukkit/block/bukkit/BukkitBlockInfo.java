@@ -1,26 +1,25 @@
-package com.lauriethefish.betterportals.bukkit.block;
+package com.lauriethefish.betterportals.bukkit.block.bukkit;
 
 import com.comphenix.protocol.wrappers.WrappedBlockData;
+import com.lauriethefish.betterportals.api.IntVector;
+import com.lauriethefish.betterportals.bukkit.block.IViewableBlockInfo;
 import lombok.Getter;
 import org.bukkit.block.data.BlockData;
 
-// Represents each block that is not fully obscured and will be rendered through the portal
-// A collection of these is built by IViewableBlockArray
-// NOTE: This may be read on other threads
-public class ViewableBlockInfo {
-    @Getter private BlockData baseOriginData;
-    @Getter private BlockData baseDestData;
-    @Getter private WrappedBlockData originData;
-    @Getter private WrappedBlockData destData;
+public class BukkitBlockInfo implements IViewableBlockInfo {
+    @Getter private final IntVector originPos;
 
-    public ViewableBlockInfo(BlockData originData, BlockData destData) {
+    @Getter private BlockData baseOriginData;
+    @Getter private final BlockData baseDestData;
+    @Getter private WrappedBlockData originData;
+    @Getter private WrappedBlockData renderedDestData;
+
+    public BukkitBlockInfo(IntVector originPos, BlockData originData, BlockData destData) {
+        this.originPos = originPos;
         this.baseOriginData = originData;
         this.baseDestData = destData;
         this.originData = WrappedBlockData.createData(originData);
     }
-
-    // Test constructor
-    public ViewableBlockInfo() { }
 
     public void setOriginData(BlockData originData) {
         this.baseOriginData = originData;
@@ -28,6 +27,6 @@ public class ViewableBlockInfo {
     }
 
     public void setRenderedDestData(WrappedBlockData destData) {
-        this.destData = destData;
+        this.renderedDestData = destData;
     }
 }

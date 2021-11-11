@@ -41,6 +41,8 @@ public class RenderConfig {
         new IntVector(0, 0, -1),
     };
 
+    private int[] intOffsets;
+
     private Vector collisionBox;
     private int blockUpdateInterval;
 
@@ -88,7 +90,6 @@ public class RenderConfig {
         blockStateRefreshInterval = file.getInt("blockStateRefreshInterval");
 
         String bgBlockString = file.getString("backgroundBlock", "");
-        assert bgBlockString != null;
 
         if(bgBlockString.isEmpty()) {
             backgroundBlockData = null;
@@ -100,13 +101,18 @@ public class RenderConfig {
                 logger.warning("Using default of black concrete");
             }
         }
+
+        intOffsets = new int[]{
+                1,
+                -1,
+                zMultip,
+                -zMultip,
+                yMultip,
+                -yMultip
+        };
     }
 
     public boolean isOutsideBounds(int x, int y, int z) {
         return x <= minXZ || x >= maxXZ || y <= minY || y >= maxY || z <= minXZ || z >= maxXZ;
-    }
-
-    public boolean isOutsideBounds(IntVector vec) {
-        return isOutsideBounds(vec.getX(), vec.getY(), vec.getZ());
     }
 }

@@ -2,6 +2,7 @@ package com.lauriethefish.betterportals.bukkit.block;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
+import com.lauriethefish.betterportals.bukkit.block.bukkit.BukkitBlockMapModule;
 import com.lauriethefish.betterportals.bukkit.block.external.BlockChangeWatcher;
 import com.lauriethefish.betterportals.bukkit.block.external.ExternalBlockWatcherManager;
 import com.lauriethefish.betterportals.bukkit.block.external.IBlockChangeWatcher;
@@ -16,11 +17,6 @@ public class BlockModule extends AbstractModule {
     @Override
     public void configure() {
         install(new FactoryModuleBuilder()
-                .implement(IViewableBlockArray.class, FloodFillViewableBlockArray.class)
-                .build(IViewableBlockArray.Factory.class)
-        );
-
-        install(new FactoryModuleBuilder()
                 .implement(IBlockChangeWatcher.class, BlockChangeWatcher.class)
                 .build(IBlockChangeWatcher.Factory.class)
         );
@@ -31,7 +27,8 @@ public class BlockModule extends AbstractModule {
                 .build(ViewFactory.class)
         );
 
-
         bind(IExternalBlockWatcherManager.class).to(ExternalBlockWatcherManager.class);
+
+        install(new BukkitBlockMapModule());
     }
 }

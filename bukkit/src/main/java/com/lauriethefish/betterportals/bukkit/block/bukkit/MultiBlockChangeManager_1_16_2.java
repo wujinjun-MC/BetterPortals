@@ -1,4 +1,4 @@
-package com.lauriethefish.betterportals.bukkit.block.multiblockchange;
+package com.lauriethefish.betterportals.bukkit.block.bukkit;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
@@ -7,6 +7,8 @@ import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import com.lauriethefish.betterportals.bukkit.block.IMultiBlockChangeManager;
+import com.lauriethefish.betterportals.bukkit.block.IViewableBlockInfo;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
@@ -14,7 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MultiBlockChangeManager_1_16_2 implements IMultiBlockChangeManager   {
+public class MultiBlockChangeManager_1_16_2 implements IMultiBlockChangeManager {
     private final Player player;
     // Section positions have to be done with BlockPositions for now in ProtocolLib
     private final HashMap<BlockPosition, Map<Vector, WrappedBlockData>> changes = new HashMap<>();
@@ -35,6 +37,16 @@ public class MultiBlockChangeManager_1_16_2 implements IMultiBlockChangeManager 
         // Create/get the list for this chunk section
         Map<Vector, WrappedBlockData> existingList = changes.computeIfAbsent(sectionPosition, k -> new HashMap<>());
         existingList.put(position, newData);
+    }
+
+    @Override
+    public void addChangeOrigin(Vector position, IViewableBlockInfo newData) {
+        addChange(position, ((BukkitBlockInfo) newData).getOriginData());
+    }
+
+    @Override
+    public void addChangeDestination(Vector position, IViewableBlockInfo newData) {
+        addChange(position, ((BukkitBlockInfo) newData).getRenderedDestData());
     }
 
     private short getShortLocation(Vector vec) {

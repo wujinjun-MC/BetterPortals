@@ -5,13 +5,14 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
-import com.lauriethefish.betterportals.bukkit.block.ViewableBlockInfo;
-import com.lauriethefish.betterportals.bukkit.block.multiblockchange.IMultiBlockChangeManager;
+import com.lauriethefish.betterportals.bukkit.block.IViewableBlockInfo;
+import com.lauriethefish.betterportals.bukkit.block.IMultiBlockChangeManager;
 import com.lauriethefish.betterportals.bukkit.player.view.block.IPlayerBlockStates;
 import com.lauriethefish.betterportals.bukkit.player.view.block.PlayerBlockStates;
 import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import implementations.TestLoggerModule;
 import implementations.TestMultiBlockChangeManager;
+import implementations.TestViewableBlockInfo;
 import org.bukkit.util.Vector;
 import org.junit.After;
 import org.junit.Before;
@@ -55,11 +56,11 @@ public class PlayerBlockStatesTests {
     @Test
     @SuppressWarnings("unchecked")
     public void setViewableTest() {
-        ViewableBlockInfo blockInfo = new ViewableBlockInfo();
+        IViewableBlockInfo blockInfo = new TestViewableBlockInfo();
 
         assertTrue(blockView.setViewable(position, blockInfo));
 
-        Map<Vector, ViewableBlockInfo> viewedStates = (Map<Vector, ViewableBlockInfo>) ReflectionUtil.getField(blockView, "viewedStates");
+        Map<Vector, IViewableBlockInfo> viewedStates = (Map<Vector, IViewableBlockInfo>) ReflectionUtil.getField(blockView, "viewedStates");
         assertEquals(viewedStates.get(position), blockInfo);
 
         // Setting it to viewable twice shouldn't return true multiple times
@@ -69,13 +70,13 @@ public class PlayerBlockStatesTests {
     @Test
     @SuppressWarnings("unchecked")
     public void setNotViewableTest() {
-        ViewableBlockInfo blockInfo = new ViewableBlockInfo();
+        IViewableBlockInfo blockInfo = new TestViewableBlockInfo();
 
         // Make it viewable, and then non-viewable again to test that it is removed from the map correctly
         assertTrue(blockView.setViewable(position, blockInfo));
         assertTrue(blockView.setNonViewable(position, blockInfo));
 
-        Map<Vector, ViewableBlockInfo> viewedStates = (Map<Vector, ViewableBlockInfo>) ReflectionUtil.getField(blockView, "viewedStates");
+        Map<Vector, IViewableBlockInfo> viewedStates = (Map<Vector, IViewableBlockInfo>) ReflectionUtil.getField(blockView, "viewedStates");
         assertNull(viewedStates.get(position));
 
         // Setting it not viewable twice shouldn't return true multiple times
