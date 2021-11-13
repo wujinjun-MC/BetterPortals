@@ -16,7 +16,6 @@ For more info, see the plugin's [Spigot Page](https://www.spigotmc.org/resources
 
 ## Limitations
 Of course, being a plugin, there are several limitations.
-- Sign text cannot currently be seen through portals.
 - Portal animations can lag players if not using optifine.
 - Players with high ping see artifacts of the portal projection.
 - Much longer render distances lag both players and the server.
