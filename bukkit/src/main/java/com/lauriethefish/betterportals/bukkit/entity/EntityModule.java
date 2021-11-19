@@ -3,7 +3,6 @@ package com.lauriethefish.betterportals.bukkit.entity;
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.lauriethefish.betterportals.bukkit.entity.faking.*;
-import com.lauriethefish.betterportals.bukkit.nms.NMSEntityTracker;
 
 public class EntityModule extends AbstractModule {
     @Override
