@@ -6,7 +6,7 @@ import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.lauriethefish.betterportals.api.IntVector;
 import com.lauriethefish.betterportals.bukkit.util.VersionUtil;
 import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
-import com.lauriethefish.betterportals.shared.util.ReflectionUtil.ReflectionException;
+import com.lauriethefish.betterportals.shared.util.ReflectionException;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.jetbrains.annotations.NotNull;

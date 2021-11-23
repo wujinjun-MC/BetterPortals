@@ -17,20 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * Note: All exceptions while handling reflective operations in this class are boxed as {@link ReflectionException}.
  */
 public class ReflectionUtil {
-    public static class ReflectionException extends RuntimeException    {
-        public ReflectionException(Throwable cause) {
-            super(cause);
-        }
-
-        public ReflectionException(String message, Throwable cause) {
-            super(message, cause);
-        }
-
-        public ReflectionException(String message) {
-            super(message);
-        }
-
-    }
 
     private static class MethodInfo {
         private final Class<?> klass;

@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.lauriethefish.betterportals.bukkit.block.IViewableBlockInfo;
 import com.lauriethefish.betterportals.bukkit.block.IMultiBlockChangeManager;
+import com.lauriethefish.betterportals.shared.util.ReflectionException;
 import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
@@ -102,7 +103,7 @@ public class MultiBlockChangeManager_NMS implements IMultiBlockChangeManager {
                 blockStatesField.set(packet, data);
                 positionsField.set(packet, positions);
             }   catch(IllegalAccessException ex) {
-                throw new ReflectionUtil.ReflectionException(ex);
+                throw new ReflectionException(ex);
             }
 
             // Now our packet is ready to send
