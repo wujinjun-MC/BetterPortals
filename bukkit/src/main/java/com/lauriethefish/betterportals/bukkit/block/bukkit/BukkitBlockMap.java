@@ -6,7 +6,6 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.lauriethefish.betterportals.api.IntVector;
 import com.lauriethefish.betterportals.bukkit.block.FloodFillBlockMap;
-import com.lauriethefish.betterportals.bukkit.block.IViewableBlockInfo;
 import com.lauriethefish.betterportals.bukkit.block.fetch.BlockDataFetcherFactory;
 import com.lauriethefish.betterportals.bukkit.block.fetch.IBlockDataFetcher;
 import com.lauriethefish.betterportals.bukkit.block.rotation.IBlockRotator;
@@ -157,8 +156,9 @@ public class BukkitBlockMap extends FloodFillBlockMap {
      */
     @Override
     protected void checkForChanges() {
-        for(IViewableBlockInfo entry : nonObscuredStates) {
-            BukkitBlockInfo blockInfo = (BukkitBlockInfo) entry;
+        int statesLength = nonObscuredStates.size();
+        for(int i = 0; i < statesLength; i++) { // We do not use foreach to avoid concurrent modifications
+            BukkitBlockInfo blockInfo = (BukkitBlockInfo) nonObscuredStates.get(i);
 
             IntVector destPos = rotateOriginToDest.transform(blockInfo.getOriginPos().subtract(portalOriginPos)).add(portalDestPos); // Avoid directly using the matrix to fix floating point precision issues
             BlockData newDestData = dataFetcher.getData(destPos);
