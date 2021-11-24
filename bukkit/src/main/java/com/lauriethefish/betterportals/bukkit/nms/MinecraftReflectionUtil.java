@@ -1,5 +1,6 @@
 package com.lauriethefish.betterportals.bukkit.nms;
 
+import com.lauriethefish.betterportals.shared.util.NewReflectionUtil;
 import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import org.bukkit.Bukkit;
 
@@ -25,7 +26,7 @@ public class MinecraftReflectionUtil {
      * @return The located class
      */
     public static Class<?> findVersionedNMSClass(String name) {
-        return ReflectionUtil.findClass(minecraftClassPrefix + name);
+        return NewReflectionUtil.findClass(minecraftClassPrefix + name);
     }
 
     /**
@@ -34,6 +35,6 @@ public class MinecraftReflectionUtil {
      * @return The located class
      */
     public static Class<?> findCraftBukkitClass(String name) {
-        return ReflectionUtil.findClass(craftBukkitClassPrefix + name);
+        return NewReflectionUtil.findClass(craftBukkitClassPrefix + name);
     }
 }

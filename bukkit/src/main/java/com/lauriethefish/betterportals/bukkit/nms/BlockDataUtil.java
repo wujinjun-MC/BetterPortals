@@ -5,8 +5,7 @@ import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.lauriethefish.betterportals.api.IntVector;
 import com.lauriethefish.betterportals.bukkit.util.VersionUtil;
-import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
-import com.lauriethefish.betterportals.shared.util.ReflectionException;
+import com.lauriethefish.betterportals.shared.util.NewReflectionUtil;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.jetbrains.annotations.NotNull;
@@ -26,15 +25,15 @@ public class BlockDataUtil {
         boolean packageNamesMapped = VersionUtil.isMcVersionAtLeast("1.17.0");
 
         if(VersionUtil.isMcVersionAtLeast("1.13.0")) {
-            Class<?> nmsBlock = packageNamesMapped ? ReflectionUtil.findClass("net.minecraft.world.level.block.Block") : MinecraftReflectionUtil.findVersionedNMSClass("Block");
+            Class<?> nmsBlock = packageNamesMapped ? NewReflectionUtil.findClass("net.minecraft.world.level.block.Block") : MinecraftReflectionUtil.findVersionedNMSClass("Block");
             Class<?> craftBlockData = MinecraftReflectionUtil.findCraftBukkitClass("block.data.CraftBlockData");
-            Class<?> nmsBlockData = packageNamesMapped ? ReflectionUtil.findClass("net.minecraft.world.level.block.state.IBlockData") : MinecraftReflectionUtil.findVersionedNMSClass("IBlockData");
+            Class<?> nmsBlockData = packageNamesMapped ? NewReflectionUtil.findClass("net.minecraft.world.level.block.state.IBlockData") : MinecraftReflectionUtil.findVersionedNMSClass("IBlockData");
 
-            GET_HANDLE = ReflectionUtil.findMethod(craftBlockData, "getState");
-            GET_COMBINED_ID = ReflectionUtil.findMethod(nmsBlock, "getCombinedId", new Class[]{nmsBlockData});
+            GET_HANDLE = NewReflectionUtil.findMethod(craftBlockData, "getState");
+            GET_COMBINED_ID = NewReflectionUtil.findMethod(nmsBlock, "getCombinedId", nmsBlockData);
 
-            GET_FROM_COMBINED_ID = ReflectionUtil.findMethod(nmsBlock, "getByCombinedId", new Class[]{int.class});
-            FROM_HANDLE = ReflectionUtil.findMethod(craftBlockData, "fromData", new Class[]{nmsBlockData});
+            GET_FROM_COMBINED_ID = NewReflectionUtil.findMethod(nmsBlock, "getByCombinedId", int.class);
+            FROM_HANDLE = NewReflectionUtil.findMethod(craftBlockData, "fromData", nmsBlockData);
         }   else    {
             GET_HANDLE = null;
             GET_COMBINED_ID = null;
@@ -43,9 +42,9 @@ public class BlockDataUtil {
         }
 
         Class<?> blockEntityState = MinecraftReflectionUtil.findCraftBukkitClass("block.CraftBlockEntityState");
-        Class<?> nmsTileEntity = packageNamesMapped ? ReflectionUtil.findClass("net.minecraft.world.level.block.entity.TileEntity") : MinecraftReflectionUtil.findVersionedNMSClass("TileEntity");
-        GET_TILE_ENTITY = ReflectionUtil.findMethod(blockEntityState, "getTileEntity");
-        GET_UPDATE_PACKET = ReflectionUtil.findMethod(nmsTileEntity, "getUpdatePacket");
+        Class<?> nmsTileEntity = packageNamesMapped ? NewReflectionUtil.findClass("net.minecraft.world.level.block.entity.TileEntity") : MinecraftReflectionUtil.findVersionedNMSClass("TileEntity");
+        GET_TILE_ENTITY = NewReflectionUtil.findMethod(blockEntityState, "getTileEntity");
+        GET_UPDATE_PACKET = NewReflectionUtil.findMethod(nmsTileEntity, "getUpdatePacket");
     }
 
     /**
@@ -54,12 +53,8 @@ public class BlockDataUtil {
      * @return The combined ID of the data
      */
     public static int getCombinedId(@NotNull BlockData blockData) {
-        try {
-            Object nmsData = GET_HANDLE.invoke(blockData);
-            return (int) GET_COMBINED_ID.invoke(null, nmsData);
-        }   catch(ReflectiveOperationException ex) {
-            throw new ReflectionException(ex);
-        }
+        Object nmsData = NewReflectionUtil.invokeMethod(blockData, GET_HANDLE);
+        return (int) NewReflectionUtil.invokeMethod(null, GET_COMBINED_ID, nmsData);
     }
 
     /**
@@ -68,12 +63,8 @@ public class BlockDataUtil {
      * @return The bukkit block data
      */
     public static BlockData getByCombinedId(int combinedId) {
-        try {
-            Object nmsData = GET_FROM_COMBINED_ID.invoke(null, combinedId);
-            return (BlockData) FROM_HANDLE.invoke(null, nmsData);
-        }   catch(ReflectiveOperationException ex) {
-            throw new ReflectionException(ex);
-        }
+        Object nmsData = NewReflectionUtil.invokeMethod(null, GET_FROM_COMBINED_ID, combinedId);
+        return (BlockData) NewReflectionUtil.invokeMethod(null, FROM_HANDLE, nmsData);
     }
 
     /**
@@ -82,17 +73,14 @@ public class BlockDataUtil {
      * @return The ProtocolLib wrapper
      */
     public static @Nullable PacketContainer getUpdatePacket(@NotNull BlockState tileState) {
-        try {
-            Object nmsTileEntity = GET_TILE_ENTITY.invoke(tileState);
-            Object unwrappedPacket = GET_UPDATE_PACKET.invoke(nmsTileEntity);
-            if(unwrappedPacket == null) {
-                return null;
-            }
+        Object nmsTileEntity = NewReflectionUtil.invokeMethod(tileState, GET_TILE_ENTITY);
+        Object unwrappedPacket = NewReflectionUtil.invokeMethod(nmsTileEntity, GET_UPDATE_PACKET);
 
-            return PacketContainer.fromPacket(unwrappedPacket);
-        }   catch(ReflectiveOperationException ex) {
-            throw new ReflectionException(ex);
+        if(unwrappedPacket == null) {
+            return null;
         }
+
+        return PacketContainer.fromPacket(unwrappedPacket);
     }
 
     /**

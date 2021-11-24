@@ -3,7 +3,7 @@ package com.lauriethefish.betterportals.bukkit.nms;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.lauriethefish.betterportals.bukkit.util.VersionUtil;
-import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
+import com.lauriethefish.betterportals.shared.util.NewReflectionUtil;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
@@ -17,32 +17,24 @@ import java.lang.reflect.Modifier;
 
 public class EntityUtil {
     private static final Method GET_HANDLE;
-    private static Field DATA_WATCHER;
+    private static final Field DATA_WATCHER;
     private static final Field ENTITY_YAW;
     private static final boolean USE_DIRECT_ENTITY_PACKET;
-    private static Method GET_ENTITY_SPAWN_PACKET = null;
+    private static final Method GET_ENTITY_SPAWN_PACKET;
     private static final Constructor<?> ENTITY_TRACKER_ENTRY_NEW;
 
     static {
         boolean packageNamesMapped = VersionUtil.isMcVersionAtLeast("1.17.0");
-        Class<?> NMS_ENTITY = packageNamesMapped ? ReflectionUtil.findClass("net.minecraft.world.entity.Entity") : MinecraftReflectionUtil.findVersionedNMSClass("Entity");
-        Class<?> NMS_DATA_WATCHER = packageNamesMapped ? ReflectionUtil.findClass("net.minecraft.network.syncher.DataWatcher") : MinecraftReflectionUtil.findVersionedNMSClass("DataWatcher");
+        Class<?> NMS_ENTITY = packageNamesMapped ? NewReflectionUtil.findClass("net.minecraft.world.entity.Entity") : MinecraftReflectionUtil.findVersionedNMSClass("Entity");
+        Class<?> NMS_DATA_WATCHER = packageNamesMapped ? NewReflectionUtil.findClass("net.minecraft.network.syncher.DataWatcher") : MinecraftReflectionUtil.findVersionedNMSClass("DataWatcher");
 
-        GET_HANDLE = ReflectionUtil.findMethod(MinecraftReflectionUtil.findCraftBukkitClass("entity.CraftEntity"), "getHandle");
+        GET_HANDLE = NewReflectionUtil.findMethod(MinecraftReflectionUtil.findCraftBukkitClass("entity.CraftEntity"), "getHandle");
 
-        // Find the field that corresponds to the Entity's data watcher
-        boolean foundDataWatcher = false;
-        for(Field field : NMS_ENTITY.getDeclaredFields()) {
-            if(field.getType().equals(NMS_DATA_WATCHER)) {
-                field.setAccessible(true);
-                DATA_WATCHER = field;
-                break;
-            }
-        }
+        DATA_WATCHER = NewReflectionUtil.findFieldByType(NMS_ENTITY, NMS_DATA_WATCHER);
         if (VersionUtil.isMcVersionAtLeast("1.17.0")) {
             ENTITY_YAW = null;
         }   else {
-            ENTITY_YAW = ReflectionUtil.findField(NMS_ENTITY, "yaw");
+            ENTITY_YAW = NewReflectionUtil.findField(NMS_ENTITY, "yaw");
         }
 
         // On newer versions of the game, the Entity NMS class have an abstract method for getting the correct spawn packet that is overridden by every entity.
@@ -50,30 +42,18 @@ public class EntityUtil {
             USE_DIRECT_ENTITY_PACKET = true;
             ENTITY_TRACKER_ENTRY_NEW = null;
 
-            Class<?> NMS_PACKET = packageNamesMapped ? ReflectionUtil.findClass("net.minecraft.network.protocol.Packet") : MinecraftReflectionUtil.findVersionedNMSClass("Packet");
-            for(Method method : NMS_ENTITY.getMethods()) {
-                if(method.getReturnType().equals(NMS_PACKET) && Modifier.isAbstract(method.getModifiers())) {
-                    GET_ENTITY_SPAWN_PACKET = method;
-                    break;
-                }
-            }
+            Class<?> NMS_PACKET = packageNamesMapped ? NewReflectionUtil.findClass("net.minecraft.network.protocol.Packet") : MinecraftReflectionUtil.findVersionedNMSClass("Packet");
 
-            if(GET_ENTITY_SPAWN_PACKET == null) {
-                throw new RuntimeException("Unable to find method to get entity spawn packet");
-            }
+            int abstractMask = Modifier.ABSTRACT;
+            GET_ENTITY_SPAWN_PACKET = NewReflectionUtil.findMethodByTypes(NMS_ENTITY, NMS_PACKET, abstractMask, abstractMask);
         }   else    {
             // On older versions, we create a dummy EntityTrackerEntry and use that to generate our packet
             USE_DIRECT_ENTITY_PACKET = false;
 
-            Class<?> TRACKER_ENTRY = packageNamesMapped ? ReflectionUtil.findClass("net.minecraft.server.level.EntityTrackerEntry") : MinecraftReflectionUtil.findVersionedNMSClass("EntityTrackerEntry");
+            Class<?> TRACKER_ENTRY = packageNamesMapped ? NewReflectionUtil.findClass("net.minecraft.server.level.EntityTrackerEntry") : MinecraftReflectionUtil.findVersionedNMSClass("EntityTrackerEntry");
 
-            try {
-                ENTITY_TRACKER_ENTRY_NEW = TRACKER_ENTRY.getConstructor(NMS_ENTITY, int.class, int.class, int.class, boolean.class);
-            }   catch(NoSuchMethodException ex) {
-                throw new RuntimeException(ex);
-            }
-
-            GET_ENTITY_SPAWN_PACKET = ReflectionUtil.findMethod(TRACKER_ENTRY, "e");
+            ENTITY_TRACKER_ENTRY_NEW = NewReflectionUtil.findConstructor(TRACKER_ENTRY, NMS_ENTITY, int.class, int.class, int.class, boolean.class);
+            GET_ENTITY_SPAWN_PACKET = NewReflectionUtil.findMethod(TRACKER_ENTRY, "e");
         }
     }
 
@@ -86,13 +66,9 @@ public class EntityUtil {
      */
     @NotNull
     public static WrappedDataWatcher getActualDataWatcher(@NotNull Entity entity) {
-        try {
-            Object nmsEntity = GET_HANDLE.invoke(entity);
-            Object nmsDataWatcher = DATA_WATCHER.get(nmsEntity);
-            return new WrappedDataWatcher(nmsDataWatcher);
-        }   catch(ReflectiveOperationException ex) {
-            throw new RuntimeException(ex);
-        }
+        Object nmsEntity = NewReflectionUtil.invokeMethod(entity, GET_HANDLE);
+        Object nmsDataWatcher = NewReflectionUtil.getField(nmsEntity, DATA_WATCHER);
+        return new WrappedDataWatcher(nmsDataWatcher);
     }
 
     /**
@@ -102,20 +78,16 @@ public class EntityUtil {
      * @return A container with the valid packet, or <code>null</code> since some entities can't be spawned with a packet.
      */
     public static @Nullable PacketContainer getRawEntitySpawnPacket(@NotNull Entity entity) {
-        try {
-            Object nmsEntity = GET_HANDLE.invoke(entity);
-            if(USE_DIRECT_ENTITY_PACKET) {
-                return PacketContainer.fromPacket(GET_ENTITY_SPAWN_PACKET.invoke(nmsEntity));
-            }   else    {
-                // Create a dummy tracker entry
-                Object trackerEntry = ENTITY_TRACKER_ENTRY_NEW.newInstance(nmsEntity, 0, 0, 0, false);
-                Object nmsPacket = GET_ENTITY_SPAWN_PACKET.invoke(trackerEntry);
-                if(nmsPacket == null) {return null;}
+        Object nmsEntity = NewReflectionUtil.invokeMethod(entity, GET_HANDLE);
+        if(USE_DIRECT_ENTITY_PACKET) {
+            return PacketContainer.fromPacket(NewReflectionUtil.invokeMethod(nmsEntity, GET_ENTITY_SPAWN_PACKET));
+        }   else    {
+            // Create a dummy tracker entry
+            Object trackerEntry = NewReflectionUtil.invokeConstructor(ENTITY_TRACKER_ENTRY_NEW, nmsEntity, 0, 0, 0, false);
+            Object nmsPacket = NewReflectionUtil.invokeMethod(trackerEntry, GET_ENTITY_SPAWN_PACKET);
+            if(nmsPacket == null) {return null;}
 
-                return PacketContainer.fromPacket(nmsPacket);
-            }
-        }   catch(ReflectiveOperationException ex) {
-            throw new RuntimeException(ex);
+            return PacketContainer.fromPacket(nmsPacket);
         }
     }
 
@@ -131,16 +103,11 @@ public class EntityUtil {
             return entity.getLocation().getDirection();
         }
 
-        try {
-            Object nmsEntity = GET_HANDLE.invoke(entity);
+        Object nmsEntity = NewReflectionUtil.invokeMethod(entity, GET_HANDLE);
 
-            float yaw = (float) ENTITY_YAW.get(nmsEntity); // Use the NMS yaw field
-            Location entityLoc = entity.getLocation();
-            entityLoc.setYaw(yaw);
-            return entityLoc.getDirection();
-
-        }   catch(ReflectiveOperationException ex) {
-            throw new RuntimeException(ex);
-        }
+        float yaw = (float) NewReflectionUtil.getField(nmsEntity, ENTITY_YAW);
+        Location entityLoc = entity.getLocation();
+        entityLoc.setYaw(yaw);
+        return entityLoc.getDirection();
     }
 }
