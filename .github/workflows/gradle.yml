@@ -15,15 +15,6 @@ jobs:
           java-version: 16.0.2
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
-      - name: Cache gradle data
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ secrets.CACHE_SUFFIX }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-${{ secrets.CACHE_SUFFIX }}-
       - name: Build with Gradle
         run: ./gradlew clean build
       - uses: actions/upload-artifact@v2
