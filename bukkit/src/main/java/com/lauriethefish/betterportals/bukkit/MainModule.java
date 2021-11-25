@@ -22,7 +22,7 @@ public class MainModule extends AbstractModule {
     /**
      * Experimental mode uses NMS implementations of some code to significantly improve performance
      */
-    private static final boolean EXPERIMENTAL_MODE = true;
+    private static final boolean EXPERIMENTAL_MODE = false;
 
     private final BetterPortals pl;
 
