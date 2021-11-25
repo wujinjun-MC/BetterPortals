@@ -1,6 +1,7 @@
 package com.lauriethefish.betterportals.bukkit;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Module;
 import com.lauriethefish.betterportals.bukkit.block.BlockModule;
 import com.lauriethefish.betterportals.bukkit.command.CommandsModule;
 import com.lauriethefish.betterportals.bukkit.entity.EntityModule;
@@ -12,9 +13,17 @@ import com.lauriethefish.betterportals.bukkit.tasks.BlockUpdateFinisher;
 import com.lauriethefish.betterportals.bukkit.tasks.ThreadedBlockUpdateFinisher;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import com.lauriethefish.betterportals.shared.logging.OverrideLogger;
+import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.lang.reflect.Constructor;
+
 public class MainModule extends AbstractModule {
+    /**
+     * Experimental mode uses NMS implementations of some code to significantly improve performance
+     */
+    private static final boolean EXPERIMENTAL_MODE = true;
+
     private final BetterPortals pl;
 
     public MainModule(BetterPortals pl) {
@@ -35,10 +44,22 @@ public class MainModule extends AbstractModule {
         install(new EventsModule());
         install(new CommandsModule());
         install(new PortalModule());
-        install(new BlockModule());
+        install(new BlockModule(EXPERIMENTAL_MODE));
         install(new NetworkModule());
         install(new PlayerModule());
-        install(new EntityModule());
+        install(new EntityModule(EXPERIMENTAL_MODE));
         install(new MinecraftVersionModule());
+
+        if(EXPERIMENTAL_MODE) {
+            install(createNmsModule());
+        }
+    }
+
+    private Module createNmsModule() {
+        // We create the module via reflection to avoid referencing it and the packages it references, which might not exist if this method isn't called
+        Class<?> nmsModuleClass = ReflectionUtil.findClass("com.lauriethefish.betterportals.bukkit.nms.direct.NmsOptimisationModule");
+        Constructor<?> nmsModuleCtor = ReflectionUtil.findConstructor(nmsModuleClass);
+
+        return (Module) ReflectionUtil.invokeConstructor(nmsModuleCtor);
     }
 }

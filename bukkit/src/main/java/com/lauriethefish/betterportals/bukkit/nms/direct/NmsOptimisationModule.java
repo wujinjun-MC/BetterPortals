@@ -4,8 +4,12 @@ import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.lauriethefish.betterportals.bukkit.block.IMultiBlockChangeManager;
 import com.lauriethefish.betterportals.bukkit.block.IBlockMap;
+import com.lauriethefish.betterportals.bukkit.entity.faking.IEntityTracker;
 
-public class NmsBlockMapModule extends AbstractModule  {
+/**
+ * NOTE: This class is referred to by reflection - check for reflective references before renaming
+ */
+public class NmsOptimisationModule extends AbstractModule  {
     @Override
     protected void configure() {
         install(new FactoryModuleBuilder()
@@ -16,6 +20,11 @@ public class NmsBlockMapModule extends AbstractModule  {
         install(new FactoryModuleBuilder()
             .implement(IBlockMap.class, NmsBlockMap.class)
             .build(IBlockMap.Factory.class)
+        );
+
+        install(new FactoryModuleBuilder()
+            .implement(IEntityTracker.class, NMSEntityTracker.class)
+            .build(IEntityTracker.Factory.class)
         );
     }
 }

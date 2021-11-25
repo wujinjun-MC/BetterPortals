@@ -14,6 +14,12 @@ import com.lauriethefish.betterportals.bukkit.player.view.entity.IPlayerEntityVi
 import com.lauriethefish.betterportals.bukkit.player.view.entity.PlayerEntityView;
 
 public class BlockModule extends AbstractModule {
+    private final boolean usingNms;
+
+    public BlockModule(boolean useNms) {
+        this.usingNms = useNms;
+    }
+
     @Override
     public void configure() {
         install(new FactoryModuleBuilder()
@@ -29,6 +35,9 @@ public class BlockModule extends AbstractModule {
 
         bind(IExternalBlockWatcherManager.class).to(ExternalBlockWatcherManager.class);
 
-        install(new BukkitBlockMapModule());
+        // If using direct NMS, then alternative block map implementations are used
+        if(!usingNms) {
+            install(new BukkitBlockMapModule());
+        }
     }
 }
