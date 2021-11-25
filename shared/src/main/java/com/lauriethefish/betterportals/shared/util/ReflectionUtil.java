@@ -8,7 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-public class NewReflectionUtil {
+public class ReflectionUtil {
 
     /**
      * Uses reflection to find the class with the given name (equivalent to {@link Class#forName})

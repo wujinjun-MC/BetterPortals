@@ -1,7 +1,7 @@
 package com.lauriethefish.betterportals.bukkit.nms;
 
 import com.lauriethefish.betterportals.shared.logging.Logger;
-import com.lauriethefish.betterportals.shared.util.NewReflectionUtil;
+import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import com.mojang.authlib.GameProfile;
 import lombok.Getter;
 import net.minecraft.network.protocol.Packet;
@@ -27,8 +27,8 @@ public class PacketProxyProvider {
     private static final Field seenByField;
 
     static {
-        serverEntityField = NewReflectionUtil.findFieldByType(ChunkMap.TrackedEntity.class, ServerEntity.class);
-        seenByField = NewReflectionUtil.findFieldByType(ChunkMap.TrackedEntity.class, Set.class);
+        serverEntityField = ReflectionUtil.findFieldByType(ChunkMap.TrackedEntity.class, ServerEntity.class);
+        seenByField = ReflectionUtil.findFieldByType(ChunkMap.TrackedEntity.class, Set.class);
     }
 
     private static class EntityProxy implements ServerPlayerConnection  {

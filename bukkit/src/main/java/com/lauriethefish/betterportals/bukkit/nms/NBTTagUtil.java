@@ -1,7 +1,7 @@
 package com.lauriethefish.betterportals.bukkit.nms;
 
 import com.lauriethefish.betterportals.bukkit.util.VersionUtil;
-import com.lauriethefish.betterportals.shared.util.NewReflectionUtil;
+import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,25 +32,25 @@ public class NBTTagUtil {
 
     static  {
         if(VersionUtil.isMcVersionAtLeast("1.17.0")) {
-            NBT_TAG_STRING = NewReflectionUtil.findClass("net.minecraft.nbt.NBTTagString");
-            NBT_TAG_COMPOUND = NewReflectionUtil.findClass("net.minecraft.nbt.NBTTagCompound");
-            ITEM_STACK = NewReflectionUtil.findClass("net.minecraft.world.item.ItemStack");
-            NBT_BASE = NewReflectionUtil.findClass("net.minecraft.nbt.NBTBase");
+            NBT_TAG_STRING = ReflectionUtil.findClass("net.minecraft.nbt.NBTTagString");
+            NBT_TAG_COMPOUND = ReflectionUtil.findClass("net.minecraft.nbt.NBTTagCompound");
+            ITEM_STACK = ReflectionUtil.findClass("net.minecraft.world.item.ItemStack");
+            NBT_BASE = ReflectionUtil.findClass("net.minecraft.nbt.NBTBase");
         }   else    {
             NBT_TAG_STRING = MinecraftReflectionUtil.findVersionedNMSClass("NBTTagString");
             NBT_TAG_COMPOUND = MinecraftReflectionUtil.findVersionedNMSClass("NBTTagCompound");
             ITEM_STACK = MinecraftReflectionUtil.findVersionedNMSClass("ItemStack");
-            NBT_BASE = NewReflectionUtil.findClass("NBTBase");
+            NBT_BASE = ReflectionUtil.findClass("NBTBase");
         }
 
-        HAS_TAG = NewReflectionUtil.findMethod(ITEM_STACK, "hasTag");
-        GET_TAG = NewReflectionUtil.findMethod(ITEM_STACK, "getTag");
-        GET_STRING = NewReflectionUtil.findMethod(NBT_TAG_COMPOUND, "getString", String.class);
-        TAG_SET = NewReflectionUtil.findMethod(NBT_TAG_COMPOUND, "set", String.class, NBT_BASE);
-        AS_NMS_COPY = NewReflectionUtil.findMethod(CRAFT_ITEM_STACK, "asNMSCopy", ItemStack.class);
-        AS_BUKKIT_COPY = NewReflectionUtil.findMethod(CRAFT_ITEM_STACK, "asBukkitCopy", ITEM_STACK);
-        STRING_TAG_CTOR = NewReflectionUtil.findConstructor(NBT_TAG_STRING, String.class);
-        TAG_COMPOUND_CTOR = NewReflectionUtil.findConstructor(NBT_TAG_COMPOUND);
+        HAS_TAG = ReflectionUtil.findMethod(ITEM_STACK, "hasTag");
+        GET_TAG = ReflectionUtil.findMethod(ITEM_STACK, "getTag");
+        GET_STRING = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "getString", String.class);
+        TAG_SET = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "set", String.class, NBT_BASE);
+        AS_NMS_COPY = ReflectionUtil.findMethod(CRAFT_ITEM_STACK, "asNMSCopy", ItemStack.class);
+        AS_BUKKIT_COPY = ReflectionUtil.findMethod(CRAFT_ITEM_STACK, "asBukkitCopy", ITEM_STACK);
+        STRING_TAG_CTOR = ReflectionUtil.findConstructor(NBT_TAG_STRING, String.class);
+        TAG_COMPOUND_CTOR = ReflectionUtil.findConstructor(NBT_TAG_COMPOUND);
     }
 
     /**
@@ -64,10 +64,10 @@ public class NBTTagUtil {
         Object nmsItem = getNMSItemStack(item);
 
         // Get the NBT tag, or create one if the item doesn't have one
-        Object itemTag = ((boolean) NewReflectionUtil.invokeMethod(nmsItem, HAS_TAG)) ? NewReflectionUtil.invokeMethod(nmsItem, GET_TAG) : NewReflectionUtil.invokeConstructor(TAG_COMPOUND_CTOR);
-        Object stringValue = NewReflectionUtil.invokeConstructor(STRING_TAG_CTOR, MARKER_VALUE);
+        Object itemTag = ((boolean) ReflectionUtil.invokeMethod(nmsItem, HAS_TAG)) ? ReflectionUtil.invokeMethod(nmsItem, GET_TAG) : ReflectionUtil.invokeConstructor(TAG_COMPOUND_CTOR);
+        Object stringValue = ReflectionUtil.invokeConstructor(STRING_TAG_CTOR, MARKER_VALUE);
 
-        NewReflectionUtil.invokeMethod(itemTag, TAG_SET, MARKER_PREFIX + name, stringValue); // Set the value
+        ReflectionUtil.invokeMethod(itemTag, TAG_SET, MARKER_PREFIX + name, stringValue); // Set the value
 
         return getBukkitItemStack(nmsItem);
     }
@@ -81,21 +81,21 @@ public class NBTTagUtil {
     public static boolean hasMarkerTag(@NotNull ItemStack item, @NotNull String name)	{
         Object nmsItem = getNMSItemStack(item);
 
-        if(!(boolean) NewReflectionUtil.invokeMethod(nmsItem, HAS_TAG)) {return false;} // Return null if it has no NBT data
-        Object itemTag = NewReflectionUtil.invokeMethod(nmsItem, GET_TAG); // Otherwise, get the item's NBT tag
+        if(!(boolean) ReflectionUtil.invokeMethod(nmsItem, HAS_TAG)) {return false;} // Return null if it has no NBT data
+        Object itemTag = ReflectionUtil.invokeMethod(nmsItem, GET_TAG); // Otherwise, get the item's NBT tag
 
-        String value = (String) NewReflectionUtil.invokeMethod(itemTag, GET_STRING, MARKER_PREFIX + name);
+        String value = (String) ReflectionUtil.invokeMethod(itemTag, GET_STRING, MARKER_PREFIX + name);
 
         return MARKER_VALUE.equals(value); // Return the value of the key
     }
 
     @NotNull
     private static Object getNMSItemStack(@NotNull ItemStack item) {
-        return NewReflectionUtil.invokeMethod(null, AS_NMS_COPY, item);
+        return ReflectionUtil.invokeMethod(null, AS_NMS_COPY, item);
     }
 
     @NotNull
     private static ItemStack getBukkitItemStack(@NotNull Object nmsItem) {
-        return (ItemStack) NewReflectionUtil.invokeMethod(null, AS_BUKKIT_COPY, nmsItem);
+        return (ItemStack) ReflectionUtil.invokeMethod(null, AS_BUKKIT_COPY, nmsItem);
     }
 }

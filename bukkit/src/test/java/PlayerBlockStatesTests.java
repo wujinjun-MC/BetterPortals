@@ -9,7 +9,7 @@ import com.lauriethefish.betterportals.bukkit.block.IViewableBlockInfo;
 import com.lauriethefish.betterportals.bukkit.block.IMultiBlockChangeManager;
 import com.lauriethefish.betterportals.bukkit.player.view.block.IPlayerBlockStates;
 import com.lauriethefish.betterportals.bukkit.player.view.block.PlayerBlockStates;
-import com.lauriethefish.betterportals.shared.util.NewReflectionUtil;
+import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import implementations.TestLoggerModule;
 import implementations.TestMultiBlockChangeManager;
 import implementations.TestViewableBlockInfo;
@@ -24,7 +24,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PlayerBlockStatesTests {
-    private static final Field VIEWED_STATES_FIELD = NewReflectionUtil.findField(PlayerBlockStates.class, "viewedStates");
+    private static final Field VIEWED_STATES_FIELD = ReflectionUtil.findField(PlayerBlockStates.class, "viewedStates");
 
     private IPlayerBlockStates blockView;
     private final Vector position = new Vector(0.0, 1.0, 0.0);
@@ -63,7 +63,7 @@ public class PlayerBlockStatesTests {
 
         assertTrue(blockView.setViewable(position, blockInfo));
 
-        Map<Vector, IViewableBlockInfo> viewedStates = (Map<Vector, IViewableBlockInfo>) NewReflectionUtil.getField(blockView, VIEWED_STATES_FIELD);
+        Map<Vector, IViewableBlockInfo> viewedStates = (Map<Vector, IViewableBlockInfo>) ReflectionUtil.getField(blockView, VIEWED_STATES_FIELD);
         assertEquals(viewedStates.get(position), blockInfo);
 
         // Setting it to viewable twice shouldn't return true multiple times
@@ -79,7 +79,7 @@ public class PlayerBlockStatesTests {
         assertTrue(blockView.setViewable(position, blockInfo));
         assertTrue(blockView.setNonViewable(position, blockInfo));
 
-        Map<Vector, IViewableBlockInfo> viewedStates = (Map<Vector, IViewableBlockInfo>) NewReflectionUtil.getField(blockView, VIEWED_STATES_FIELD);
+        Map<Vector, IViewableBlockInfo> viewedStates = (Map<Vector, IViewableBlockInfo>) ReflectionUtil.getField(blockView, VIEWED_STATES_FIELD);
         assertNull(viewedStates.get(position));
 
         // Setting it not viewable twice shouldn't return true multiple times

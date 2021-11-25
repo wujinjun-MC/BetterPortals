@@ -5,7 +5,7 @@ import com.lauriethefish.betterportals.bukkit.config.MessageConfig;
 import com.lauriethefish.betterportals.bukkit.player.IPlayerData;
 import com.lauriethefish.betterportals.bukkit.player.IPlayerDataManager;
 import com.lauriethefish.betterportals.shared.logging.Logger;
-import com.lauriethefish.betterportals.shared.util.NewReflectionUtil;
+import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import lombok.Getter;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -159,12 +159,12 @@ public class SubCommand implements ICommand {
     private Object runValueOfMethod(Class<?> type, String argument) throws CommandException {
         Method method = valueOfCache.get(type);
         if(method == null) {
-            method = NewReflectionUtil.findMethod(type, "valueOf", String.class);
+            method = ReflectionUtil.findMethod(type, "valueOf", String.class);
             valueOfCache.put(type, method);
         }
 
         try {
-            return NewReflectionUtil.invokeMethod(null, method, argument);
+            return ReflectionUtil.invokeMethod(null, method, argument);
         }   catch(IllegalArgumentException ex) {
             throw new CommandException(messageConfig.getErrorMessage("invalidArgs"), ex);
         }
