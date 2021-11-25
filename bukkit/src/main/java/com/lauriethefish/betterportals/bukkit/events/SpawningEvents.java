@@ -11,7 +11,7 @@ import com.lauriethefish.betterportals.bukkit.portal.spawning.IPortalSpawner;
 import com.lauriethefish.betterportals.bukkit.portal.spawning.PortalSpawnPosition;
 import com.lauriethefish.betterportals.bukkit.util.VersionUtil;
 import com.lauriethefish.betterportals.shared.logging.Logger;
-import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
+import com.lauriethefish.betterportals.shared.util.NewReflectionUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -24,6 +24,7 @@ import org.bukkit.event.world.PortalCreateEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -31,6 +32,11 @@ import java.util.UUID;
 public class SpawningEvents implements Listener {
     // In 1.12 and 1.13 there's no way to get the entity that lit a portal, so we just send it to all players within a range.
     private static final double PORTAL_WARNING_SEND_RANGE = 10;
+
+
+    private static Method GET_BLOCKS_METHOD = NewReflectionUtil.findMethod(PortalCreateEvent.class, "getBlocks");
+    private static Method GET_ENTITY_METHOD = NewReflectionUtil.findMethod(PortalCreateEvent.class, "getEntity");
+    private static boolean methodsPrepared = false;
 
     private final IPortalSpawner portalSpawnChecker;
     private final IPortalManager portalManager;
@@ -48,7 +54,18 @@ public class SpawningEvents implements Listener {
         this.messageConfig = messageConfig;
         this.logger = logger;
 
+        initReflection();
         eventRegistrar.register(this);
+    }
+
+    private static void initReflection() {
+        if(methodsPrepared) {
+            return;
+        }
+
+        GET_BLOCKS_METHOD = NewReflectionUtil.findMethod(PortalCreateEvent.class, "getBlocks");
+        GET_ENTITY_METHOD = NewReflectionUtil.findMethod(PortalCreateEvent.class, "getEntity");
+        methodsPrepared = true;
     }
 
     @EventHandler
@@ -61,7 +78,7 @@ public class SpawningEvents implements Listener {
         Vector lowPosition = null;
 
         // For some reason the event sometimes gets called with no blocks completely randomly
-        List<?> blocks = (List<?>) ReflectionUtil.runMethod(event, "getBlocks");
+        List<?> blocks = (List<?>) NewReflectionUtil.invokeMethod(event, GET_BLOCKS_METHOD);
         if(blocks.size() == 0) {return;}
 
         // Find the highest and lowest position to calculate the portal size
@@ -163,13 +180,13 @@ public class SpawningEvents implements Listener {
 
         if(VersionUtil.isMcVersionAtLeast("1.14.0")) {
             // Yay! convenient method exists in these versions
-            Entity lighter = (Entity) ReflectionUtil.runMethod(event, "getEntity");
+            Entity lighter = (Entity) NewReflectionUtil.invokeMethod(event, GET_ENTITY_METHOD);
             if(!(lighter instanceof Player)) {return;}
 
             lighter.sendMessage(message);
         }   else    {
             // Loop through the nearby entities to find who to send the message to
-            List<?> blocks = (List<?>) ReflectionUtil.runMethod(event, "getBlocks");
+            List<?> blocks = (List<?>) NewReflectionUtil.invokeMethod(event, GET_BLOCKS_METHOD);
 
             Location portalLocation = ((Block) blocks.get(0)).getLocation();
             Collection<Entity> nearby = event.getWorld().getNearbyEntities(portalLocation, PORTAL_WARNING_SEND_RANGE, PORTAL_WARNING_SEND_RANGE, PORTAL_WARNING_SEND_RANGE);

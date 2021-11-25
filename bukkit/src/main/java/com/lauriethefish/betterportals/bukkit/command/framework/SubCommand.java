@@ -5,7 +5,7 @@ import com.lauriethefish.betterportals.bukkit.config.MessageConfig;
 import com.lauriethefish.betterportals.bukkit.player.IPlayerData;
 import com.lauriethefish.betterportals.bukkit.player.IPlayerDataManager;
 import com.lauriethefish.betterportals.shared.logging.Logger;
-import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
+import com.lauriethefish.betterportals.shared.util.NewReflectionUtil;
 import lombok.Getter;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -14,9 +14,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class SubCommand implements ICommand {
     private final Object instance;
@@ -24,6 +22,8 @@ public class SubCommand implements ICommand {
     private final MessageConfig messageConfig;
     private final Logger logger;
     private final IPlayerDataManager playerDataManager;
+
+    private static final Map<Class<?>, Method> valueOfCache = new HashMap<>();
 
     private boolean requiresPlayer = false;
     private boolean usePlayerData; // Whether or not we'll automatically fetch the IPlayerData for the first argument
@@ -141,13 +141,30 @@ public class SubCommand implements ICommand {
             }   else if(type.isPrimitive()) {
                 throw new InvalidCommandException("Unknown primitive type on command argument");
             }   else    {
-                try {
-                    return ReflectionUtil.runMethod(null, type, "valueOf", new Class[]{String.class}, new Object[]{argument});
-                }   catch(RuntimeException ex) {
-                    throw new CommandException(messageConfig.getErrorMessage("invalidArgs"), ex);
-                }
+                return runValueOfMethod(type, argument);
             }
 
+        }   catch(IllegalArgumentException ex) {
+            throw new CommandException(messageConfig.getErrorMessage("invalidArgs"), ex);
+        }
+    }
+
+    /**
+     * Caches and runs a parsing method for the type, taking the given string argument.
+     * @param type Type to parse
+     * @param argument Argument to pass to the <code>valueOf</code> method
+     * @return The parsed object
+     * @throws CommandException If parsing throws an {@link IllegalArgumentException}
+     */
+    private Object runValueOfMethod(Class<?> type, String argument) throws CommandException {
+        Method method = valueOfCache.get(type);
+        if(method == null) {
+            method = NewReflectionUtil.findMethod(type, "valueOf", String.class);
+            valueOfCache.put(type, method);
+        }
+
+        try {
+            return NewReflectionUtil.invokeMethod(null, method, argument);
         }   catch(IllegalArgumentException ex) {
             throw new CommandException(messageConfig.getErrorMessage("invalidArgs"), ex);
         }

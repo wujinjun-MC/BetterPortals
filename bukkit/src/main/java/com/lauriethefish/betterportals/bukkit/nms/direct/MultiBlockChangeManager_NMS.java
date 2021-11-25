@@ -5,8 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.lauriethefish.betterportals.bukkit.block.IViewableBlockInfo;
 import com.lauriethefish.betterportals.bukkit.block.IMultiBlockChangeManager;
-import com.lauriethefish.betterportals.shared.util.ReflectionException;
-import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
+import com.lauriethefish.betterportals.shared.util.NewReflectionUtil;
 import net.minecraft.core.SectionPos;
 import net.minecraft.network.protocol.game.ClientboundSectionBlocksUpdatePacket;
 import net.minecraft.server.level.ServerLevel;
@@ -24,8 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MultiBlockChangeManager_NMS implements IMultiBlockChangeManager {
-    private static final Field blockStatesField = ReflectionUtil.findField(ClientboundSectionBlocksUpdatePacket.class, BlockState[].class);
-    private static final Field positionsField = ReflectionUtil.findField(ClientboundSectionBlocksUpdatePacket.class, short[].class);
+    private static final Field BLOCK_STATES_FIELD = NewReflectionUtil.findFieldByType(ClientboundSectionBlocksUpdatePacket.class, BlockState[].class);
+    private static final Field POSITIONS_FIELD = NewReflectionUtil.findFieldByType(ClientboundSectionBlocksUpdatePacket.class, short[].class);
 
     private final Player player;
     private final HashMap<SectionPos, Map<Vector, BlockState>> changes = new HashMap<>();
@@ -99,12 +98,8 @@ public class MultiBlockChangeManager_NMS implements IMultiBlockChangeManager {
             }
 
             // Set our data in the private fields
-            try {
-                blockStatesField.set(packet, data);
-                positionsField.set(packet, positions);
-            }   catch(IllegalAccessException ex) {
-                throw new ReflectionException(ex);
-            }
+            NewReflectionUtil.setField(packet, BLOCK_STATES_FIELD, data);
+            NewReflectionUtil.setField(packet, POSITIONS_FIELD, positions);
 
             // Now our packet is ready to send
             playerConnection.send(packet);
