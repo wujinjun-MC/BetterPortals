@@ -1,7 +1,6 @@
 package com.lauriethefish.betterportals.bukkit.nms;
 
 import com.lauriethefish.betterportals.shared.util.NewReflectionUtil;
-import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import org.bukkit.Bukkit;
 
 /**

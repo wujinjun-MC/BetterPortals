@@ -10,7 +10,6 @@ import com.lauriethefish.betterportals.bukkit.block.IMultiBlockChangeManager;
 import com.lauriethefish.betterportals.bukkit.player.view.block.IPlayerBlockStates;
 import com.lauriethefish.betterportals.bukkit.player.view.block.PlayerBlockStates;
 import com.lauriethefish.betterportals.shared.util.NewReflectionUtil;
-import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import implementations.TestLoggerModule;
 import implementations.TestMultiBlockChangeManager;
 import implementations.TestViewableBlockInfo;
