@@ -4,6 +4,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.lauriethefish.betterportals.bukkit.block.IMultiBlockChangeManager;
 import com.lauriethefish.betterportals.bukkit.block.IBlockMap;
+import com.lauriethefish.betterportals.bukkit.entity.IEntityFinder;
 import com.lauriethefish.betterportals.bukkit.entity.faking.IEntityTracker;
 
 /**
@@ -26,5 +27,7 @@ public class NmsOptimisationModule extends AbstractModule  {
             .implement(IEntityTracker.class, NMSEntityTracker.class)
             .build(IEntityTracker.Factory.class)
         );
+
+        bind(IEntityFinder.class).to(NmsEntityFinder.class);
     }
 }

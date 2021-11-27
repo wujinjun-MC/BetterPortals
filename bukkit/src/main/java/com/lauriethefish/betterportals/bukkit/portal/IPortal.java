@@ -4,7 +4,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.lauriethefish.betterportals.api.BetterPortal;
 import com.lauriethefish.betterportals.api.PortalPosition;
 import com.lauriethefish.betterportals.bukkit.block.IBlockMap;
-import com.lauriethefish.betterportals.bukkit.entity.IPortalEntityList;
+import com.lauriethefish.betterportals.bukkit.entity.IPortalEntityManager;
 import com.lauriethefish.betterportals.bukkit.math.PortalTransformations;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -55,7 +55,7 @@ public interface IPortal extends BetterPortal {
     /**
      * @return The lists of entities nearby this portal at the origin and destination
      */
-    @NotNull IPortalEntityList getEntityList();
+    @NotNull IPortalEntityManager getEntityList();
 
     /**
      * Gets the end of the permissions for this portal.

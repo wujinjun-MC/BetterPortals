@@ -2,9 +2,8 @@ package com.lauriethefish.betterportals.bukkit.portal;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
-import com.lauriethefish.betterportals.bukkit.entity.IPortalEntityList;
-import com.lauriethefish.betterportals.bukkit.entity.PortalEntityList;
-import com.lauriethefish.betterportals.bukkit.entity.PortalEntityListFactory;
+import com.lauriethefish.betterportals.bukkit.entity.IPortalEntityManager;
+import com.lauriethefish.betterportals.bukkit.entity.PortalEntityManager;
 import com.lauriethefish.betterportals.bukkit.math.PortalTransformationsFactory;
 import com.lauriethefish.betterportals.bukkit.portal.blend.DimensionBlendManager;
 import com.lauriethefish.betterportals.bukkit.portal.blend.IDimensionBlendManager;
@@ -23,8 +22,8 @@ public class PortalModule extends AbstractModule {
                 .build(IPortal.Factory.class)
         );
         install(new FactoryModuleBuilder()
-                .implement(IPortalEntityList.class, PortalEntityList.class)
-                .build(PortalEntityListFactory.class)
+                .implement(IPortalEntityManager.class, PortalEntityManager.class)
+                .build(IPortalEntityManager.Factory.class)
         );
         install(new FactoryModuleBuilder().build(PortalTransformationsFactory.class));
 

@@ -19,10 +19,13 @@ public class EntityModule extends AbstractModule {
                     .implement(IEntityTracker.class, EntityTracker.class)
                     .build(IEntityTracker.Factory.class)
             );
+
+            bind(IEntityFinder.class).to(BukkitEntityFinder.class);
         }
 
-        // If using direct NMS, then we can use a no-update entity tracking manager, since updates are forwarded from NMS code
         bind(IEntityPacketManipulator.class).to(EntityPacketManipulator.class);
+
+        // If using direct NMS, then we can use a no-update entity tracking manager, since updates are forwarded from NMS code
         bind(EntityTrackingManager.class).to(usingNms ? NoUpdateEntityTrackingManager.class : EventEntityTrackingManager.class);
     }
 }
