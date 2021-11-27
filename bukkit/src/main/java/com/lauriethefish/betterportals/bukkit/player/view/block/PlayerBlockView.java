@@ -14,7 +14,6 @@ import com.lauriethefish.betterportals.bukkit.math.PlaneIntersectionChecker;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.tasks.BlockUpdateFinisher;
 import com.lauriethefish.betterportals.bukkit.util.MaterialUtil;
-import com.lauriethefish.betterportals.bukkit.util.performance.OperationTimer;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -101,8 +100,6 @@ public class PlayerBlockView implements IPlayerBlockView   {
 
             PlaneIntersectionChecker intersectionChecker = portal.getTransformations().createIntersectionChecker(playerPosition);
 
-            OperationTimer timer = new OperationTimer();
-
             IBlockMap viewableBlockArray = portal.getViewableBlocks();
             List<IViewableBlockInfo> viewableStates = viewableBlockArray.getViewableStates();
             for (IViewableBlockInfo blockInfo : viewableStates) {
@@ -146,7 +143,8 @@ public class PlayerBlockView implements IPlayerBlockView   {
                 throw new RuntimeException(ex);
             }
 
-            logger.finest("Performed viewable block process. Time taken: %fms", timer.getTimeTakenMillis());
+            // Removed due to being unreasonably frequent
+            //logger.finest("Performed viewable block process. Time taken: %fms", timer.getTimeTakenMillis());
         }   finally     {
             statesLock.unlock();
         }

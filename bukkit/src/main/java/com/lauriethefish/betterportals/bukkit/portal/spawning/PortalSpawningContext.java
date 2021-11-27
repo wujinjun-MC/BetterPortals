@@ -15,7 +15,6 @@ public class PortalSpawningContext {
     private final Vector size;
 
     /**
-     *
      * @param worldLink Contains info about how the two worlds are connected, e.g. min/max spawn height, coordinate rescaling
      * @param preferredLocation The location in the destination world where we want to spawn the portal
      * @param size The size of the origin portal window.

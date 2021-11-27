@@ -7,6 +7,7 @@ import com.lauriethefish.betterportals.bukkit.config.RenderConfig;
 import com.lauriethefish.betterportals.bukkit.player.view.block.IPlayerBlockView;
 import com.lauriethefish.betterportals.bukkit.player.view.entity.IPlayerEntityView;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
+import com.lauriethefish.betterportals.bukkit.util.StringUtil;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -42,7 +43,7 @@ public class PlayerPortalView implements IPlayerPortalView  {
         if(previousPosition == null) {return false;} // This condition shouldn't happen unless a player gets near a portal really quickly before going away, but to be on the safe side
         Location currentPosition = player.getLocation();
 
-        logger.finer("Previous pos: %s, Current pos: %s", previousPosition, currentPosition);
+        logger.finer("Checking deactivation type of portal view, previous pos: %s, current pos: %s", StringUtil.locationToString(previousPosition), StringUtil.locationToString(currentPosition));
         if(previousPosition.getWorld() != currentPosition.getWorld()) {return false;} // No need to bother if the player has switched worlds
         // Roughly measure whether or not the player moved so far that they're out of render distance
         // This is needed to not send the block reset packets if the player moved a long distance away

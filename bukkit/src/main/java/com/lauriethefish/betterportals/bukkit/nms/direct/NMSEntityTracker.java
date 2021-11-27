@@ -169,7 +169,6 @@ public class NMSEntityTracker implements IEntityTracker {
 
             IEntityTracker pickerUpperTracker = trackingManager.getTracker(portal, nmsEntity.level.getEntity(packet.getPlayerId()).getBukkitEntity());
             if(pickerUpperTracker == null) {
-                logger.finer("No tracker found for picking up player");
                 return null;
             }
 
@@ -178,7 +177,6 @@ public class NMSEntityTracker implements IEntityTracker {
         if(p instanceof ClientboundSetPassengersPacket) {
             ClientboundSetPassengersPacket packet = (ClientboundSetPassengersPacket) p;
             if(packet.getVehicle() != nmsEntity.getId()) {
-                logger.finer("Entity ID mismatch");
                 return null;
             }
 
@@ -219,9 +217,7 @@ public class NMSEntityTracker implements IEntityTracker {
                         ClientboundMoveEntityPacket.packetToEntity(packet.getYa()),
                         ClientboundMoveEntityPacket.packetToEntity(packet.getZa())
                 );
-                //logger.fine("Original movement amount %s", movement);
                 movement = entityInfo.getRotation().transform(movement);
-                //logger.fine("Transformed movement amount %s", movement);
 
                 short aX = (short) ClientboundMoveEntityPacket.entityToPacket(movement.getX());
                 short aY = (short) ClientboundMoveEntityPacket.entityToPacket(movement.getY());
@@ -520,7 +516,6 @@ public class NMSEntityTracker implements IEntityTracker {
     public void addTracking(@NotNull Player player) {
         if(trackingPlayers.containsKey(player.getUniqueId())) {throw new IllegalArgumentException("Player is already tracking this entity");}
         if(trackingPlayers.size() == 0) {
-            logger.fine("Starting tracking");
             // Assign our redirection consumer if no players were previously tracking this entity
             begin();
         }
@@ -532,7 +527,7 @@ public class NMSEntityTracker implements IEntityTracker {
         ClientboundPlayerInfoPacket.PlayerUpdate entry = null;
         // If the entity is a player, then we need to send a player info packet to coerce the client into thinking that a player with this fake UUID exists, but has the same skin as the player
         if(entityInfo.getEntity() instanceof Player) {
-            logger.finer("Sending player info packet!");
+            logger.finest("Sending player info packet!");
             ClientboundPlayerInfoPacket playerInfoPacket = new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, serverPlayer);
 
             ServerPlayer entityPlayer = (ServerPlayer) nmsEntity;
@@ -589,7 +584,6 @@ public class NMSEntityTracker implements IEntityTracker {
         }
 
         if(trackingPlayers.size() == 0) {
-            logger.fine("Killing tracker");
             // Remove our redirection consumer
             stop();
         }

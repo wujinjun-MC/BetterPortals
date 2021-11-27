@@ -59,7 +59,6 @@ public class EntityTracker implements IEntityTracker    {
 
         List<Entity> newMounts = entity.getPassengers();
         if(!newMounts.equals(lastMounts)) {
-            logger.fine("Riding entities changing! (new count: %s)", newMounts.size());
             lastMounts = newMounts;
 
             List<EntityInfo> visibleMounts = new ArrayList<>();

@@ -3,6 +3,7 @@ package com.lauriethefish.betterportals.bukkit.portal;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.lauriethefish.betterportals.bukkit.portal.predicate.IPortalPredicateManager;
+import com.lauriethefish.betterportals.bukkit.util.StringUtil;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -111,13 +112,13 @@ public class PortalManager implements IPortalManager    {
             portalsById.remove(portal.getId());
         }
 
-        logger.fine("Unregistering %d portal(s) at position %s", portalsRemoved.size(), originLoc);
+        logger.fine("Unregistering %d portal(s) at position %s", portalsRemoved.size(), StringUtil.locationToString(originLoc));
         return portalsRemoved.size();
     }
 
     @Override
     public boolean removePortal(@NotNull IPortal portal) {
-        logger.fine("Unregistering portal at position %s", portal.getOriginPos().getLocation());
+        logger.fine("Unregistering portal at position %s", StringUtil.locationToString(portal.getOriginPos().getLocation()));
 
         Set<IPortal> portalsAtLoc = portals.get(portal.getOriginPos().getLocation());
         if(portalsAtLoc == null) {return false;}

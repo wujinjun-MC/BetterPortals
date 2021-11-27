@@ -93,7 +93,7 @@ public class UpdateManager {
             msg = msg.replace("{current}", currentVersion);
             msg = msg.replace("{new}", latestVersionStr);
 
-            logger.info(msg);
+            logger.warning(msg);
         }
     }
 }

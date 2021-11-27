@@ -92,14 +92,14 @@ public class Portal implements IPortal, ConfigurationSerializable {
 
     @Override
     public void onActivate() {
-        logger.fine("Portal was activated");
+        logger.finer("Portal was activated");
         chunkLoader.forceloadPortalChunks(destPos);
         ticksSinceActivated = 0;
     }
 
     @Override
     public void onDeactivate() {
-        logger.fine("Portal was deactivated");
+        logger.finer("Portal was deactivated");
         chunkLoader.unforceloadPortalChunks(destPos);
         viewableBlocks.reset();
         ticksSinceActivated = -1;
@@ -107,13 +107,13 @@ public class Portal implements IPortal, ConfigurationSerializable {
 
     @Override
     public void onViewActivate() {
-        logger.fine("Portal was view-activated");
+        logger.finest("Portal was view-activated");
         ticksSinceViewActivated = 0;
     }
 
     @Override
     public void onViewDeactivate() {
-        logger.fine("Portal was view-deactivated");
+        logger.finest("Portal was view-deactivated");
         ticksSinceViewActivated = -1;
     }
 

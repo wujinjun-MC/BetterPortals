@@ -36,15 +36,8 @@ import java.util.*;
  */
 @Singleton
 public class EntityPacketManipulator implements IEntityPacketManipulator {
-    private final Logger logger;
-
     private static final boolean useHideEntityArray = !VersionUtil.isMcVersionAtLeast("1.17.0") && !VersionUtil.isMcVersionAtLeast("1.17.1");
     private static final boolean useHideEntityList = VersionUtil.isMcVersionAtLeast("1.17.1");
-
-    @Inject
-    public EntityPacketManipulator(Logger logger) {
-        this.logger = logger;
-    }
 
     @Override
     public void showEntity(EntityInfo tracker, Collection<Player> players) {
@@ -122,7 +115,6 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
             if (rotated == null) {
                 throw new IllegalStateException("Portal attempted to rotate painting to an invalid block direction");
             }
-            logger.finer("Current direction: %s. Rotated: %s", currentDirection, rotated);
 
             directions.write(0, rotated);
         }   else if(packetType == PacketType.Play.Server.SPAWN_ENTITY)  {
@@ -137,7 +129,6 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
                     if (rotated == null) {
                         throw new IllegalStateException("Portal attempted to rotate a hanging entity to an invalid block direction");
                     }
-                    logger.finer("Current direction: %s. Rotated: %s. ID: %d", currentDirection, rotated, RotationUtil.getId(rotated));
                     packet.getIntegers().write(6, RotationUtil.getId(rotated));
                 }
             }
@@ -293,11 +284,7 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
         if(VersionUtil.isMcVersionAtLeast("1.16.0")) {
             // Why minecraft, why not just use a map...
             List<Pair<EnumWrappers.ItemSlot, ItemStack>> wrappedChanges = new ArrayList<>();
-            changes.forEach((slot, item) -> {
-                logger.finest("Performing equipment change. Slot: %s. New value: %s", slot, item);
-
-                wrappedChanges.add(new Pair<>(slot, item == null ? new ItemStack(Material.AIR) : item));
-            });
+            changes.forEach((slot, item) -> wrappedChanges.add(new Pair<>(slot, item == null ? new ItemStack(Material.AIR) : item)));
 
             PacketContainer packet = new PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT);
             packet.getIntegers().write(0, tracker.getEntityId());
@@ -350,7 +337,6 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
     public void sendEntityAnimation(EntityInfo tracker, Collection<Player> players, AnimationType animationType) {
         PacketContainer packet = new PacketContainer(PacketType.Play.Server.ANIMATION);
 
-        logger.finer("Sending animation packet of type %s", animationType);
         StructureModifier<Integer> integers = packet.getIntegers();
         integers.write(0, tracker.getEntityId());
         integers.write(1, animationType.getNmsId());

@@ -30,7 +30,7 @@ public class PlayerBlockStates implements IPlayerBlockStates {
         // Use a MultiBlockChangeManager to actually send the changes
         IMultiBlockChangeManager multiBlockChangeManager = multiBlockChangeManagerFactory.create(player);
 
-        logger.finer("Resetting %d blocks", viewedStates.size());
+        logger.finest("Resetting %d blocks", viewedStates.size());
         for(Map.Entry<Vector, IViewableBlockInfo> entry : viewedStates.entrySet()) {
             multiBlockChangeManager.addChangeOrigin(entry.getKey(), entry.getValue());
         }

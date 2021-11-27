@@ -56,8 +56,6 @@ public abstract class FloodFillBlockMap implements IBlockMap {
         this.destDirection = portal.getDestPos().getDirection();
         this.portalOriginPos = new IntVector(portal.getOriginPos().getVector());
         this.portalDestPos = roundBasedOnDirection(portal);
-        logger.fine("Origin pos: %s, Dest pos: %s", portalOriginPos, portalDestPos);
-        logger.fine("Origin direction: %s, Dest Direction: %s", portal.getOriginPos().getDirection(), portal.getDestPos().getDirection());
 
         reset();
     }
@@ -132,7 +130,7 @@ public abstract class FloodFillBlockMap implements IBlockMap {
 
     @Override
     public void reset() {
-        logger.finer("Clearing block array to save memory");
+        logger.finest("Clearing block array to save memory");
 
         // In practise there should be no block update ongoing when this happens, but to be on the safe side
         queuedViewableStatesLock.lock();

@@ -65,7 +65,6 @@ public class BukkitBlockMap extends FloodFillBlockMap {
 
         int[] stack = new int[firstUpdate ? renderConfig.getTotalArrayLength() : 16];
 
-        logger.fine("Starting at %s", start.subtract(centerPos));
         stack[0] = getArrayMapIndex(start.subtract(centerPos));
         int stackPos = 0;
         while(stackPos >= 0) {
@@ -164,13 +163,11 @@ public class BukkitBlockMap extends FloodFillBlockMap {
             BlockData newDestData = dataFetcher.getData(destPos);
 
             if(!newDestData.equals(blockInfo.getBaseDestData())) {
-                logger.finer("Destination block change");
                 searchFromBlock(blockInfo.getOriginPos());
             }
 
             if(!portal.isCrossServer()) {
                 if (MaterialUtil.isTileEntity(newDestData.getMaterial())) {
-                    logger.finer("Adding tile state to map . . .");
                     Block destBlock = destPos.getBlock(Objects.requireNonNull(portal.getDestPos().getWorld()));
 
                     PacketContainer updatePacket = BlockDataUtil.getUpdatePacket(destBlock.getState());
@@ -185,7 +182,6 @@ public class BukkitBlockMap extends FloodFillBlockMap {
             Block originBlock = blockInfo.getOriginPos().getBlock(originWorld);
             BlockData newOriginData = originBlock.getBlockData();
             if(MaterialUtil.isTileEntity(originBlock.getType()))  {
-                logger.finer("Adding tile state to map . . .");
                 PacketContainer updatePacket = BlockDataUtil.getUpdatePacket(originBlock.getState());
                 if(updatePacket != null) {
                     originTileStates.put(blockInfo.getOriginPos(), updatePacket);
@@ -193,7 +189,6 @@ public class BukkitBlockMap extends FloodFillBlockMap {
             }
 
             if(!newOriginData.equals(blockInfo.getBaseOriginData())) {
-                logger.finer("Origin block change");
                 blockInfo.setOriginData(newOriginData);
                 if(!newOriginData.equals(newDestData) && !portal.getOriginPos().isInLine(blockInfo.getOriginPos())) {
                     queuedViewableStates.add(blockInfo);

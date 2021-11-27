@@ -101,7 +101,7 @@ public class CrossServerDestinationChecker implements PortalPredicate {
         }
         ongoingRequest.add(portal);
 
-        logger.finer("Checking validity of portal %s", portal.getId());
+        logger.finest("Checking validity of portal %s", portal.getId());
         CheckDestinationValidityRequest request = new CheckDestinationValidityRequest();
         request.setOriginGameVersion(VersionUtil.getCurrentVersion());
         request.setDestinationWorldId(portal.getDestPos().getWorldId());
@@ -111,7 +111,7 @@ public class CrossServerDestinationChecker implements PortalPredicate {
             try {
                 response.checkForErrors();
                 putValidityValue(portal, true);
-                logger.finer("Destination validity OK!");
+                logger.finest("Destination validity OK!");
             }   catch(RequestException ex) {
                 // Avoid spamming validity messages by only logging when the validity changes to invalid
                 Boolean previousValidityValue = cachedValidity.get(portal);

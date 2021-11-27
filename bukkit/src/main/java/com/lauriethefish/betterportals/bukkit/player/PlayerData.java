@@ -10,7 +10,6 @@ import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.portal.IPortalActivityManager;
 import com.lauriethefish.betterportals.bukkit.portal.IPortalManager;
 import com.lauriethefish.betterportals.bukkit.portal.predicate.IPortalPredicateManager;
-import com.lauriethefish.betterportals.bukkit.util.performance.OperationTimer;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import lombok.Getter;
 import lombok.Setter;
@@ -104,8 +103,6 @@ public class PlayerData implements IPlayerData  {
 
     @Override
     public void onUpdate() {
-        OperationTimer timer = new OperationTimer();
-
         Collection<IPortal> nowViewablePortals = updateViewablePortals();
         updatePortalViews(nowViewablePortals);
     }
