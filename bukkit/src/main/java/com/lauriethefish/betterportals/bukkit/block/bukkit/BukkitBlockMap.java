@@ -122,7 +122,7 @@ public class BukkitBlockMap extends FloodFillBlockMap {
             boolean canSkip = destData.equals(originData) && firstUpdate && !isEdge;
             boolean isInLine = isInLine(destRelPos);
             if (!isInLine && !canSkip) {
-                viewableStates.add(blockInfo);
+                queuedViewableStates.add(blockInfo);
             }
 
             // Stop when we reach the edge or an occluding block, since we don't want to show blocks outside the view area
@@ -196,7 +196,7 @@ public class BukkitBlockMap extends FloodFillBlockMap {
                 logger.finer("Origin block change");
                 blockInfo.setOriginData(newOriginData);
                 if(!newOriginData.equals(newDestData) && !portal.getOriginPos().isInLine(blockInfo.getOriginPos())) {
-                    viewableStates.add(blockInfo);
+                    queuedViewableStates.add(blockInfo);
                 }
             }
         }
