@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.lauriethefish.betterportals.api.PortalPosition;
 import com.lauriethefish.betterportals.bukkit.block.IBlockMap;
-import com.lauriethefish.betterportals.bukkit.entity.IPortalEntityList;
+import com.lauriethefish.betterportals.bukkit.entity.IPortalEntityManager;
 import com.lauriethefish.betterportals.bukkit.math.PortalTransformations;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import lombok.Getter;
@@ -107,7 +107,7 @@ public class TestPortal implements IPortal {
     }
 
     @Override
-    public @NotNull IPortalEntityList getEntityList() {
+    public @NotNull IPortalEntityManager getEntityList() {
         return null;
     }
 
