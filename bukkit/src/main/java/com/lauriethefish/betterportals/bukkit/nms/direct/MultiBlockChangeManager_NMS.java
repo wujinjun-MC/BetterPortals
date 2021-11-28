@@ -76,6 +76,9 @@ public class MultiBlockChangeManager_NMS implements IMultiBlockChangeManager {
         // Each chunk position needs a different packet
         for(Map.Entry<SectionPos, Map<Vector, BlockState>> entry : changes.entrySet()) {
             SectionPos chunkPos = entry.getKey();
+            if(chunkPos.getY() < 0 || chunkPos.getY() > 15) {
+                continue;
+            }
             LevelChunkSection chunkSection = playerLevel.getChunk(chunkPos.getX(), chunkPos.getZ()).getSections()[chunkPos.getY()];
 
             // First create a dummy packet

@@ -15,42 +15,25 @@ import java.util.Objects;
 public class PortalChunkAccess {
     private LevelChunkSection[] sections = null;
 
-    private final int minX;
-    private final int minY;
-    private final int minZ;
+    private int minX;
+    private int minY;
+    private int minZ;
 
-    private final int maxX;
-    private final int maxY;
-    private final int maxZ;
+    private int yMultip;
+    private int zMultip;
 
-    private final int yMultip;
-    private final int zMultip;
-    private final int totalLength;
+    private final PortalPosition portalPosition;
+    private final Logger logger;
+    private final RenderConfig renderConfig;
 
     private final ServerLevel level;
 
     public PortalChunkAccess(PortalPosition portalPosition, RenderConfig renderConfig, Logger logger) {
+        this.portalPosition = portalPosition;
+        this.logger = logger;
+        this.renderConfig = renderConfig;
+
         level = ((CraftWorld) Objects.requireNonNull(portalPosition.getWorld())).getHandle();
-
-        IntVector minPos = portalPosition.getIntVector().subtract(renderConfig.getHalfFullSize());
-        IntVector maxPos = portalPosition.getIntVector().add(renderConfig.getHalfFullSize());
-
-        minX = minPos.getX() >> 4;
-        minY = minPos.getY() >> 4;
-        minZ = minPos.getZ() >> 4;
-
-        maxX = maxPos.getX() >> 4;
-        maxY = maxPos.getY() >> 4;
-        maxZ = maxPos.getZ() >> 4;
-
-        int xSize = (maxX - minX) + 1;
-        int ySize = (maxY - minY) + 1;
-        int zSize = (maxZ - minZ) + 1;
-        logger.fine("Chunk map sizes, X: %d, Y: %d, Z: %d", xSize, ySize, zSize);
-
-        yMultip = xSize;
-        zMultip = xSize * ySize;
-        totalLength = xSize * ySize * zSize;
     }
 
     public final BlockState getBlock(int x, int y, int z) {
@@ -72,13 +55,36 @@ public class PortalChunkAccess {
             return;
         }
 
+        IntVector minPos = portalPosition.getIntVector().subtract(renderConfig.getHalfFullSize());
+        IntVector maxPos = portalPosition.getIntVector().add(renderConfig.getHalfFullSize());
+        minX = minPos.getX() >> 4;
+        minY = minPos.getY() >> 4;
+        minZ = minPos.getZ() >> 4;
+
+        int maxX = maxPos.getX() >> 4;
+        int maxY = maxPos.getY() >> 4;
+        int maxZ = maxPos.getZ() >> 4;
+
+        int xSize = (maxX - minX) + 1;
+        int ySize = (maxY - minY) + 1;
+        int zSize = (maxZ - minZ) + 1;
+        logger.fine("Chunk map sizes, X: %d, Y: %d, Z: %d", xSize, ySize, zSize);
+
+        yMultip = xSize;
+        zMultip = xSize * ySize;
+        int totalLength = xSize * ySize * zSize;
+
         sections = new LevelChunkSection[totalLength];
         int i = 0;
         for(int z = minZ; z <= maxZ; z++) {
             for(int y = minY; y <= maxY; y++) {
                 for(int x = minX; x <= maxX; x++) {
-                    // This may be null if a section is empty
-                    sections[i] = level.getChunk(x, z).getSections()[y];
+                    if(y > 15 || y < 0) {
+                        sections[i] = null;
+                    }   else    {
+                        // This may be null if a section is empty
+                        sections[i] = level.getChunk(x, z).getSections()[y];
+                    }
                     i++;
                 }
             }

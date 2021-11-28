@@ -62,6 +62,11 @@ public class MultiBlockChangeManager_1_16_2 implements IMultiBlockChangeManager 
         // Each chunk position needs a different packet
         for(Map.Entry<BlockPosition, Map<Vector, WrappedBlockData>> entry : changes.entrySet()) {
             PacketContainer packet = new PacketContainer(PacketType.Play.Server.MULTI_BLOCK_CHANGE);
+            int chunkY = entry.getKey().getY();
+            if(chunkY > 15 || chunkY < 0) {
+                continue;
+            }
+
             // Write the correct chunk section
             packet.getSectionPositions().write(0, entry.getKey());
 
