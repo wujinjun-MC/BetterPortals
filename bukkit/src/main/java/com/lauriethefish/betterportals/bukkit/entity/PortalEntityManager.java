@@ -178,8 +178,6 @@ public class PortalEntityManager implements IPortalEntityManager {
      * @param entity The entity to be teleported
      */
     private void teleportLocal(Entity entity) {
-        destinationEntities.remove(entity);
-
         PortalTransformations transformations = portal.getTransformations();
 
         Location destPos;
