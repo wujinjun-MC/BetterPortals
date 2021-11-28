@@ -5,59 +5,37 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.lauriethefish.betterportals.api.IntVector;
 import com.lauriethefish.betterportals.bukkit.block.FloodFillBlockMap;
+import com.lauriethefish.betterportals.bukkit.block.IViewableBlockInfo;
 import com.lauriethefish.betterportals.bukkit.config.RenderConfig;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.shared.logging.Logger;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.LevelChunkSection;
-import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * After lots of testing, a flood-fill appears to be the most efficient way to find the blocks around the destination that aren't obscured.
  * <br>If you want, you can try to optimise more, but I'm not sure how to make this much better with the requirements it has.
  */
 public class NmsBlockMap extends FloodFillBlockMap {
-    private final ServerLevel originLevel;
-    private final ServerLevel destinationLevel;
+    private final PortalChunkAccess originAccess;
+    private final PortalChunkAccess destAccess;
 
     @Inject
     public NmsBlockMap(@Assisted IPortal portal, Logger logger, RenderConfig renderConfig) {
         super(portal, logger, renderConfig);
 
-        this.originLevel = getLevel(portal.getOriginPos().getWorld());
-        this.destinationLevel = getLevel(portal.getDestPos().getWorld());
-    }
-
-    private ServerLevel getLevel(World bukkitWorld) {
-        return ((CraftWorld) bukkitWorld).getHandle();
-    }
-
-    private BlockState getNmsBlockState(ServerLevel world, IntVector pos) {
-        int sectX = pos.getX() >> 4;
-        int sectY = pos.getY() >> 4;
-        int sectZ = pos.getZ() >> 4;
-        int relX = pos.getX() & 0xF;
-        int relY = pos.getY() & 0xF;
-        int relZ = pos.getZ() & 0xF;
-
-        if(sectY < 0 || sectY > 15) {
-            return null;
-        }
-
-        LevelChunkSection chunkSection =  world.getChunk(sectX, sectZ).getSections()[sectY];
-        return chunkSection == null ? Blocks.AIR.defaultBlockState() : chunkSection.getBlockState(relX, relY, relZ);
+        this.originAccess = new PortalChunkAccess(portal.getOriginPos(), renderConfig, logger);
+        this.destAccess = new PortalChunkAccess(portal.getDestPos(), renderConfig, logger);
     }
 
     @Override
-    protected void searchFromBlock(IntVector start) {
+    protected void searchFromBlock(IntVector start, List<IViewableBlockInfo> statesOutput, IViewableBlockInfo firstBlockInfo) {
         WrappedBlockData backgroundData = getBackgroundData();
 
         int[] stack = new int[firstUpdate ? renderConfig.getTotalArrayLength() : 16];
 
-        logger.fine("Starting at %s", start.subtract(centerPos));
         stack[0] = getArrayMapIndex(start.subtract(centerPos));
         int stackPos = 0;
         while(stackPos >= 0) {
@@ -76,8 +54,8 @@ public class NmsBlockMap extends FloodFillBlockMap {
             IntVector destRelPos =  rotateOriginToDest.transform(relX, relY, relZ);
             IntVector destPos = destRelPos.add(portalDestPos);
 
-            BlockState originData = getNmsBlockState(originLevel, originPos);
-            BlockState destData = getNmsBlockState(destinationLevel, destPos);
+            BlockState originData = originAccess.getBlock(originPos.getX(), originPos.getY(), originPos.getZ());
+            BlockState destData = destAccess.getBlock(destPos.getX(), destPos.getY(), destPos.getZ());
             if(originData == null || destData == null) {
                 // We are outside the world
                 continue;
@@ -107,7 +85,7 @@ public class NmsBlockMap extends FloodFillBlockMap {
                 }
             }*/
 
-            NmsBlockInfo blockInfo = new NmsBlockInfo(originPos, originData, destData);
+            NmsBlockInfo blockInfo = firstBlockInfo == null ? new NmsBlockInfo(originPos, originData, destData) : (NmsBlockInfo) firstBlockInfo;
             boolean isEdge = renderConfig.isOutsideBounds(relX, relY, relZ);
             if(isEdge && !isOccluding) {
                 blockInfo.setRenderedDestData((BlockState) backgroundData.getHandle());
@@ -115,12 +93,26 @@ public class NmsBlockMap extends FloodFillBlockMap {
                 // TODO: Reimplement rotation
                 blockInfo.setRenderedDestData(destData);
             }
-            nonObscuredStates.add(blockInfo);
 
+            // If the newly added block was not added previously (i.e. passed in via firstBlockInfo), then we need to add it to the non-obscured states
+            // This list is used for incremental updates later
+            if(firstBlockInfo == null) {
+                nonObscuredStates.add(blockInfo);
+            }
+            firstBlockInfo = null;
+
+            // If we're not on an edge block, and the origin and destination block are the exact same, then we can skip this block
+            // This is because rendering it will do nothing - it's the same at both ends
             boolean canSkip = destData.equals(originData) && firstUpdate && !isEdge;
+
             boolean isInLine = isInLine(destRelPos);
-            if (!isInLine && !canSkip) {
-                queuedViewableStates.add(blockInfo);
+
+            // Don't bother adding blocks which are in line with the portal window, as these will never be visible anyway, and just serve to made the block map larger
+            // We also only add this block to the viewable states if it doesn't already exist there (this is the case if the alreadyReachedMap's value is 1)
+            // The above check is only important on incremental updates, since on the first update the block must never have been added to the block map - it's being checked for the first time
+            if (!isInLine && !canSkip && alreadyReachedMap[positionInt] < 2) {
+                alreadyReachedMap[positionInt] = 2; // Make sure that this block will not be added multiple times
+                statesOutput.add(blockInfo);
             }
 
             // Stop when we reach the edge or an occluding block, since we don't want to show blocks outside the view area
@@ -137,8 +129,8 @@ public class NmsBlockMap extends FloodFillBlockMap {
 
             for(int offset : renderConfig.getIntOffsets()) {
                 int newPos = positionInt + offset;
-                if(!alreadyReachedMap[newPos]) {
-                    alreadyReachedMap[newPos] = true;
+                if(alreadyReachedMap[newPos] == 0) {
+                    alreadyReachedMap[newPos] = 1;
 
                     stackPos += 1;
                     stack[stackPos] = newPos;
@@ -149,20 +141,19 @@ public class NmsBlockMap extends FloodFillBlockMap {
 
     @Override
     protected void checkForChanges() {
+        List<IViewableBlockInfo> newStates = new ArrayList<>();
+
         int statesLength = nonObscuredStates.size();
         for(int i = 0; i < statesLength; i++) { // We do not use foreach to avoid concurrent modifications
             NmsBlockInfo blockInfo = (NmsBlockInfo) nonObscuredStates.get(i);
             IntVector destPos = rotateOriginToDest.transform(blockInfo.getOriginPos().subtract(portalOriginPos)).add(portalDestPos); // Avoid directly using the matrix to fix floating point precision issues
-            BlockState newDestData = getNmsBlockState(destinationLevel, destPos);
+            BlockState newDestData = destAccess.getBlock(destPos.getX(), destPos.getY(), destPos.getZ());
 
             if(newDestData != blockInfo.getBaseDestData()) {
+                blockInfo.setBaseDestData(newDestData);
+
                 logger.finer("Destination block change");
-                queuedViewableStatesLock.lock();
-                try {
-                    searchFromBlock(blockInfo.getOriginPos());
-                }   finally {
-                    queuedViewableStatesLock.unlock();
-                }
+                searchFromBlock(blockInfo.getOriginPos(), newStates, blockInfo);
             }
 
             /*
@@ -181,7 +172,8 @@ public class NmsBlockMap extends FloodFillBlockMap {
             }*/
 
             //Block originBlock = entry.getKey().getBlock(originWorld);
-            BlockState newOriginData = getNmsBlockState(originLevel, blockInfo.getOriginPos());
+            IntVector originPos = blockInfo.getOriginPos();
+            BlockState newOriginData = originAccess.getBlock(originPos.getX(), originPos.getY(), originPos.getZ());
             /*
             if(MaterialUtil.isTileEntity(originBlock.getType()))  {
                 logger.finer("Adding tile state to map . . .");
@@ -192,11 +184,18 @@ public class NmsBlockMap extends FloodFillBlockMap {
             }*/
 
             if(newOriginData != blockInfo.getBaseOriginData()) {
-                logger.finer("Origin block change");
-                blockInfo.setOriginData(newOriginData);
+                // If the new origin data is different to the new dest data, then we might need to add this block to the viewable states
+                // This is because it will not have been added previously if the origin and destination data are the same
                 if(!newOriginData.equals(newDestData) && !portal.getOriginPos().isInLine(blockInfo.getOriginPos())) {
-                    queuedViewableStates.add(blockInfo);
+                    int position = getArrayMapIndex(blockInfo.getOriginPos().subtract(portalOriginPos));
+                    // Only add this block as viewable if it is not already designated as viewable
+                    if(alreadyReachedMap[position] < 2) {
+                        alreadyReachedMap[position] = 2;
+                        newStates.add(blockInfo);
+                    }
                 }
+
+                blockInfo.setOriginData(newOriginData);
             }
         }
 
@@ -205,6 +204,10 @@ public class NmsBlockMap extends FloodFillBlockMap {
         if(!portal.isCrossServer()) {
             updateTileStateMap(destTileStates, portal.getDestPos().getWorld(), true);
         }*/
+
+        if(newStates.size() > 0) {
+            stateQueue.enqueueStates(newStates);
+        }
     }
 
     /*
@@ -226,4 +229,23 @@ public class NmsBlockMap extends FloodFillBlockMap {
             }
         }
     }*/
+
+    @Override
+    public void updateInternal() {
+        originAccess.prepare();
+        destAccess.prepare();
+        super.updateInternal();
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+
+        if(originAccess != null) {
+            originAccess.clear();
+        }
+        if(destAccess != null) {
+            destAccess.clear();
+        }
+    }
 }

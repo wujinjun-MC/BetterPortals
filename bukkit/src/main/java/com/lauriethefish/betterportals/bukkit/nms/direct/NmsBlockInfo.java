@@ -3,6 +3,7 @@ package com.lauriethefish.betterportals.bukkit.nms.direct;
 import com.lauriethefish.betterportals.api.IntVector;
 import com.lauriethefish.betterportals.bukkit.block.IViewableBlockInfo;
 import lombok.Getter;
+import lombok.Setter;
 import net.minecraft.world.level.block.state.BlockState;
 
 /**
@@ -12,7 +13,7 @@ public class NmsBlockInfo implements IViewableBlockInfo {
     @Getter private final IntVector originPos;
 
     @Getter private BlockState baseOriginData;
-    @Getter private final BlockState baseDestData;
+    @Getter @Setter private BlockState baseDestData;
     @Getter private BlockState renderedDestData;
 
     public NmsBlockInfo(IntVector originPos, BlockState baseOriginData, BlockState baseDestData) {
