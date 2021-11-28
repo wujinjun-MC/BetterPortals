@@ -27,6 +27,11 @@ public class PlayerBlockStates implements IPlayerBlockStates {
 
     @Override
     public void resetAndUpdate() {
+        if(viewedStates.size() == 0) {
+            logger.finer("No states to reset!");
+            return;
+        }
+
         // Use a MultiBlockChangeManager to actually send the changes
         IMultiBlockChangeManager multiBlockChangeManager = multiBlockChangeManagerFactory.create(player);
 
