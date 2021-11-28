@@ -53,7 +53,8 @@ public class PlayerPortalView implements IPlayerPortalView  {
 
     @Override
     public void update() {
-        boolean moved = !player.getLocation().equals(previousPosition);
+        // Only compare the coordinates, not the looking direction
+        boolean moved = previousPosition == null || !player.getLocation().toVector().equals(previousPosition.toVector());
 
         // We refresh the block view every N ticks so that if the client doesn't change some of the blocks, they will be resent
         if(ticksSinceStarted % renderConfig.getBlockStateRefreshInterval() == 0) {
