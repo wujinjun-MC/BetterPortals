@@ -135,6 +135,10 @@ public class PortalPosition implements Serializable, ConfigurationSerializable {
         return new Vector(x, y, z);
     }
 
+    public IntVector getIntVector() {
+        return new IntVector(x, y, z);
+    }
+
     // Convenience function for getting the block at this location
     public Block getBlock() {
         if(isExternal()) {throw new IllegalStateException("Cannot get the block of an external position");}
