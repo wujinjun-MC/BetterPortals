@@ -102,6 +102,10 @@ public class PlayerBlockView implements IPlayerBlockView   {
 
             IBlockMap viewableBlockArray = portal.getViewableBlocks();
             List<IViewableBlockInfo> viewableStates = viewableBlockArray.getViewableStates();
+            if(viewableStates == null) {
+                return;
+            }
+
             for (IViewableBlockInfo blockInfo : viewableStates) {
                 Vector position = blockInfo.getOriginPos().getCenterPos();
 

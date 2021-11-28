@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.lauriethefish.betterportals.api.IntVector;
 import com.lauriethefish.betterportals.bukkit.block.FloodFillBlockMap;
+import com.lauriethefish.betterportals.bukkit.block.IViewableBlockInfo;
 import com.lauriethefish.betterportals.bukkit.block.fetch.BlockDataFetcherFactory;
 import com.lauriethefish.betterportals.bukkit.block.fetch.IBlockDataFetcher;
 import com.lauriethefish.betterportals.bukkit.block.rotation.IBlockRotator;
@@ -19,7 +20,10 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentMap;
@@ -54,15 +58,18 @@ public class BukkitBlockMap extends FloodFillBlockMap {
     /**
      * Starts a flood fill from <code>start</code> out to the edges of the viewed portal area.
      * The fill stops when it reaches occluding blocks, as we don't need to render other blocks behind these.
-     * The origin data is also fetched, and this is placed in {@link BukkitBlockMap#viewableStates}.
+     * The origin data is also fetched, and this is placed in <code>statesOutput</code>
      * <br>Some notes:
      * - There used to be a check to see if the origin and destination states are the same, but this added too much complexity when checking for changes, so I decided to remove it.
      * - That unfortunately reduces the performance of the threaded bit slightly, but I think it's worth it for the gains here.
      * @param start Start position of the flood fill, at the origin
+     * @param statesOutput List to place the newly viewable states in
+     * @param firstBlockInfo Optional, used instead of adding a new block to the map for the first block. Useful for incremental updates
      */
-    protected void searchFromBlock(IntVector start) {
+    protected void searchFromBlock(IntVector start, List<IViewableBlockInfo> statesOutput, @Nullable IViewableBlockInfo firstBlockInfo) {
         WrappedBlockData backgroundData = getBackgroundData();
 
+        // We don't use a Stack<T> or ArrayList<T> since those are much too slow
         int[] stack = new int[firstUpdate ? renderConfig.getTotalArrayLength() : 16];
 
         stack[0] = getArrayMapIndex(start.subtract(centerPos));
@@ -71,6 +78,7 @@ public class BukkitBlockMap extends FloodFillBlockMap {
             int positionInt = stack[stackPos];
             stackPos--;
 
+            // Convert our position integer into the origin relative coordinates
             int relX = (positionInt % renderConfig.getZMultip());
             int relY = Math.floorDiv(positionInt, renderConfig.getYMultip());
             int relZ = Math.floorDiv(positionInt - relY * renderConfig.getYMultip(), renderConfig.getZMultip());
@@ -109,25 +117,43 @@ public class BukkitBlockMap extends FloodFillBlockMap {
                 }
             }
 
-            BukkitBlockInfo blockInfo = new BukkitBlockInfo(originPos, originData, destData);
+            // Use the existing first block if given, otherwise make a new block info
+            BukkitBlockInfo blockInfo = firstBlockInfo == null ? new BukkitBlockInfo(originPos, originData, destData) : (BukkitBlockInfo) firstBlockInfo;
             boolean isEdge = renderConfig.isOutsideBounds(relX, relY, relZ);
+
+            // If we're on a block on the edge of the portal view, and it is not a fully occluding material, then we must set it to the portal background
+            // This avoids the real-world being visible through the edge of the projection
             if(isEdge && !isOccluding) {
                 blockInfo.setRenderedDestData(backgroundData);
             }   else    {
                 blockInfo.setRenderedDestData(WrappedBlockData.createData(blockRotator.rotateByMatrix(rotateDestToOrigin, destData)));
             }
-            nonObscuredStates.add(blockInfo);
 
+            // If the newly added block was not added previously (i.e. passed in via firstBlockInfo), then we need to add it to the non-obscured states
+            // This list is used for incremental updates later
+            if(firstBlockInfo == null) {
+                nonObscuredStates.add(blockInfo);
+            }
+            firstBlockInfo = null;
+
+            // If we're not on an edge block, and the origin and destination block are the exact same, then we can skip this block
+            // This is because rendering it will do nothing - it's the same at both ends
             boolean canSkip = destData.equals(originData) && firstUpdate && !isEdge;
+
             boolean isInLine = isInLine(destRelPos);
-            if (!isInLine && !canSkip) {
-                queuedViewableStates.add(blockInfo);
+
+            // Don't bother adding blocks which are in line with the portal window, as these will never be visible anyway, and just serve to made the block map larger
+            // We also only add this block to the viewable states if it doesn't already exist there (this is the case if the alreadyReachedMap's value is 1)
+            // The above check is only important on incremental updates, since on the first update the block must never have been added to the block map - it's being checked for the first time
+            if (!isInLine && !canSkip && alreadyReachedMap[positionInt] < 2) {
+                alreadyReachedMap[positionInt] = 2; // Make sure that this block will not be added multiple times
+                statesOutput.add(blockInfo);
             }
 
-            // Stop when we reach the edge or an occluding block, since we don't want to show blocks outside the view area
+            // Stop when we reach the edge, as otherwise the flood-fill will continue forever
+            // Also stop when we reach an occluding block, as displaying a block behind an occluding block is useless - it will never be seen anyway
             if (isOccluding || isEdge) {continue;}
 
-            // Continue for any surrounding blocks that haven't been checked yet
 
             // Resize the stack if there's a possibility there won't be enough room to fit our new items
             if(!firstUpdate && (stack.length - (stackPos + 1) < 5)) {
@@ -136,10 +162,11 @@ public class BukkitBlockMap extends FloodFillBlockMap {
                 stack = newStack;
             }
 
+            // Continue for the surrounding blocks
             for(int offset : renderConfig.getIntOffsets()) {
                 int newPos = positionInt + offset;
-                if(!alreadyReachedMap[newPos]) {
-                    alreadyReachedMap[newPos] = true;
+                if(alreadyReachedMap[newPos] == 0) {
+                    alreadyReachedMap[newPos] = 1;
 
                     stackPos += 1;
                     stack[stackPos] = newPos;
@@ -155,6 +182,8 @@ public class BukkitBlockMap extends FloodFillBlockMap {
      */
     @Override
     protected void checkForChanges() {
+        List<IViewableBlockInfo> newStates = new ArrayList<>();
+
         int statesLength = nonObscuredStates.size();
         for(int i = 0; i < statesLength; i++) { // We do not use foreach to avoid concurrent modifications
             BukkitBlockInfo blockInfo = (BukkitBlockInfo) nonObscuredStates.get(i);
@@ -162,8 +191,14 @@ public class BukkitBlockMap extends FloodFillBlockMap {
             IntVector destPos = rotateOriginToDest.transform(blockInfo.getOriginPos().subtract(portalOriginPos)).add(portalDestPos); // Avoid directly using the matrix to fix floating point precision issues
             BlockData newDestData = dataFetcher.getData(destPos);
 
+
             if(!newDestData.equals(blockInfo.getBaseDestData())) {
-                searchFromBlock(blockInfo.getOriginPos());
+                logger.finer("Destination block change");
+                blockInfo.setBaseDestData(newDestData); // Set the new base data, so that this update isn't detected next change check
+
+                // Re-floodfill from this block, as if this block has changed from occluding to non-occluding, it may have revealed some new blocks
+                // We pass in our existing blockInfo to avoid double-adding to the non obscured states
+                searchFromBlock(blockInfo.getOriginPos(), newStates, blockInfo);
             }
 
             if(!portal.isCrossServer()) {
@@ -189,16 +224,29 @@ public class BukkitBlockMap extends FloodFillBlockMap {
             }
 
             if(!newOriginData.equals(blockInfo.getBaseOriginData())) {
-                blockInfo.setOriginData(newOriginData);
+                // If the new origin data is different to the new dest data, then we might need to add this block to the viewable states
+                // This is because it will not have been added previously if the origin and destination data are the same
                 if(!newOriginData.equals(newDestData) && !portal.getOriginPos().isInLine(blockInfo.getOriginPos())) {
-                    queuedViewableStates.add(blockInfo);
+                    int position = getArrayMapIndex(blockInfo.getOriginPos().subtract(portalOriginPos));
+                    // Only add this block as viewable if it is not already designated as viewable
+                    if(alreadyReachedMap[position] < 2) {
+                        alreadyReachedMap[position] = 2;
+                        newStates.add(blockInfo);
+                    }
                 }
+
+                blockInfo.setOriginData(newOriginData);
             }
         }
+
 
         updateTileStateMap(originTileStates, originWorld, false);
         if(!portal.isCrossServer()) {
             updateTileStateMap(destTileStates, portal.getDestPos().getWorld(), true);
+        }
+
+        if(newStates.size() > 0) {
+            stateQueue.enqueueStates(newStates);
         }
     }
 

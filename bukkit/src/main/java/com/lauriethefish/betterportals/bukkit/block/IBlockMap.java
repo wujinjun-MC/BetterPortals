@@ -24,9 +24,9 @@ public interface IBlockMap {
 
     /**
      * Gets the current list of viewable positions.
-     * @return The current list of viewable positions and their data.
+     * @return The current list of viewable positions and their data, or null if no list is currently available
      */
-    List<IViewableBlockInfo> getViewableStates();
+    @Nullable List<IViewableBlockInfo> getViewableStates();
 
 
     /**

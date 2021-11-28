@@ -4,13 +4,14 @@ import com.comphenix.protocol.wrappers.WrappedBlockData;
 import com.lauriethefish.betterportals.api.IntVector;
 import com.lauriethefish.betterportals.bukkit.block.IViewableBlockInfo;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.block.data.BlockData;
 
 public class BukkitBlockInfo implements IViewableBlockInfo {
     @Getter private final IntVector originPos;
 
     @Getter private BlockData baseOriginData;
-    @Getter private final BlockData baseDestData;
+    @Getter @Setter private BlockData baseDestData;
     @Getter private WrappedBlockData originData;
     @Getter private WrappedBlockData renderedDestData;
 

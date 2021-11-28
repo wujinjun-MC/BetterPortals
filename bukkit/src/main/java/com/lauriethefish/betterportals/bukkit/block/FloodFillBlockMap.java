@@ -18,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Abstract viewable block map that is intended to have the update functions perform a flood fill to find which blocks are viewable.
@@ -30,13 +29,11 @@ public abstract class FloodFillBlockMap implements IBlockMap {
     protected final ConcurrentHashMap<IntVector, PacketContainer> originTileStates = new ConcurrentHashMap<>();
     protected final ConcurrentHashMap<IntVector, PacketContainer> destTileStates = new ConcurrentHashMap<>();
 
-    protected List<IViewableBlockInfo> viewableStates = new ArrayList<>();
-    protected List<IViewableBlockInfo> queuedViewableStates = new ArrayList<>();
-    protected final ReentrantLock queuedViewableStatesLock = new ReentrantLock();
+    protected StateQueue stateQueue;
 
     protected List<IViewableBlockInfo> nonObscuredStates = new ArrayList<>();
 
-    protected boolean[] alreadyReachedMap;
+    protected byte[] alreadyReachedMap;
 
     protected final IPortal portal;
     protected final Matrix rotateOriginToDest;
@@ -83,8 +80,10 @@ public abstract class FloodFillBlockMap implements IBlockMap {
      * The fill stops when it reaches occluding blocks, as we don't need to render other blocks behind these.
      * The origin data is also fetched, and this is placed in the viewable states
      * @param originPos Start position of the flood fill, at the origin (non-relative)
+     * @param statesOutput List to place the new viewable states within
+     * @param firstBlockInfo Optional, used instead of adding a new block to the map for the first block. Useful for incremental updates
      */
-    protected abstract void searchFromBlock(IntVector originPos);
+    protected abstract void searchFromBlock(IntVector originPos, List<IViewableBlockInfo> statesOutput, @Nullable IViewableBlockInfo firstBlockInfo);
 
     /**
      * Checks the origin and destination blocks for changes.
@@ -115,50 +114,35 @@ public abstract class FloodFillBlockMap implements IBlockMap {
 
         OperationTimer timer = new OperationTimer();
         if(firstUpdate) {
-            queuedViewableStatesLock.lock();
-            try {
-                searchFromBlock(centerPos);
-            }   finally {
-                queuedViewableStatesLock.unlock();
-            }
+            List<IViewableBlockInfo> initialStates = new ArrayList<>();
+            searchFromBlock(centerPos, initialStates, null);
+            stateQueue.addStatesInitially(initialStates);
         }   else    {
             checkForChanges();
         }
         firstUpdate = false;
-        logger.fine("Viewable block array update took: %.3f ms. Block count: %d. Viewable count: %d", timer.getTimeTakenMillis(), nonObscuredStates.size(), viewableStates.size());
+        logger.fine("Viewable block array update took: %.3f ms. Block count: %d. Viewable count: %d", timer.getTimeTakenMillis(), nonObscuredStates.size(), stateQueue.stateCount());
     }
 
     @Override
     public void reset() {
-        logger.finest("Clearing block array to save memory");
+        logger.finer("Clearing block array to save memory");
 
-        // In practise there should be no block update ongoing when this happens, but to be on the safe side
-        queuedViewableStatesLock.lock();
-        try {
-            queuedViewableStates = new ArrayList<>();
-        }   finally {
-            queuedViewableStatesLock.unlock();
-        }
-        viewableStates = new ArrayList<>();
+        stateQueue = new StateQueue(logger);
         nonObscuredStates = new ArrayList<>();
         originTileStates.clear();
         destTileStates.clear();
         firstUpdate = true;
-        alreadyReachedMap = new boolean[renderConfig.getTotalArrayLength()];
+        alreadyReachedMap = new byte[renderConfig.getTotalArrayLength()];
     }
 
     @Override
     public List<IViewableBlockInfo> getViewableStates() {
-        if(queuedViewableStatesLock.tryLock()) {
-            try {
-                viewableStates.addAll(queuedViewableStates);
-                queuedViewableStates.clear();
-            }   finally {
-                queuedViewableStatesLock.unlock();
-            }
+        if(stateQueue == null) {
+            return null;
         }
 
-        return viewableStates;
+        return stateQueue.getViewableStates();
     }
 
     @Override
