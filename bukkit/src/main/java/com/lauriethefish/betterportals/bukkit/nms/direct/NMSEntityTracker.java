@@ -12,7 +12,6 @@ import com.lauriethefish.betterportals.bukkit.entity.faking.EntityTrackingManage
 import com.lauriethefish.betterportals.bukkit.entity.faking.IEntityTracker;
 import com.lauriethefish.betterportals.bukkit.math.MathUtil;
 import com.lauriethefish.betterportals.bukkit.nms.AnimationType;
-import com.lauriethefish.betterportals.bukkit.nms.PacketProxyProvider;
 import com.lauriethefish.betterportals.bukkit.nms.RotationUtil;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.shared.logging.Logger;

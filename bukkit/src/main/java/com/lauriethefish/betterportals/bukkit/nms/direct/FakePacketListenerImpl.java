@@ -1,4 +1,4 @@
-package com.lauriethefish.betterportals.bukkit.nms;
+package com.lauriethefish.betterportals.bukkit.nms.direct;
 
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;

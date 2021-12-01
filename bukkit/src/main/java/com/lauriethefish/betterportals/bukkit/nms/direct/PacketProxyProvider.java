@@ -1,5 +1,6 @@
-package com.lauriethefish.betterportals.bukkit.nms;
+package com.lauriethefish.betterportals.bukkit.nms.direct;
 
+import com.lauriethefish.betterportals.bukkit.nms.direct.FakePacketListenerImpl;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import com.mojang.authlib.GameProfile;
