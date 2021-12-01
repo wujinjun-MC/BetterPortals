@@ -28,7 +28,7 @@ entityCheckInterval: 5 # How often the portal will check for surrounding entitie
 
 # Setting this to true will allow you to see straight through a portal
 # NOTE: This generally makes it look a bit less convincing, since it's easier to see when the player's client doesn't quite keep up
-hidePortalBlocks: false
+hidePortalBlocks: true
 
 # How close portals can spawn to each other, in blocks
 minimumPortalSpawnDistance: 6
@@ -67,9 +67,16 @@ disabledWorlds:
 # Set to 0 to disable
 waitTimeAfterSwitchingWorlds: 1
 
-# The background used for when the portal render distance is reached.
-# Set to an empty string to use the default (black concrete)
+# Portal view background blocks for specific worlds
+# If no background block is found for a world, the default for the world type will be used
+# Overworld: white concrete
+# Nether: Red concrete
+# End: Black concrete
+worldBackgroundBlocks: {}
+
+# Overrides all worldBackgroundBlocks if not empty
 backgroundBlock: ''
+
 
 teleportCooldown: 2 # How long to wait before a player can go back after going through a portal (0 to disable)
 
@@ -104,6 +111,13 @@ proxy:
   key: "" # A UUID used for encrypted communication with the proxy. You should set this to the UUID in the BetterPortals config on the bungee side.
   reconnectionDelay: 300 # Delay in ticks before attempting a reconnection to the proxy if disconnected (default 30 seconds) Set to -1 to disable.
 
+  # Whether to display a warning if a player's selection is missing upon switching between two servers which both have BetterPortals.
+  # This shouldn't happen, unless UUID forwarding is disabled, in which case it makes sense to disable this warning message.
+  # UUID forwarding is required for selection syncing between servers.
+  warnOnMissingSelection: true
+
+  keepAlive: true # Whether or not to enable keepAlive on the socket
+
 # Will randomly swap some blocks between the two ends of a nether portal when it's made, makes a cool effect.
 dimensionBlend:
   enable: false
@@ -132,6 +146,8 @@ chatMessages:
   horizontalIssues: "Warning: horizontal portals with different origin/destination directions can cause issues with block rotations - not all blocks can be rotated in every direction"
   noName: "This portal has no name"
   nameNetherPortal: "You can't set the name of a nether portal"
+  seeThroughPortalDisabled: "All nether portals will now look like vanilla portals to you!"
+  seeThroughPortalEnabled: "All eligible nether portals will now show you what's on the other side."
 
   # Printed if a player lights a portal in an unlinked world
   # To disable, just remove all the text inside the quotes
@@ -159,6 +175,10 @@ chatMessages:
   startedReconnection: "Started reconnecting to the proxy. See console for details."
   changedName: "Successfully changed the portal name"
   currentName: "The name for this portal is: {name}"
+  allowsItems: "This portal allows item teleportation"
+  doesNotAllowItems: "This portal does not allow item teleportation"
+  changedAllowsItems: "Successfully set that the portal allows item teleportation"
+  changedDoesNotAllowItems: "Successfully set that the portal does not allow item teleportation"
   help: "Sub Commands"
 
   setPosA: "Set position A"

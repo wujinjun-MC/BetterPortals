@@ -7,11 +7,15 @@ import com.lauriethefish.betterportals.api.IntVector;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import lombok.Getter;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.util.Vector;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 
 @Singleton
@@ -31,6 +35,8 @@ public class RenderConfig {
     private IntVector halfFullSize;
 
     private WrappedBlockData backgroundBlockData; // Default to black concrete
+
+    private Map<String, WrappedBlockData> worldBackgroundBlockData = new HashMap<>();
 
     private final IntVector[] surroundingOffsets = new IntVector[]{
         new IntVector(1, 0, 0),
@@ -55,6 +61,16 @@ public class RenderConfig {
     @Inject
     public RenderConfig(Logger logger) {
         this.logger = logger;
+    }
+
+    private @Nullable WrappedBlockData parseBlockData(String str) {
+        try {
+            return WrappedBlockData.createData(Material.valueOf(str.toUpperCase(Locale.ROOT)));
+        }   catch(IllegalArgumentException ex) {
+            logger.warning("Unknown material for portal edge block " + str);
+            logger.warning("Using default of black concrete");
+            return null;
+        }
     }
 
     public void load(FileConfiguration file) {
@@ -94,11 +110,22 @@ public class RenderConfig {
         if(bgBlockString.isEmpty()) {
             backgroundBlockData = null;
         }   else    {
-            try {
-                backgroundBlockData = WrappedBlockData.createData(Material.valueOf(bgBlockString.toUpperCase(Locale.ROOT)));
-            }   catch(IllegalArgumentException ex) {
-                logger.warning("Unknown material for portal edge block " + bgBlockString);
-                logger.warning("Using default of black concrete");
+            backgroundBlockData = parseBlockData(bgBlockString);
+        }
+
+        worldBackgroundBlockData.clear();
+        ConfigurationSection worldBgsSection = file.getConfigurationSection("worldBackgroundBlocks");
+
+        for(String worldName : Objects.requireNonNull(worldBgsSection).getKeys(false)) {
+            String bgValue = worldBgsSection.getString(worldName);
+
+            if(bgValue == null) {
+                continue;
+            }
+
+            WrappedBlockData parsedData = parseBlockData(bgValue);
+            if(parsedData != null) {
+                worldBackgroundBlockData.put(worldName, parsedData);
             }
         }
 
@@ -114,5 +141,32 @@ public class RenderConfig {
 
     public boolean isOutsideBounds(int x, int y, int z) {
         return x <= minXZ || x >= maxXZ || y <= minY || y >= maxY || z <= minXZ || z >= maxXZ;
+    }
+
+    public WrappedBlockData findBackgroundData(World world) {
+        if(backgroundBlockData != null) {
+            return backgroundBlockData;
+        }
+
+        WrappedBlockData worldSpecificBg = worldBackgroundBlockData.get(world.getName());
+        if(worldSpecificBg != null) {
+            return worldSpecificBg;
+        }
+
+        Material material;
+        if(world.getEnvironment() == World.Environment.NORMAL)    {
+            long time = world.getTime();
+            if(time > 0 && time < 12300) {
+                material = Material.WHITE_CONCRETE;
+            }   else {
+                material = Material.BLACK_CONCRETE;
+            }
+        }   else if(world.getEnvironment() == World.Environment.NETHER) {
+            material = Material.RED_CONCRETE;
+        }   else    {
+            material = Material.BLACK_CONCRETE;
+        }
+
+        return WrappedBlockData.createData(material);
     }
 }

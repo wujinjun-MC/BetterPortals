@@ -67,9 +67,17 @@ disabledWorlds:
 # Set to 0 to disable
 waitTimeAfterSwitchingWorlds: 1
 
-# The background used for when the portal render distance is reached.
-# Set to an empty string to use the default (black concrete)
+# Portal view background blocks for specific worlds
+# If no background block is found for a world, the default for the world type will be used
+# Overworld: white concrete
+# Nether: Red concrete
+# End: Black concrete
+worldBackgroundBlocks:
+  'example': STONE
+
+# Overrides all worldBackgroundBlocks if not empty
 backgroundBlock: ''
+
 
 teleportCooldown: 2 # How long to wait before a player can go back after going through a portal (0 to disable)
 
