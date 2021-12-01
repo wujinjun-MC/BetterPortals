@@ -23,8 +23,8 @@ portalSaveInterval: 6000
 enableEntitySupport: true
 
 # If this is true, the below is always treated like it is 1
-checkForEntitiesEveryTick: true
-entityCheckInterval: 5 # How often the portal will check for surrounding entities
+checkForEntitiesEveryTick: false
+entityCheckInterval: 7 # How often the portal will check for surrounding entities
 
 # Setting this to true will allow you to see straight through a portal
 # NOTE: This generally makes it look a bit less convincing, since it's easier to see when the player's client doesn't quite keep up
