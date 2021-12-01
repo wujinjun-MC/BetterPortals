@@ -21,7 +21,7 @@ public class ThreadedBlockUpdateFinisher extends BlockUpdateFinisher implements 
 
     @Override
     public void start() {
-        new Thread(this).start();
+        new Thread(this, "BetterPortals View Updater").start();
     }
 
     @Override
