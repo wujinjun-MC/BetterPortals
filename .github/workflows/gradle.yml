@@ -26,6 +26,9 @@ jobs:
         id: get_sha
         run: |
           echo "::set-output name=SHORT_SHA::$(git rev-parse HEAD | cut -c 1-8)"
+      - name: Set Publish JAR
+        if: ${{ github.ref == 'refs/heads/master' }}
+        run: echo "PUBLISH_JAR=$(find build/libs/*all.jar -print -quit)" >> $GITHUB_ENV
       - name: Publish JAR to webhook
         if: ${{ github.ref == 'refs/heads/master' }}
         uses: tsickert/discord-webhook@v3.2.0
@@ -35,6 +38,6 @@ jobs:
           content: "`${{ steps.get_sha.outputs.SHORT_SHA }}` - `${{ github.event.head_commit.message }}`"
           username: "BetterPortals Dev Builds"
           avatar-url: "https://i.imgur.com/4l67APG.png"
-          filename: build/libs/*all.jar
+          filename: ${{ env.PUBLISH_JAR }}
       - name: Stop gradle daemons
         run: gradle -stop
