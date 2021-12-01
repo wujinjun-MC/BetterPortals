@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 public class BlockDataUtil {
     private static final Method GET_HANDLE;
@@ -31,9 +32,9 @@ public class BlockDataUtil {
             Class<?> nmsBlockData = packageNamesMapped ? ReflectionUtil.findClass("net.minecraft.world.level.block.state.IBlockData") : MinecraftReflectionUtil.findVersionedNMSClass("IBlockData");
 
             GET_HANDLE = ReflectionUtil.findMethod(craftBlockData, "getState");
-            GET_COMBINED_ID = ReflectionUtil.findMethod(nmsBlock, "getCombinedId", new Class[]{nmsBlockData});
+            GET_COMBINED_ID = ReflectionUtil.findMethod(nmsBlock, "i", new Class[]{nmsBlockData});
 
-            GET_FROM_COMBINED_ID = ReflectionUtil.findMethod(nmsBlock, "getByCombinedId", new Class[]{int.class});
+            GET_FROM_COMBINED_ID = ReflectionUtil.findMethod(nmsBlock, "a", new Class[]{int.class});
             FROM_HANDLE = ReflectionUtil.findMethod(craftBlockData, "fromData", new Class[]{nmsBlockData});
         }   else    {
             GET_HANDLE = null;
@@ -45,7 +46,7 @@ public class BlockDataUtil {
         Class<?> blockEntityState = MinecraftReflectionUtil.findCraftBukkitClass("block.CraftBlockEntityState");
         Class<?> nmsTileEntity = packageNamesMapped ? ReflectionUtil.findClass("net.minecraft.world.level.block.entity.TileEntity") : MinecraftReflectionUtil.findVersionedNMSClass("TileEntity");
         GET_TILE_ENTITY = ReflectionUtil.findMethod(blockEntityState, "getTileEntity");
-        GET_UPDATE_PACKET = ReflectionUtil.findMethod(nmsTileEntity, "getUpdatePacket");
+        GET_UPDATE_PACKET = ReflectionUtil.findMethod(nmsTileEntity, "h");
     }
 
     /**
@@ -106,9 +107,11 @@ public class BlockDataUtil {
 
         // The NBT Data also stores the position
         NbtCompound compound = (NbtCompound) packet.getNbtModifier().read(0);
-        compound.put("x", blockPosition.getX());
-        compound.put("y", blockPosition.getY());
-        compound.put("z", blockPosition.getZ());
+        if (Objects.nonNull(compound)) {
+            compound.put("x", blockPosition.getX());
+            compound.put("y", blockPosition.getY());
+            compound.put("z", blockPosition.getZ());
+        }
     }
 
 }

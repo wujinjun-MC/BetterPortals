@@ -43,7 +43,7 @@ public class EntityUtil {
         if (VersionUtil.isMcVersionAtLeast("1.17.0")) {
             ENTITY_YAW = null;
         }   else {
-            ENTITY_YAW = ReflectionUtil.findField(NMS_ENTITY, "yaw");
+            ENTITY_YAW = ReflectionUtil.findField(NMS_ENTITY, "aA");
         }
 
         // On newer versions of the game, the Entity NMS class have an abstract method for getting the correct spawn packet that is overridden by every entity.
@@ -69,7 +69,7 @@ public class EntityUtil {
             Class<?> TRACKER_ENTRY = packageNamesMapped ? ReflectionUtil.findClass("net.minecraft.server.level.EntityTrackerEntry") : MinecraftReflectionUtil.findVersionedNMSClass("EntityTrackerEntry");
 
             try {
-                ENTITY_TRACKER_ENTRY_NEW = TRACKER_ENTRY.getConstructor(NMS_ENTITY, int.class, int.class, int.class, boolean.class);
+                ENTITY_TRACKER_ENTRY_NEW = TRACKER_ENTRY.getConstructor(NMS_ENTITY, int.class, int.class, int.class, boolean.class); // todo: inspect
             }   catch(NoSuchMethodException ex) {
                 throw new RuntimeException(ex);
             }

@@ -47,10 +47,11 @@ public class NBTTagUtil {
         Object nmsItem = getNMSItemStack(item);
 
         // Get the NBT tag, or create one if the item doesn't have one
-        Object itemTag = ((boolean) runMethod(nmsItem, "hasTag")) ? runMethod(nmsItem, "getTag") : newInstance(NBT_TAG_COMPOUND);
+        Object itemTag = ((boolean) runMethod(nmsItem, "r")) ? runMethod(nmsItem, "t") : newInstance(NBT_TAG_COMPOUND);
         Object stringValue = newInstance(NBT_TAG_STRING, new Class[]{String.class}, MARKER_VALUE);
 
-        runMethod(itemTag, "set", new Class[]{String.class, NBT_BASE}, MARKER_PREFIX + name, stringValue); // Set the value
+        // set (put in map)
+        runMethod(itemTag, "a", new Class[]{String.class, NBT_BASE}, MARKER_PREFIX + name, stringValue); // Set the value
 
         return getBukkitItemStack(nmsItem);
     }
@@ -62,12 +63,15 @@ public class NBTTagUtil {
      * @return Whether it has the tag
      */
     public static boolean hasMarkerTag(@NotNull ItemStack item, @NotNull String name)	{
-        Object nmsItem = getNMSItemStack(item);
+        Object nmsItem = getNMSItemStack(item); // ItemStack
 
-        if(!(boolean) runMethod(nmsItem, "hasTag")) {return false;} // Return null if it has no NBT data
-        Object itemTag = runMethod(nmsItem, "getTag"); // Otherwise, get the item's NBT tag
+        // hasTag
+        if(!(boolean) runMethod(nmsItem, "r")) {return false;} // Return null if it has no NBT data
+        // getTag
+        Object itemTag = runMethod(nmsItem, "t"); // Otherwise, get the item's NBT tag
 
-        String value = (String) runMethod(itemTag, "getString", new Class[]{String.class}, MARKER_PREFIX + name);
+        // getString
+        String value = (String) runMethod(itemTag, "l", new Class[]{String.class}, MARKER_PREFIX + name);
 
         return MARKER_VALUE.equals(value); // Return the value of the key
     }
