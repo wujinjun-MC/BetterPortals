@@ -154,6 +154,8 @@ public class BetterPortals extends JavaPlugin {
             ex.printStackTrace();
         }
 
+        blockUpdateFinisher.stop();
+
         try {
             portalStorage.savePortals();
         }   catch(RuntimeException | IOException ex) {

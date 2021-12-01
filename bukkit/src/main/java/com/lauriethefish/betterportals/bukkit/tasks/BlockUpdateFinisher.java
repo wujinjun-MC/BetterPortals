@@ -37,8 +37,28 @@ public abstract class BlockUpdateFinisher {
     private final BlockingQueue<BlockViewUpdateInfo> updateQueue = new LinkedBlockingQueue<>();
     protected final Logger logger;
 
+    private volatile boolean hasStopped = false;
+
     protected BlockUpdateFinisher(Logger logger) {
         this.logger = logger;
+    }
+
+    private void processUpdate(BlockViewUpdateInfo next) {
+        if(next.type == BlockViewUpdateType.RESET) {
+            logger.fine("Running scheduled reset");
+            next.blockView.finishReset();
+        }   else    {
+            next.blockView.finishUpdate(next.type == BlockViewUpdateType.REFRESH);
+        }
+    }
+
+    protected void processUpdatesContinually()  {
+        try {
+            while (!hasStopped) {
+                BlockViewUpdateInfo next = updateQueue.take();
+                processUpdate(next);
+            }
+        }   catch(InterruptedException ignored) { }
     }
 
     protected void finishPendingUpdates() {
@@ -46,12 +66,7 @@ public abstract class BlockUpdateFinisher {
             BlockViewUpdateInfo next = updateQueue.poll();
             if(next == null) {return;}
 
-            if(next.type == BlockViewUpdateType.RESET) {
-                logger.fine("Running scheduled reset");
-                next.blockView.finishReset();
-            }   else    {
-                next.blockView.finishUpdate(next.type == BlockViewUpdateType.REFRESH);
-            }
+            processUpdate(next);
         }
     }
 
@@ -59,6 +74,13 @@ public abstract class BlockUpdateFinisher {
      * Starts the task/thread that is being used
      */
     public abstract void start();
+
+    /**
+     * Stops the task/thread that is being used
+     */
+    public void stop() {
+        hasStopped = true;
+    }
 
     /**
      * Schedules the update for <code>blockView</code> to happen on another thread.

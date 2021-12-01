@@ -3,7 +3,6 @@ package com.lauriethefish.betterportals.bukkit.tasks;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.lauriethefish.betterportals.shared.logging.Logger;
-import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * Uses a thread instead of a Bukkit task to finish block view updates
@@ -11,32 +10,31 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 @Singleton
 public class ThreadedBlockUpdateFinisher extends BlockUpdateFinisher implements Runnable    {
-    private final JavaPlugin pl;
+    private Thread thread;
 
     @Inject
-    public ThreadedBlockUpdateFinisher(JavaPlugin pl, Logger logger) {
+    public ThreadedBlockUpdateFinisher(Logger logger) {
         super(logger);
-        this.pl = pl;
     }
 
     @Override
     public void start() {
-        new Thread(this, "BetterPortals View Updater").start();
+        thread = new Thread(this, "BetterPortals View Update Thread");
+        thread.start();
+    }
+
+    @Override
+    public void stop() {
+        thread.interrupt();
+        super.stop();
     }
 
     @Override
     public void run() {
         logger.fine("Hello from block view update thread!");
-        while (pl.isEnabled()) {
-            // Make sure to stop if the plugin is disabled
 
-            super.finishPendingUpdates();
-            try {
-                Thread.sleep(5);
-            } catch (InterruptedException ex) {
-                ex.printStackTrace();
-            }
-        }
+        super.processUpdatesContinually();
+
         logger.fine("Goodbye from block view update thread!");
     }
 }
