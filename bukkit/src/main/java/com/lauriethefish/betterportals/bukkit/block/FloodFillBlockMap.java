@@ -103,8 +103,6 @@ public abstract class FloodFillBlockMap implements IBlockMap {
     }
 
     protected void updateInternal() {
-        // TODO: Figure out deadlocking problem with very large render distances
-
         if(alreadyReachedMap == null) {
             alreadyReachedMap = new byte[renderConfig.getTotalArrayLength()];
         }
