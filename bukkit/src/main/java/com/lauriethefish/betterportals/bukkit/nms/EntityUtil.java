@@ -34,7 +34,7 @@ public class EntityUtil {
         if (VersionUtil.isMcVersionAtLeast("1.17.0")) {
             ENTITY_YAW = null;
         }   else {
-            ENTITY_YAW = ReflectionUtil.findField(NMS_ENTITY, "yaw");
+            ENTITY_YAW = ReflectionUtil.findField(NMS_ENTITY, VersionUtil.isMcVersionAtLeast("1.18.0") ? "aA" : "yaw");
         }
 
         // On newer versions of the game, the Entity NMS class have an abstract method for getting the correct spawn packet that is overridden by every entity.
