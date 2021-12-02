@@ -5,6 +5,8 @@ import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Method;
+
 import static com.lauriethefish.betterportals.bukkit.util.nms.MinecraftReflectionUtil.findCraftBukkitClass;
 import static com.lauriethefish.betterportals.shared.util.ReflectionUtil.newInstance;
 import static com.lauriethefish.betterportals.shared.util.ReflectionUtil.runMethod;
@@ -22,6 +24,11 @@ public class NBTTagUtil {
     private static final Class<?> NBT_TAG_COMPOUND;
     private static final Class<?> ITEM_STACK;
 
+    private static final Method NBT_HAS_TAG;
+    private static final Method NBT_GET_TAG;
+    private static final Method NBT_TAG_SET;
+    private static final Method NBT_TAG_GET_STRING;
+
     static  {
         if(VersionUtil.isMcVersionAtLeast("1.17.0")) {
             NBT_TAG_STRING = ReflectionUtil.findClass("net.minecraft.nbt.NBTTagString");
@@ -33,6 +40,18 @@ public class NBTTagUtil {
             NBT_BASE = MinecraftReflectionUtil.findVersionedNMSClass("NBTBase");
             NBT_TAG_COMPOUND = MinecraftReflectionUtil.findVersionedNMSClass("NBTTagCompound");
             ITEM_STACK = MinecraftReflectionUtil.findVersionedNMSClass("ItemStack");
+        }
+
+        if (VersionUtil.isMcVersionAtLeast("1.18.0")) {
+            NBT_HAS_TAG = ReflectionUtil.findMethod(ITEM_STACK, "r");
+            NBT_GET_TAG = ReflectionUtil.findMethod(ITEM_STACK, "t");
+            NBT_TAG_SET = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "a", new Class[]{String.class, NBT_BASE});
+            NBT_TAG_GET_STRING = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "l", new Class[]{String.class});
+        } else {
+            NBT_HAS_TAG = ReflectionUtil.findMethod(ITEM_STACK, "hasTag");
+            NBT_GET_TAG = ReflectionUtil.findMethod(ITEM_STACK, "getTag");
+            NBT_TAG_SET = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "set", new Class[]{String.class, NBT_BASE});
+            NBT_TAG_GET_STRING = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "getString", new Class[]{String.class});
         }
     }
 
@@ -46,12 +65,15 @@ public class NBTTagUtil {
     public static ItemStack addMarkerTag(@NotNull ItemStack item, @NotNull String name) {
         Object nmsItem = getNMSItemStack(item);
 
-        // Get the NBT tag, or create one if the item doesn't have one
-        Object itemTag = ((boolean) runMethod(nmsItem, "r")) ? runMethod(nmsItem, "t") : newInstance(NBT_TAG_COMPOUND);
-        Object stringValue = newInstance(NBT_TAG_STRING, new Class[]{String.class}, MARKER_VALUE);
+        try {
+            // Get the NBT tag, or create one if the item doesn't have one
+            Object itemTag = ((boolean) NBT_HAS_TAG.invoke(nmsItem)) ? NBT_GET_TAG.invoke(nmsItem) : newInstance(NBT_TAG_COMPOUND);
+            Object stringValue = newInstance(NBT_TAG_STRING, new Class[]{String.class}, MARKER_VALUE);
 
-        // set (put in map)
-        runMethod(itemTag, "a", new Class[]{String.class, NBT_BASE}, MARKER_PREFIX + name, stringValue); // Set the value
+            NBT_TAG_SET.invoke(itemTag,MARKER_PREFIX + name, stringValue); // Set the value
+        } catch (ReflectiveOperationException e) {
+            throw new ReflectionUtil.ReflectionException(e);
+        }
 
         return getBukkitItemStack(nmsItem);
     }
@@ -65,13 +87,15 @@ public class NBTTagUtil {
     public static boolean hasMarkerTag(@NotNull ItemStack item, @NotNull String name)	{
         Object nmsItem = getNMSItemStack(item); // ItemStack
 
-        // hasTag
-        if(!(boolean) runMethod(nmsItem, "r")) {return false;} // Return null if it has no NBT data
-        // getTag
-        Object itemTag = runMethod(nmsItem, "t"); // Otherwise, get the item's NBT tag
+        String value;
+        try {
+            if(!(boolean) NBT_HAS_TAG.invoke(nmsItem)) {return false;} // Return null if it has no NBT data
+            Object itemTag = NBT_GET_TAG.invoke(nmsItem); // Otherwise, get the item's NBT tag
 
-        // getString
-        String value = (String) runMethod(itemTag, "l", new Class[]{String.class}, MARKER_PREFIX + name);
+            value = (String) NBT_TAG_GET_STRING.invoke(itemTag,MARKER_PREFIX + name);
+        } catch (ReflectiveOperationException e) {
+            throw new ReflectionUtil.ReflectionException(e);
+        }
 
         return MARKER_VALUE.equals(value); // Return the value of the key
     }
