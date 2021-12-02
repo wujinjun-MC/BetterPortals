@@ -58,6 +58,8 @@ public class RenderConfig {
 
     private int blockStateRefreshInterval;
 
+    private int entityMetadataUpdateInterval;
+
     @Inject
     public RenderConfig(Logger logger) {
         this.logger = logger;
@@ -100,6 +102,8 @@ public class RenderConfig {
         if(blockUpdateInterval <= 0) {
             throw new IllegalArgumentException("Block update interval must be at least 1");
         }
+
+        entityMetadataUpdateInterval = file.getInt("entityMetadataUpdateInterval");
 
         worldSwitchWaitTime = file.getInt("waitTimeAfterSwitchingWorlds"); // TODO: implement or yeet
         portalBlocksHidden = file.getBoolean("hidePortalBlocks");

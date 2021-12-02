@@ -3,10 +3,10 @@ package com.lauriethefish.betterportals.bukkit.entity.faking;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import com.lauriethefish.betterportals.bukkit.config.RenderConfig;
 import com.lauriethefish.betterportals.bukkit.nms.AnimationType;
 import com.lauriethefish.betterportals.bukkit.nms.EntityUtil;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
-import com.lauriethefish.betterportals.shared.logging.Logger;
 import lombok.Getter;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
@@ -18,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class EntityTracker implements IEntityTracker    {
-    private final Logger logger;
     private final Entity entity;
     @Getter private final EntityInfo entityInfo;
     @Getter private final IPortal portal;
@@ -34,8 +33,11 @@ public class EntityTracker implements IEntityTracker    {
     private float lastHeadRotation;
     private List<Entity> lastMounts;
 
+    private final int metadataUpdateInterval;
+    private int ticksSinceCreated = 0;
+
     @Inject
-    public EntityTracker(@Assisted Entity entity, @Assisted IPortal portal, IEntityPacketManipulator packetManipulator, Logger logger, EntityTrackingManager entityTrackingManager) {
+    public EntityTracker(@Assisted Entity entity, @Assisted IPortal portal, IEntityPacketManipulator packetManipulator, EntityTrackingManager entityTrackingManager, RenderConfig renderConfig) {
         // Non-living entities don't have equipment
         this.equipmentWatcher = entity instanceof LivingEntity ? new EntityEquipmentWatcher((LivingEntity) entity) : null;
         this.entity = entity;
@@ -43,7 +45,7 @@ public class EntityTracker implements IEntityTracker    {
         this.portal = portal;
         this.entityInfo = new EntityInfo(portal.getTransformations(), entity);
         this.packetManipulator = packetManipulator;
-        this.logger = logger;
+        this.metadataUpdateInterval = renderConfig.getEntityMetadataUpdateInterval();
     }
 
     public void update() {
@@ -73,7 +75,10 @@ public class EntityTracker implements IEntityTracker    {
         }
 
         // The metadata packet contains tons of stuff, e.g. sneaking and beds on newer versions
-        packetManipulator.sendMetadata(entityInfo, trackingPlayers);
+        // It's quite expensive to send a full update, so we only do this every N ticks
+        if(ticksSinceCreated % metadataUpdateInterval == 0) {
+            packetManipulator.sendMetadata(entityInfo, trackingPlayers);
+        }
 
         packetManipulator.sendEntityHeadRotation(entityInfo, trackingPlayers);
 
@@ -82,6 +87,8 @@ public class EntityTracker implements IEntityTracker    {
             packetManipulator.sendEntityVelocity(entityInfo, velocity, trackingPlayers);
             lastVelocity = velocity;
         }
+
+        ticksSinceCreated++;
     }
 
     @Override

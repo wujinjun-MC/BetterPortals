@@ -26,6 +26,9 @@ enableEntitySupport: true
 checkForEntitiesEveryTick: false
 entityCheckInterval: 7 # How often the portal will check for surrounding entities
 
+# Interval for sending entity metadata updates in ticks (higher will improve performance, this is an expensive process, both for network bandwidth and CPU)
+entityMetadataUpdateInterval: 6
+
 # Setting this to true will allow you to see straight through a portal
 # NOTE: This generally makes it look a bit less convincing, since it's easier to see when the player's client doesn't quite keep up
 hidePortalBlocks: true
