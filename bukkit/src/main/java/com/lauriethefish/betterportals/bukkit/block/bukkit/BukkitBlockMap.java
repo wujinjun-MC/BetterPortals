@@ -51,8 +51,6 @@ public class BukkitBlockMap extends FloodFillBlockMap {
         this.originWorld = portal.getOriginPos().getWorld();
         logger.fine("Origin pos: %s, Dest pos: %s", portalOriginPos, portalDestPos);
         logger.fine("Origin direction: %s, Dest Direction: %s", portal.getOriginPos().getDirection(), portal.getDestPos().getDirection());
-
-        reset();
     }
 
     /**

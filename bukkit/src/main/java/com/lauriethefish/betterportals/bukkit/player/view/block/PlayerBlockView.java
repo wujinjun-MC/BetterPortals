@@ -66,6 +66,16 @@ public class PlayerBlockView implements IPlayerBlockView   {
         }
     }
 
+    @Override
+    public void finishReset() {
+        statesLock.lock();
+        try {
+            blockStates.resetAndUpdate();
+        }   finally {
+            statesLock.unlock();
+        }
+    }
+
     // Called whenever the player is no longer activating the portal
     @Override
     public void onDeactivate(boolean shouldResetStates) {
@@ -78,11 +88,18 @@ public class PlayerBlockView implements IPlayerBlockView   {
                 setPortalBlocks(getPortalBlockData());
             }
 
-            statesLock.lock();
-            try {
-                blockStates.resetAndUpdate();
-            }   finally {
-                statesLock.unlock();
+            // If the states lock is available, then brilliant, we can reset the states now
+            if(statesLock.tryLock()) {
+                logger.finest("Resetting immediately!");
+                try {
+                    blockStates.resetAndUpdate();
+                } finally {
+                    statesLock.unlock();
+                }
+            }   else    {
+                logger.finest("Scheduling reset");
+                // Otherwise, we schedule a reset to happen later on
+                updateFinisher.scheduleReset(this);
             }
         }
     }

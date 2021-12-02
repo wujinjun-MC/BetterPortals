@@ -8,7 +8,6 @@ import com.lauriethefish.betterportals.bukkit.config.RenderConfig;
 import com.lauriethefish.betterportals.bukkit.math.MathUtil;
 import com.lauriethefish.betterportals.bukkit.math.Matrix;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
-import com.lauriethefish.betterportals.bukkit.util.MaterialUtil;
 import com.lauriethefish.betterportals.bukkit.util.performance.OperationTimer;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import org.bukkit.util.Vector;
@@ -93,12 +92,7 @@ public abstract class FloodFillBlockMap implements IBlockMap {
     protected abstract void checkForChanges();
 
     protected final WrappedBlockData getBackgroundData() {
-        WrappedBlockData backgroundData = renderConfig.getBackgroundBlockData();
-        if(backgroundData == null) {
-            backgroundData = MaterialUtil.PORTAL_EDGE_DATA; // Use the default if not overridden in the config
-        }
-
-        return backgroundData;
+        return renderConfig.findBackgroundData(portal.getDestPos().getWorld());
     }
 
     @Override
@@ -109,8 +103,9 @@ public abstract class FloodFillBlockMap implements IBlockMap {
     }
 
     protected void updateInternal() {
-        // TODO: Figure out deadlocking problem with very large render distances
-
+        if(alreadyReachedMap == null) {
+            alreadyReachedMap = new byte[renderConfig.getTotalArrayLength()];
+        }
 
         OperationTimer timer = new OperationTimer();
         if(firstUpdate) {
@@ -133,7 +128,7 @@ public abstract class FloodFillBlockMap implements IBlockMap {
         originTileStates.clear();
         destTileStates.clear();
         firstUpdate = true;
-        alreadyReachedMap = new byte[renderConfig.getTotalArrayLength()];
+        alreadyReachedMap = null;
     }
 
     @Override

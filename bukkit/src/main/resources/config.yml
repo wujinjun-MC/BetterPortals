@@ -23,8 +23,11 @@ portalSaveInterval: 6000
 enableEntitySupport: true
 
 # If this is true, the below is always treated like it is 1
-checkForEntitiesEveryTick: true
-entityCheckInterval: 5 # How often the portal will check for surrounding entities
+checkForEntitiesEveryTick: false
+entityCheckInterval: 7 # How often the portal will check for surrounding entities
+
+# Interval for sending entity metadata updates in ticks (higher will improve performance, this is an expensive process, both for network bandwidth and CPU)
+entityMetadataUpdateInterval: 6
 
 # Setting this to true will allow you to see straight through a portal
 # NOTE: This generally makes it look a bit less convincing, since it's easier to see when the player's client doesn't quite keep up
@@ -67,9 +70,17 @@ disabledWorlds:
 # Set to 0 to disable
 waitTimeAfterSwitchingWorlds: 1
 
-# The background used for when the portal render distance is reached.
-# Set to an empty string to use the default (black concrete)
+# Portal view background blocks for specific worlds
+# If no background block is found for a world, the default for the world type will be used
+# Overworld: white concrete
+# Nether: Red concrete
+# End: Black concrete
+worldBackgroundBlocks:
+  'example': STONE
+
+# Overrides all worldBackgroundBlocks if not empty
 backgroundBlock: ''
+
 
 teleportCooldown: 2 # How long to wait before a player can go back after going through a portal (0 to disable)
 
