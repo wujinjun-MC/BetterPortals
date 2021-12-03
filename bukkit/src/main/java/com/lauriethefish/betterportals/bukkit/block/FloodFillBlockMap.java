@@ -92,7 +92,7 @@ public abstract class FloodFillBlockMap implements IBlockMap {
     protected abstract void checkForChanges();
 
     protected final WrappedBlockData getBackgroundData() {
-        return renderConfig.findBackgroundData(portal.getDestPos().getWorld());
+        return renderConfig.findBackgroundData(portal.getDestPos());
     }
 
     @Override
