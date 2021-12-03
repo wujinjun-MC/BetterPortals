@@ -1,5 +1,8 @@
 plugins {
     id 'java'
+
+    id 'com.github.johnrengelman.shadow' version '7.1.0'
+    id "xyz.jpenilla.special-gradle" version "1.0.0-SNAPSHOT"
 }
 
 allprojects {
@@ -9,7 +12,7 @@ allprojects {
     targetCompatibility = 1.8
 
     group = "com.lauriethefish.betterportals"
-    version = '0.10.0'
+    version = '0.10.0-' + "git rev-parse --verify --short HEAD".execute().text.trim().toLowerCase()
 
     // Optional, just for showing name
     afterEvaluate {
@@ -35,8 +38,8 @@ allprojects {
 
         compileOnly 'org.projectlombok:lombok:1.18.22'
         testImplementation 'org.projectlombok:lombok:1.18.22'
-        annotationProcessor 'org.projectlombok:lombok:1.18.20'
-        testAnnotationProcessor('org.projectlombok:lombok:1.18.20')
+        annotationProcessor 'org.projectlombok:lombok:1.18.22'
+        testAnnotationProcessor('org.projectlombok:lombok:1.18.22')
 
         testCompileOnly 'junit:junit:4.13.2'
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
@@ -45,5 +48,32 @@ allprojects {
 }
 
 subprojects {
-    archivesBaseName = "${rootProject.name}-${project.name}"
+    archivesBaseName = "${rootProject.name}-${project.name.substring(0, 1).toUpperCase() + project.name.substring(1)}"
+}
+
+specialGradle {
+    minecraftVersion.set("1.17")
+    specialSourceVersion.set("1.10.0")
+}
+
+dependencies {
+    implementation project(':shared')
+    implementation project(':bukkit')
+    implementation project(':bungee')
+    implementation project(':api')
+}
+
+tasks.build.dependsOn tasks.productionMappedJar
+shadowJar {
+    project.configurations.implementation.canBeResolved = true
+    configurations = [project.configurations.implementation]
+
+    relocate 'org.bstats', 'com.lauriethefish.bstats'
+
+    // Unfortunately manually excluding GSON here (it's included with spigot) isn't really possible so we manually relocate these separately
+    relocate 'com.google.thirdparty', 'com.lauriethefish.google.thirdparty'
+    relocate 'com.google.j2objc', 'com.lauriethefish.google.j2objc'
+    relocate 'com.google.inject', 'com.lauriethefish.google.inject'
+    relocate 'com.google.errorprone', 'com.lauriethefish.google.errorprone'
+    relocate 'com.google.common', 'com.lauriethefish.google.common'
 }
