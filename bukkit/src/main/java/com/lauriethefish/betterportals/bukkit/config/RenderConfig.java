@@ -37,16 +37,7 @@ public class RenderConfig {
 
     private WrappedBlockData backgroundBlockData; // Default to black concrete
 
-    private Map<String, WrappedBlockData> worldBackgroundBlockData = new HashMap<>();
-
-    private final IntVector[] surroundingOffsets = new IntVector[]{
-        new IntVector(1, 0, 0),
-        new IntVector(-1, 0, 0),
-        new IntVector(0, 1, 0),
-        new IntVector(0, -1, 0),
-        new IntVector(0, 0, 1),
-        new IntVector(0, 0, -1),
-    };
+    private final Map<String, WrappedBlockData> worldBackgroundBlockData = new HashMap<>();
 
     private int[] intOffsets;
 
