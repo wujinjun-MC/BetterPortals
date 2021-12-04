@@ -20,7 +20,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: artifact
-          path: final/build/libs/BetterPortals-final-0.10.0.jar
+          path: build/libs/*all.jar
       - name: Get short sha
         if: ${{ github.ref == 'refs/heads/master' }}
         id: get_sha
@@ -35,6 +35,6 @@ jobs:
           content: "`${{ steps.get_sha.outputs.SHORT_SHA }}` - `${{ github.event.head_commit.message }}`"
           username: "BetterPortals Dev Builds"
           avatar-url: "https://i.imgur.com/4l67APG.png"
-          filename: final/build/libs/BetterPortals-final-0.10.0.jar
+          filename: build/libs/*all.jar
       - name: Stop gradle daemons
         run: gradle -stop

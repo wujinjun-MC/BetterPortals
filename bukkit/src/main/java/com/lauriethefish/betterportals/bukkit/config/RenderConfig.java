@@ -4,6 +4,7 @@ import com.comphenix.protocol.wrappers.WrappedBlockData;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.lauriethefish.betterportals.api.IntVector;
+import com.lauriethefish.betterportals.api.PortalPosition;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import lombok.Getter;
 import org.bukkit.Material;
@@ -147,15 +148,25 @@ public class RenderConfig {
         return x <= minXZ || x >= maxXZ || y <= minY || y >= maxY || z <= minXZ || z >= maxXZ;
     }
 
-    public WrappedBlockData findBackgroundData(World world) {
+    public WrappedBlockData findBackgroundData(PortalPosition destPosition) {
         if(backgroundBlockData != null) {
             return backgroundBlockData;
         }
 
-        WrappedBlockData worldSpecificBg = worldBackgroundBlockData.get(world.getName());
+        // Try to find a background data set for this world
+        WrappedBlockData worldSpecificBg = worldBackgroundBlockData.get(destPosition.getWorldName());
         if(worldSpecificBg != null) {
             return worldSpecificBg;
         }
+
+        // External world's environment types cannot be determined
+        // Users can still set them specifically via the world overrides
+        if(destPosition.isExternal()) {
+            return WrappedBlockData.createData(Material.BLACK_CONCRETE);
+        }
+
+        World world = destPosition.getWorld();
+        assert world != null;
 
         Material material;
         if(world.getEnvironment() == World.Environment.NORMAL)    {
