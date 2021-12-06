@@ -1,6 +1,7 @@
 package com.lauriethefish.betterportals.bukkit.block;
 
 import com.comphenix.protocol.wrappers.WrappedBlockData;
+import com.google.inject.assistedinject.Assisted;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
@@ -36,6 +37,6 @@ public interface IMultiBlockChangeManager {
     void sendChanges();
 
     interface Factory {
-        IMultiBlockChangeManager create(Player player);
+        IMultiBlockChangeManager create(Player player, @Assisted("minChunkY") int minChunkY, @Assisted("maxChunkY") int maxChunkY);
     }
 }

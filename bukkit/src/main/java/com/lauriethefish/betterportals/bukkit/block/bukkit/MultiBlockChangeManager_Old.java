@@ -24,7 +24,7 @@ public class MultiBlockChangeManager_Old implements IMultiBlockChangeManager {
     private final HashMap<ChunkPosition, Map<Vector, WrappedBlockData>> changes = new HashMap<>();
 
     @Inject
-    public MultiBlockChangeManager_Old(@Assisted Player player, Logger logger) {
+    public MultiBlockChangeManager_Old(@Assisted Player player, @Assisted("minChunkY") int minChunkY, @Assisted("maxChunkY") int maxChunkY, Logger logger) {
         this.player = player;
         this.logger = logger;
     }

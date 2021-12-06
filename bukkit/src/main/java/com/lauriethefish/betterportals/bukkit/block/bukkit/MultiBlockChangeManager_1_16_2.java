@@ -18,12 +18,18 @@ import java.util.Map;
 
 public class MultiBlockChangeManager_1_16_2 implements IMultiBlockChangeManager {
     private final Player player;
+
+    private final int minChunkY;
+    private final int maxChunkY;
+
     // Section positions have to be done with BlockPositions for now in ProtocolLib
     private final HashMap<BlockPosition, Map<Vector, WrappedBlockData>> changes = new HashMap<>();
 
     @Inject
-    public MultiBlockChangeManager_1_16_2(@Assisted Player player) {
+    public MultiBlockChangeManager_1_16_2(@Assisted Player player, @Assisted("minChunkY") int minChunkY, @Assisted("maxChunkY") int maxChunkY) {
         this.player = player;
+        this.minChunkY = minChunkY;
+        this.maxChunkY = maxChunkY;
     }
 
     @Override
@@ -63,7 +69,7 @@ public class MultiBlockChangeManager_1_16_2 implements IMultiBlockChangeManager 
         for(Map.Entry<BlockPosition, Map<Vector, WrappedBlockData>> entry : changes.entrySet()) {
             PacketContainer packet = new PacketContainer(PacketType.Play.Server.MULTI_BLOCK_CHANGE);
             int chunkY = entry.getKey().getY();
-            if(chunkY > 15 || chunkY < 0) {
+            if(chunkY > maxChunkY || chunkY < minChunkY) {
                 continue;
             }
 

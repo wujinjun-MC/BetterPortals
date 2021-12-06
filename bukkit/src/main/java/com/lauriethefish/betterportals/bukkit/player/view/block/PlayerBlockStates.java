@@ -26,14 +26,14 @@ public class PlayerBlockStates implements IPlayerBlockStates {
     }
 
     @Override
-    public void resetAndUpdate() {
+    public void resetAndUpdate(int minChunkY, int maxChunkY) {
         if(viewedStates.size() == 0) {
             logger.finer("No states to reset!");
             return;
         }
 
         // Use a MultiBlockChangeManager to actually send the changes
-        IMultiBlockChangeManager multiBlockChangeManager = multiBlockChangeManagerFactory.create(player);
+        IMultiBlockChangeManager multiBlockChangeManager = multiBlockChangeManagerFactory.create(player, minChunkY, maxChunkY);
 
         logger.finest("Resetting %d blocks", viewedStates.size());
         for(Map.Entry<Vector, IViewableBlockInfo> entry : viewedStates.entrySet()) {

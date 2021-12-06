@@ -16,6 +16,7 @@ import com.lauriethefish.betterportals.bukkit.tasks.BlockUpdateFinisher;
 import com.lauriethefish.betterportals.bukkit.util.MaterialUtil;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
@@ -36,6 +37,9 @@ public class PlayerBlockView implements IPlayerBlockView   {
     private final BlockUpdateFinisher updateFinisher;
     private final boolean shouldHidePortalBlocks;
 
+    private final int minChunkY;
+    private final int maxChunkY;
+
     // Stored here since we can't access the Bukkit API from another thread
     private volatile Vector playerPosition;
 
@@ -53,6 +57,10 @@ public class PlayerBlockView implements IPlayerBlockView   {
         this.logger = logger;
         this.updateFinisher = updateFinisher;
         this.shouldHidePortalBlocks = portal.isNetherPortal() && renderConfig.isPortalBlocksHidden();
+
+        World viewWorld = player.getWorld();
+        minChunkY = viewWorld.getMinHeight() >> 4;
+        maxChunkY = viewWorld.getMaxHeight() >> 4;
     }
 
     // Called whenever the player moves
@@ -70,7 +78,7 @@ public class PlayerBlockView implements IPlayerBlockView   {
     public void finishReset() {
         statesLock.lock();
         try {
-            blockStates.resetAndUpdate();
+            blockStates.resetAndUpdate(minChunkY, maxChunkY);
         }   finally {
             statesLock.unlock();
         }
@@ -92,7 +100,7 @@ public class PlayerBlockView implements IPlayerBlockView   {
             if(statesLock.tryLock()) {
                 logger.finest("Resetting immediately!");
                 try {
-                    blockStates.resetAndUpdate();
+                    blockStates.resetAndUpdate(minChunkY, maxChunkY);
                 } finally {
                     statesLock.unlock();
                 }
@@ -112,7 +120,7 @@ public class PlayerBlockView implements IPlayerBlockView   {
         statesLock.lock();
 
         try {
-            IMultiBlockChangeManager multiBlockChangeManager = multiBlockChangeManagerFactory.create(player);
+            IMultiBlockChangeManager multiBlockChangeManager = multiBlockChangeManagerFactory.create(player, minChunkY, maxChunkY);
             List<PacketContainer> queuedTileEntityUpdates = new ArrayList<>();
 
             PlaneIntersectionChecker intersectionChecker = portal.getTransformations().createIntersectionChecker(playerPosition);
@@ -192,7 +200,7 @@ public class PlayerBlockView implements IPlayerBlockView   {
         PortalDirection portalDirection = portal.getOriginPos().getDirection();
         portalPos.subtract(portalDirection.swapVector(portalSize).multiply(0.5));
 
-        IMultiBlockChangeManager multiBlockChangeManager = multiBlockChangeManagerFactory.create(player);
+        IMultiBlockChangeManager multiBlockChangeManager = multiBlockChangeManagerFactory.create(player, minChunkY, maxChunkY);
         for(int x = 0; x < portalSize.getX(); x++) {
             for(int y = 0; y < portalSize.getY(); y++) {
                 // Swap the coordinates if necessary to get the relative position

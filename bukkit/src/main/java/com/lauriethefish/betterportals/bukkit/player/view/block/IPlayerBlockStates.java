@@ -9,7 +9,7 @@ import org.bukkit.util.Vector;
 public interface IPlayerBlockStates {
     // Should be called when moving a short distance in the same dimension
     // Actually changes the blocks back to what they should be
-    void resetAndUpdate();
+    void resetAndUpdate(int minChunkX, int maxChunkY);
 
     // Note: these methods just update the array, they won't actually send any packets
     // Returns if the block was not viewable last tick, AKA whether or not an update packet is needed
