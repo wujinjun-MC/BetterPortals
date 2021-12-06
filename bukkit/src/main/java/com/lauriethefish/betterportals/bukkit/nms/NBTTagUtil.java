@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Method;
 
 /**
  * Used to add simple marker tags to items, for example, the portal wand
@@ -43,10 +44,18 @@ public class NBTTagUtil {
             NBT_BASE = ReflectionUtil.findClass("NBTBase");
         }
 
-        HAS_TAG = ReflectionUtil.findMethod(ITEM_STACK, "hasTag");
-        GET_TAG = ReflectionUtil.findMethod(ITEM_STACK, "getTag");
-        GET_STRING = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "getString", String.class);
-        TAG_SET = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "set", String.class, NBT_BASE);
+        if (VersionUtil.isMcVersionAtLeast("1.18.0")) {
+            HAS_TAG = ReflectionUtil.findMethod(ITEM_STACK, "r");
+            GET_TAG = ReflectionUtil.findMethod(ITEM_STACK, "t");
+            TAG_SET = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "a", String.class, NBT_BASE);
+            GET_STRING = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "l", String.class);
+        } else {
+            HAS_TAG = ReflectionUtil.findMethod(ITEM_STACK, "hasTag");
+            GET_TAG = ReflectionUtil.findMethod(ITEM_STACK, "getTag");
+            TAG_SET = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "set", String.class, NBT_BASE);
+            GET_STRING = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "getString", String.class);
+        }
+
         AS_NMS_COPY = ReflectionUtil.findMethod(CRAFT_ITEM_STACK, "asNMSCopy", ItemStack.class);
         AS_BUKKIT_COPY = ReflectionUtil.findMethod(CRAFT_ITEM_STACK, "asBukkitCopy", ITEM_STACK);
         STRING_TAG_CTOR = ReflectionUtil.findConstructor(NBT_TAG_STRING, String.class);
