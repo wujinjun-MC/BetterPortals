@@ -82,6 +82,25 @@ public class ConfigManager {
     }
 
     /**
+     * Evaluates the config keys in this file
+     * Does not include the world connections section of the config if it exists
+     * @param allKeys List of all of the keys in the config (used to avoid calling getKeys twice)
+     * @param file File to evaluate keys within
+     * @return The key count, not including world connections
+     */
+    private int evaluateKeyCount(Set<String> allKeys, FileConfiguration file) {
+        int deepKeyCount = allKeys.size();
+        ConfigurationSection worldConnections = file.getConfigurationSection("worldConnections");
+        if(worldConnections == null) {
+            return deepKeyCount;
+        }
+
+        // Avoid including world connections in the key count, since these are specified by the user
+        int worldConnectionKeyCount = worldConnections.getKeys(true).size();
+        return deepKeyCount - worldConnectionKeyCount;
+    }
+
+    /**
      * Copies any missing parameters from the config into the default config if any are missing.
      * This has the side effect of removing comments, so it only happens if there are actually keys missing
      * @param pl The BetterPortals plugin
@@ -95,7 +114,11 @@ public class ConfigManager {
 
             // If the saved config file has the right keys and values, return it since it is on the correct version
             Set<String> savedFileKeys = file.getKeys(true);
-            if(defaultConfig.getKeys(true).size() <= savedFileKeys.size())   {
+            int savedKeyCount = evaluateKeyCount(savedFileKeys, file);
+            int defaultKeyCount = evaluateKeyCount(defaultConfig.getKeys(true), defaultConfig);
+
+            logger.finer("Saved keys: %d, Default keys: %d", savedKeyCount, defaultKeyCount);
+            if(savedKeyCount < defaultKeyCount)   {
                 return file;
             }
 

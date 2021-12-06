@@ -16,6 +16,16 @@ import java.util.*;
 
 @Singleton
 public class PortalSpawnConfig {
+    /**
+     * Minimum space from bottom of the world and top of the world that portals will be generated when using the default world link
+     */
+    private static final int MAIN_Y_PADDING = 5;
+
+    /**
+     * Rescaling factor from the nether to the overworld in the default world link
+     */
+    private static final double MAIN_RESCALE_FACTOR = 8.0;
+
     private final Logger logger;
 
     private Map<World, WorldLink> worldLinks;
@@ -63,6 +73,11 @@ public class PortalSpawnConfig {
             worldLinks.put(newLink.getOriginWorld(), newLink);
         }
 
+        boolean useDefaultWorldLinks = file.getBoolean("enableDefaultWorldConnections");
+        if(useDefaultWorldLinks) {
+            generateDefaultLinks();
+        }
+
         List<String> disabledWorldsString = file.getStringList("disabledWorlds");
         for(String worldString : disabledWorldsString)  {
             World world = Bukkit.getWorld(worldString);
@@ -78,6 +93,28 @@ public class PortalSpawnConfig {
 
         minimumPortalSpawnDistance = file.getInt("minimumPortalSpawnDistance");
         allowedSpawnTimePerTick = file.getDouble("allowedSpawnTimePerTick");
+    }
+
+    private void generateDefaultLinks() {
+        World mainWorld = Bukkit.getWorlds().get(0);
+        World netherWorld = Bukkit.getWorld(mainWorld.getName() + "_nether");
+
+        if(netherWorld == null) {
+            logger.warning("Cannot add default world links - no nether world exists");
+            return;
+        }
+
+        if(mainWorld.getEnvironment() != World.Environment.NORMAL) {
+            logger.warning("Cannot add default world links - first world is not overworld");
+            return;
+        }
+
+        if(netherWorld.getEnvironment() != World.Environment.NETHER) {
+            logger.warning("Cannot add default world links - _nether world is not actually nether");
+        }
+
+        worldLinks.put(mainWorld, new WorldLink(mainWorld, netherWorld, 1 / MAIN_RESCALE_FACTOR, MAIN_Y_PADDING));
+        worldLinks.put(netherWorld, new WorldLink(netherWorld, mainWorld, MAIN_RESCALE_FACTOR, MAIN_Y_PADDING));
     }
 
     public boolean isWorldDisabled(World world) {

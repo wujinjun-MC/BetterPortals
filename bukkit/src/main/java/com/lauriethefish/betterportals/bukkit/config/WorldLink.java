@@ -40,6 +40,24 @@ public class WorldLink  {
         coordinateRescalingFactor = config.getDouble("coordinateRescalingFactor");
     }
 
+    public WorldLink(World originWorld, World destinationWorld, double coordinateRescalingFactor, int minSpawnY, int maxSpawnY) {
+        originWorldName = originWorld.getName();
+        destWorldName = destinationWorld.getName();
+        this.originWorld = originWorld;
+        this.destinationWorld = destinationWorld;
+        this.minSpawnY = minSpawnY;
+        this.maxSpawnY = maxSpawnY;
+        this.coordinateRescalingFactor = coordinateRescalingFactor;
+    }
+
+    public WorldLink(World originWorld, World destinationWorld, double coordinateRescalingFactor, int yMinSpace) {
+        this(originWorld, destinationWorld, coordinateRescalingFactor, destinationWorld.getMinHeight() + yMinSpace, getMaxHeight(destinationWorld) - yMinSpace);
+    }
+
+    private static int getMaxHeight(World world) {
+        return world.getEnvironment() == World.Environment.NETHER ? 128 : world.getMaxHeight();
+    }
+
     public boolean isValid()    {
         return originWorld != null && destinationWorld != null;
     }
