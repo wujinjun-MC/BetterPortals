@@ -15,6 +15,10 @@ jobs:
           java-version: 16.0.2
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
+      - uses: "finnp/create-file-action@master"
+        env:
+          FILE_NAME: "commitversion.enable"
+          FILE_DATA: ""
       - name: Build with Gradle
         run: ./gradlew clean build
       - uses: actions/upload-artifact@v2

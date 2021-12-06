@@ -10,6 +10,8 @@ dependency-reduced-pom.xml
 .factorypath
 .project
 
+commitversion.enable
+
 # These must NOT be ignored
 !gradlew
 !gradlew.bat

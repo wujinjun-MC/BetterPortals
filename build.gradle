@@ -12,7 +12,12 @@ allprojects {
     targetCompatibility = 1.8
 
     group = "com.lauriethefish.betterportals"
-    version = '0.10.0-' + "git rev-parse --verify --short HEAD".execute().text.trim().toLowerCase()
+
+    if (project.file("commitversion.enable").exists()) {
+        version = gradle.ext.versionName + '-' + "git rev-parse --verify --short HEAD".execute().text.trim().toLowerCase()
+    } else {
+       version = gradle.ext.versionName
+    }
 
     // Optional, just for showing name
     afterEvaluate {
