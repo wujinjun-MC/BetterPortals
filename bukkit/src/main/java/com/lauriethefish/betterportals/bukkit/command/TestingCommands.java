@@ -12,7 +12,6 @@ import com.lauriethefish.betterportals.bukkit.net.requests.TestForwardedRequest;
 import com.lauriethefish.betterportals.bukkit.nms.BlockDataUtil;
 import com.lauriethefish.betterportals.bukkit.portal.spawning.NewPortalChecker;
 import com.lauriethefish.betterportals.bukkit.util.MaterialUtil;
-import com.lauriethefish.betterportals.bukkit.util.performance.Operation;
 import com.lauriethefish.betterportals.bukkit.util.performance.OperationTimer;
 import com.lauriethefish.betterportals.shared.net.RequestException;
 import org.bukkit.Chunk;
@@ -45,6 +44,7 @@ public class TestingCommands {
     @Path("betterportals/test/portalBlock")
     @Argument(name = "dataValue")
     @RequiresPlayer
+    @SuppressWarnings("deprecation")
     public boolean createTestPortalBlock(Player sender, byte dataValue) {
         BlockState state = sender.getLocation().getBlock().getState();
 
@@ -171,6 +171,7 @@ public class TestingCommands {
     @Command
     @Path("betterportals/test/refresh")
     @RequiresPlayer
+    @SuppressWarnings("deprecation")
     public boolean refreshChunk(Player sender) {
         Chunk senderChunk = sender.getLocation().getChunk();
         sender.getWorld().refreshChunk(senderChunk.getX(), senderChunk.getZ());
