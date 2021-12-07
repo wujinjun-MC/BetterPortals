@@ -20,10 +20,27 @@ import java.io.Serializable;
 public final class IntVector implements Cloneable, Serializable {
     private static final long serialVersionUID = 1;
 
+    /**
+     * X coordinate
+     */
     private int x;
+
+    /**
+     * Y coordinate
+     */
     private int y;
+
+    /**
+     * Z coordinate
+     */
     private int z;
 
+    /**
+     * Creates a new instance from XYZ coordinates
+     * @param x X coordinate
+     * @param y Y coordinate
+     * @param z Z coordinate
+     */
     public IntVector(int x, int y, int z) {
         this.x = x;
         this.y = y;
@@ -32,6 +49,9 @@ public final class IntVector implements Cloneable, Serializable {
 
     /**
      * Creates a new instance rounding down the double coordinates.
+     * @param x X coordinate
+     * @param y Y coordinate
+     * @param z Z coordinate
      */
     public IntVector(double x, double y, double z) {
         this((int) Math.floor(x), (int) Math.floor(y), (int) Math.floor(z));

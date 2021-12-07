@@ -8,11 +8,34 @@ import org.jetbrains.annotations.NotNull;
  * Represents a portal's direction. Portals can not be diagonal, only up/down/left/right/forward/backwards.
  */
 public enum PortalDirection {
+    /**
+     * Up direction
+     */
     UP(new Vector(0.0, 1.0, 0.0), new Vector(1.0, 0.0, 0.0)),
+
+    /**
+     * Down direction
+     */
     DOWN(new Vector(0.0, -1.0, 0.0), new Vector(1.0, 0.0, 0.0)),
+
+    /**
+     * North (+z) direction
+     */
     NORTH(new Vector(0.0, 0.0, 1.0), new Vector(0.0, 1.0, 0.0)),
+
+    /**
+     * South (-z) direction
+     */
     SOUTH(new Vector(0.0, 0.0, -1.0), new Vector(0.0, 1.0, 0.0)),
+
+    /**
+     * East (+x) direction
+     */
     EAST(new Vector(1.0, 0.0, 0.0), new Vector(0.0, 1.0, 0.0)),
+
+    /**
+     * West (-x) direction
+     */
     WEST(new Vector(-1.0, 0.0, 0.0), new Vector(0.0, 1.0, 0.0));
 
     private final Vector direction;
@@ -23,6 +46,13 @@ public enum PortalDirection {
         this.inversionRotationAxis = inversionRotationAxis;
     }
 
+    /**
+     * Loads a {@link PortalDirection} from a storage string
+     * This will return <code>NORTH</code> if <code>EAST_WEST</code> is inputted, and <code>EAST</code> if <code>NORTH_SOUTH</code> is inputted for backwards compatibility.
+     * Otherwise it is equivalent to the enum's <code>valueOf</code> method
+     * @param string Portal direction string to load from
+     * @return Parsed portal direction
+     */
     public static PortalDirection fromStorage(String string) {
         switch(string) {
             case "EAST_WEST":
@@ -98,7 +128,11 @@ public enum PortalDirection {
         return swapVector(loc.toVector()).toLocation(loc.getWorld());
     }
 
-    // Returns true if a portal with this direction is oriented only on the X or Z
+
+    /**
+     * Finds if this portal is a horizontal portal (i.e. flat)
+     * @return If this portal points up or down
+     */
     public boolean isHorizontal() {
         return this == UP || this == DOWN;
     }

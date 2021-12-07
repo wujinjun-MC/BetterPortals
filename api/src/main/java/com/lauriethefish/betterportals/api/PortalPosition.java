@@ -28,17 +28,41 @@ import java.util.UUID;
 public class PortalPosition implements Serializable, ConfigurationSerializable {
     private static final long serialVersionUID = 7309245176857806033L;
 
+    /**
+     * Direction that the portal at this position faces
+     */
     @Getter private final PortalDirection direction;
 
+    /**
+     * X coordinate
+     */
     private final double x;
+
+    /**
+     * Y coordinate
+     */
     private final double y;
+
+    /**
+     * Z coordinate
+     */
     private final double z;
 
-    // We store the world ID *and* the world name. How this works is that we first
-    // look up the world by ID, and if it doesn't exist, look it up by the name
-    @Getter private UUID worldId = null; // Currently unused on cross server portals
+    /**
+     * We store the world ID <i>and</i> the world name. How this works is that we first
+     * look up the world by ID, and if it doesn't exist, look it up by the name.
+     * World ID is null for cross-server portals
+     */
+    @Getter private UUID worldId = null;
+
+    /**
+     * World name of the destination of the portal
+     */
     @Getter private String worldName = null;
 
+    /**
+     * Name of the destination server, if a cross-server portal
+     */
     @Getter @Setter private String serverName = null;
 
     // Since looking up the world of this portal is fairly expensive, we cache the location for later
@@ -77,6 +101,10 @@ public class PortalPosition implements Serializable, ConfigurationSerializable {
         }
     }
 
+    /**
+     * Loads this portal position from YAML storage
+     * @param map The map of YAML keys to values
+     */
     public PortalPosition(Map<String, Object> map) {
         Object worldIdString = map.get("worldId");
         if(worldIdString != null) {
@@ -124,6 +152,8 @@ public class PortalPosition implements Serializable, ConfigurationSerializable {
     }
 
     /**
+     * Finds if this vector is in the line represented by the portal's teleportation plane
+     * @param vec Vector to test
      * @return If this vector is in line <i>with the plane</i> of this portal position.
      */
     public boolean isInLine(IntVector vec) {
@@ -131,20 +161,35 @@ public class PortalPosition implements Serializable, ConfigurationSerializable {
                 direction.swapVector(vec).getZ();
     }
 
+    /**
+     * Gets the exact center of this portal as a {@link Vector}
+     * @return The exact center of this portal
+     */
     public Vector getVector() {
         return new Vector(x, y, z);
     }
 
+    /**
+     * Gets the center of this portal as an {@link IntVector}
+     * @return Location at the center of the portal
+     */
     public IntVector getIntVector() {
         return new IntVector(x, y, z);
     }
 
-    // Convenience function for getting the block at this location
+    /**
+     * Returns the block at the center of the portal's plane
+     * @return Block at the center of the portal's plane
+     */
     public Block getBlock() {
         if(isExternal()) {throw new IllegalStateException("Cannot get the block of an external position");}
         return getLocation().getBlock();
     }
 
+    /**
+     * Finds if this instance represents an external portal position
+     * @return If this instance represents an external portal position
+     */
     public boolean isExternal() {
         return serverName != null;
     }
