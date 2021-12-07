@@ -2,7 +2,6 @@ plugins {
     id 'java'
 
     id 'com.github.johnrengelman.shadow' version '7.1.0'
-    id "xyz.jpenilla.special-gradle" version "1.0.0-SNAPSHOT"
 }
 
 allprojects {
@@ -56,19 +55,14 @@ subprojects {
     archivesBaseName = "${rootProject.name}-${project.name.substring(0, 1).toUpperCase() + project.name.substring(1)}"
 }
 
-specialGradle {
-    minecraftVersion.set("1.17")
-    specialSourceVersion.set("1.10.0")
-}
-
 dependencies {
     implementation project(':shared')
-    implementation project(':bukkit')
+    implementation project(path: ':bukkit', configuration: 'remapped')
     implementation project(':bungee')
     implementation project(':api')
 }
 
-tasks.build.dependsOn tasks.productionMappedJar
+tasks.build.dependsOn tasks.shadowJar
 shadowJar {
     project.configurations.implementation.canBeResolved = true
     configurations = [project.configurations.implementation]
