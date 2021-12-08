@@ -63,10 +63,14 @@ dependencies {
     implementation project(':api')
 }
 
+def getImplementationConfigurations(parentProject) {
+    parentProject.configurations.implementation.canBeResolved = true
+    return parentProject.configurations.implementation
+}
+
 tasks.build.dependsOn tasks.shadowJar
 shadowJar {
-    project.configurations.implementation.canBeResolved = true
-    configurations = [project.configurations.implementation]
+    configurations = [getImplementationConfigurations(project), getImplementationConfigurations(project(':bukkit'))]
 
     relocate 'org.bstats', 'com.lauriethefish.bstats'
 
