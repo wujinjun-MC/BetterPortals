@@ -117,8 +117,8 @@ public class ConfigManager {
             int savedKeyCount = evaluateKeyCount(savedFileKeys, file);
             int defaultKeyCount = evaluateKeyCount(defaultConfig.getKeys(true), defaultConfig);
 
-            logger.finer("Saved keys: %d, Default keys: %d", savedKeyCount, defaultKeyCount);
-            if(savedKeyCount < defaultKeyCount)   {
+            logger.fine("Saved keys: %d, Default keys: %d", savedKeyCount, defaultKeyCount);
+            if(!(savedKeyCount < defaultKeyCount))   {
                 return file;
             }
 
