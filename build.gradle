@@ -1,7 +1,5 @@
 plugins {
     id 'java'
-
-    id 'com.github.johnrengelman.shadow' version '7.1.0'
 }
 
 allprojects {
@@ -54,30 +52,4 @@ allprojects {
 
 subprojects {
     archivesBaseName = "${rootProject.name}-${project.name}"
-}
-
-dependencies {
-    implementation project(':shared')
-    implementation project(path: ':bukkit', configuration: 'reobf')
-    implementation project(':bungee')
-    implementation project(':api')
-}
-
-def getImplementationConfigurations(parentProject) {
-    parentProject.configurations.implementation.canBeResolved = true
-    return parentProject.configurations.implementation
-}
-
-tasks.build.dependsOn tasks.shadowJar
-shadowJar {
-    configurations = [getImplementationConfigurations(project), getImplementationConfigurations(project(':bukkit'))]
-
-    relocate 'org.bstats', 'com.lauriethefish.betterportals.dependencies.org.bstats'
-    relocate 'com.google', 'com.lauriethefish.betterportals.dependencies.com.google'
-    relocate 'javax.annotation', 'com.lauriethefish.betterportals.dependencies.javax.annotation'
-    relocate 'javax.inject', 'com.lauriethefish.betterportals.dependencies.javax.inject'
-    relocate 'org.aopalliance', 'com.lauriethefish.betterportals.dependencies.aopalliance'
-    relocate 'org.checkerframework', 'com.lauriethefish.betterportals.dependencies.checkerframework'
-    relocate 'org.intellij.lang.annotations', 'com.lauriethefish.betterportals.dependencies.intellij.lang.annotations'
-    relocate 'org.jetbrains.annotations', 'com.lauriethefish.betterportals.dependencies.jetbrains.annotations'
 }
