@@ -13,15 +13,17 @@ import implementations.TestLoggerModule;
 import implementations.TestPortal;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PortalPredicateTests {
     private Injector injector;
     private PlayerMock player;
@@ -29,7 +31,7 @@ public class PortalPredicateTests {
     private WorldMock overworld;
     private WorldMock nether;
 
-    @Before
+    @BeforeAll
     public void setup() {
         ServerMock server = MockBukkit.mock();
         overworld = server.addSimpleWorld("world");
@@ -48,7 +50,7 @@ public class PortalPredicateTests {
         portal = new TestPortal(originPos, destPos, new Vector(3.0, 3.0, 0.0), true, UUID.randomUUID(), null, null, true);
     }
 
-    @After
+    @AfterAll
     public void tearDown() {
         MockBukkit.unmock();
     }

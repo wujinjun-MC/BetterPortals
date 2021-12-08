@@ -1,6 +1,6 @@
 import com.lauriethefish.betterportals.bukkit.math.PlaneIntersectionChecker;
 import org.bukkit.util.Vector;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

@@ -1,6 +1,6 @@
 import com.lauriethefish.betterportals.shared.net.encryption.CipherManager;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import javax.crypto.AEADBadTagException;
 import java.security.GeneralSecurityException;
@@ -9,12 +9,13 @@ import java.util.Random;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class EncryptionTests {
     private CipherManager cipherManager;
     private byte[] data;
 
-    @Before
+    @BeforeEach
     public void setUp() throws NoSuchAlgorithmException {
         cipherManager = new CipherManager();
         cipherManager.init(UUID.fromString("c27769c6-41f1-4bd7-a0f1-b6fb62b213a7"));
@@ -34,12 +35,14 @@ public class EncryptionTests {
         }
     }
 
-    @Test(expected = AEADBadTagException.class)
-    public void testInvalidKey() throws GeneralSecurityException {
-        CipherManager invalidCipher = new CipherManager();
-        invalidCipher.init(UUID.fromString("6f653d86-c69c-4d3c-95b3-38037eedddd7"));
+    @Test
+    public void testInvalidKey() {
+        assertThrows(AEADBadTagException.class, () -> {
+            CipherManager invalidCipher = new CipherManager();
+            invalidCipher.init(UUID.fromString("6f653d86-c69c-4d3c-95b3-38037eedddd7"));
 
-        byte[] encrypted = cipherManager.createEncrypt().doFinal(data);
-        invalidCipher.createDecrypt().doFinal(encrypted);
+            byte[] encrypted = cipherManager.createEncrypt().doFinal(data);
+            invalidCipher.createDecrypt().doFinal(encrypted);
+        });
     }
 }

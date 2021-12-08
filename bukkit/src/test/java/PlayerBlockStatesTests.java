@@ -14,22 +14,21 @@ import implementations.TestLoggerModule;
 import implementations.TestMultiBlockChangeManager;
 import implementations.TestViewableBlockInfo;
 import org.bukkit.util.Vector;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.*;
 
 import java.lang.reflect.Field;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PlayerBlockStatesTests {
     private static final Field VIEWED_STATES_FIELD = ReflectionUtil.findField(PlayerBlockStates.class, "viewedStates");
 
     private IPlayerBlockStates blockView;
     private final Vector position = new Vector(0.0, 1.0, 0.0);
 
-    @Before
+    @BeforeAll
     public void setUp() {
         Injector injector = Guice.createInjector(new AbstractModule() {
             @Override
@@ -51,7 +50,7 @@ public class PlayerBlockStatesTests {
         blockView = injector.getInstance(IPlayerBlockStates.Factory.class).create(player);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         MockBukkit.unmock();
     }

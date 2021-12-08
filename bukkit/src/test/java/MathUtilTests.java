@@ -1,7 +1,7 @@
 import com.lauriethefish.betterportals.bukkit.math.MathUtil;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 

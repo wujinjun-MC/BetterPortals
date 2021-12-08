@@ -1,7 +1,8 @@
 import com.lauriethefish.betterportals.bukkit.util.ArrayUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ArrayUtilTests {
     private final Integer[] testArray = new Integer[]{1, 2, 3, 4, 5};
@@ -14,9 +15,9 @@ public class ArrayUtilTests {
         assertEquals(4, result.length);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test()
     public void testRemoveFirstElementEmpty() {
-        ArrayUtil.removeFirstElement(new Integer[0]);
+        assertThrows(IllegalArgumentException.class, () -> ArrayUtil.removeFirstElement(new Integer[0]));
     }
 
     @Test
@@ -27,8 +28,8 @@ public class ArrayUtilTests {
         assertEquals(4, result.length);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test()
     public void testRemoveLastElementEmpty() {
-        ArrayUtil.removeLastElement(new Integer[0]);
+        assertThrows(IllegalArgumentException.class, () -> ArrayUtil.removeLastElement(new Integer[0]));
     }
 }

@@ -1,6 +1,6 @@
 import com.lauriethefish.betterportals.bukkit.chunk.chunkpos.ChunkPosition;
 import com.lauriethefish.betterportals.bukkit.chunk.chunkpos.SpiralChunkAreaIterator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 

@@ -1,7 +1,7 @@
 import com.lauriethefish.betterportals.shared.net.encryption.CipherManager;
 import com.lauriethefish.betterportals.shared.net.encryption.EncryptedObjectStream;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -20,10 +20,9 @@ public class EncryptedObjectStreamTests {
 
         @Override
         public boolean equals(Object other) {
-            if(!(other instanceof TestTransmit)) {
+            if(!(other instanceof TestTransmit otherInstance)) {
                 return false;
             }
-            TestTransmit otherInstance = (TestTransmit) other;
 
             return otherInstance.testFieldA == testFieldA && otherInstance.testFieldB.equals(testFieldB);
         }
@@ -31,7 +30,7 @@ public class EncryptedObjectStreamTests {
 
     private CipherManager cipherManager;
 
-    @Before
+    @BeforeEach
     public void setUp() throws NoSuchAlgorithmException {
         this.cipherManager = new CipherManager();
         cipherManager.init(UUID.randomUUID());

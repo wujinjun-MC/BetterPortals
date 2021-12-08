@@ -9,14 +9,16 @@ import com.lauriethefish.betterportals.bukkit.player.PlayerDataManager;
 import implementations.TestLoggerModule;
 import implementations.TestPlayerData;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.junit.After;
-import org.junit.Before;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PlayerDataManagerTests {
     private PlayerDataManager playerDataManager;
     private ServerMock serverMock;
 
-    @Before
+    @BeforeAll
     public void setup() {
         serverMock = MockBukkit.mock();
         JavaPlugin mockPlugin = MockBukkit.createMockPlugin();
@@ -34,7 +36,7 @@ public class PlayerDataManagerTests {
         playerDataManager = injector.getInstance(PlayerDataManager.class);
     }
 
-    @After
+    @AfterAll
     public void cleanup() {
         MockBukkit.unmock();
     }

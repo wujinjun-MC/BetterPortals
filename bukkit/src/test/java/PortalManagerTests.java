@@ -15,9 +15,10 @@ import com.lauriethefish.betterportals.bukkit.portal.predicate.IPortalPredicateM
 import implementations.*;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import java.util.Collection;
 import java.util.UUID;
@@ -25,6 +26,7 @@ import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PortalManagerTests {
     private ServerMock server;
     private WorldMock overworld;
@@ -33,7 +35,7 @@ public class PortalManagerTests {
     private PortalManager portalManager;
     private final TestPortalPredicateManager predicateManager = new TestPortalPredicateManager();
 
-    @Before
+    @BeforeAll
     public void setup() {
         server = MockBukkit.mock();
         overworld = server.addSimpleWorld("world");
@@ -56,7 +58,7 @@ public class PortalManagerTests {
         portalManager = injector.getInstance(PortalManager.class);
     }
 
-    @After
+    @AfterAll
     public void cleanUp() {
         MockBukkit.unmock();
     }

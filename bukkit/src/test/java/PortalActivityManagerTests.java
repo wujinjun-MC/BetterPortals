@@ -9,18 +9,20 @@ import implementations.TestLoggerModule;
 import implementations.TestPortal;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class PortalActivityManagerTests {
     private PortalActivityManager portalActivityManager;
     private IPortal.Factory portalFactory;
 
-    @Before
+    @BeforeAll
     public void setup() {
         Injector injector = Guice.createInjector(
                 new FactoryModuleBuilder().implement(IPortal.class, TestPortal.class).build(IPortal.Factory.class),
