@@ -21,6 +21,8 @@ import java.lang.reflect.Constructor;
 public class MainModule extends AbstractModule {
     /**
      * Experimental mode uses NMS implementations of some code to significantly improve performance
+     * TODO: Direct NMS code has been temporarily removed, but left in on another branch
+     * TODO: Enabling this on the master branch will crash
      */
     private static final boolean EXPERIMENTAL_MODE = false;
 
