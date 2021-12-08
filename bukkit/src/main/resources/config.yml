@@ -92,7 +92,7 @@ enableDefaultWorldConnections: true
 # This is to allow one way links between dimensions
 # The x and z coordinates of the portals are multiplied by the coordinateRescalingFactor to spawn portals
 # The min and max spawn y limit where portals can spawn - for instance you should not be able to spawn portals above the nether ceiling
-worldConnections:
+worldConnections: {}
   #'0':
   #  originWorld: 'example'
   #  destinationWorld: 'example_nether'
