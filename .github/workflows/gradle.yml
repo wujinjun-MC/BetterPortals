@@ -12,7 +12,7 @@ jobs:
       - name: Set up JDK 16
         uses: actions/setup-java@v1.4.3
         with:
-          java-version: 16.0.2
+          java-version: 17.0.1
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
       - uses: "finnp/create-file-action@master"
