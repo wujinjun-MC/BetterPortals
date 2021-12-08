@@ -1,6 +1,5 @@
 package com.lauriethefish.betterportals.bukkit.nms.direct;
 
-import com.lauriethefish.betterportals.bukkit.nms.direct.FakePacketListenerImpl;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import com.mojang.authlib.GameProfile;
@@ -9,8 +8,8 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.*;
 import net.minecraft.server.network.ServerPlayerConnection;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_18_R1.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 
 import javax.inject.Inject;
@@ -45,7 +44,7 @@ public class PacketProxyProvider {
             net.minecraft.world.entity.Entity nmsEntity = ((CraftEntity) entity).getHandle();
             ServerChunkCache chunkCache = (ServerChunkCache) nmsEntity.level.getChunkSource();
             ChunkMap levelChunkMap = chunkCache.chunkMap;
-            ChunkMap.TrackedEntity entityTracker = levelChunkMap.G.get(nmsEntity.getId());
+            ChunkMap.TrackedEntity entityTracker = levelChunkMap.entityMap.get(nmsEntity.getId());
 
             try {
                 // TODO: Try to speed up this reflection

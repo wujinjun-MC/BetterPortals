@@ -6,9 +6,6 @@ plugins {
 
 allprojects {
     apply plugin: 'java'
-    
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
 
     group = "com.lauriethefish.betterportals"
 
@@ -43,21 +40,25 @@ allprojects {
         compileOnly 'org.projectlombok:lombok:1.18.22'
         testImplementation 'org.projectlombok:lombok:1.18.22'
         annotationProcessor 'org.projectlombok:lombok:1.18.22'
-        testAnnotationProcessor('org.projectlombok:lombok:1.18.22')
+        testAnnotationProcessor 'org.projectlombok:lombok:1.18.22'
 
-        testCompileOnly 'junit:junit:4.13.2'
-        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-        testRuntimeOnly 'org.junit.vintage:junit-vintage-engine:5.8.1'
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+    }
+
+    tasks {
+        compileJava {
+            options.release.set(17)
+        }
     }
 }
 
 subprojects {
-    archivesBaseName = "${rootProject.name}-${project.name.substring(0, 1).toUpperCase() + project.name.substring(1)}"
+    archivesBaseName = "${rootProject.name}-${project.name}"
 }
 
 dependencies {
     implementation project(':shared')
-    implementation project(path: ':bukkit', configuration: 'remapped')
+    implementation project(path: ':bukkit', configuration: 'reobf')
     implementation project(':bungee')
     implementation project(':api')
 }

@@ -1,12 +1,5 @@
 plugins {
-    id "xyz.jpenilla.special-gradle" version "1.0.0-SNAPSHOT"
-}
-
-apply plugin: 'xyz.jpenilla.special-gradle'
-
-specialGradle {
-    minecraftVersion.set("1.17")
-    specialSourceVersion.set("1.10.0")
+    id "io.papermc.paperweight.userdev" version "1.3.1"
 }
 
 repositories {
@@ -16,24 +9,20 @@ repositories {
     maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
 }
 
+
 dependencies {
+    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.18-R0.1-SNAPSHOT")
     implementation 'org.bstats:bstats-bukkit:2.2.1'
-    testImplementation 'com.github.seeseemelk:MockBukkit-v1.16:1.5.2'
+    testImplementation 'com.github.seeseemelk:MockBukkit-v1.17:1.12.0'
     testImplementation 'com.comphenix.protocol:ProtocolLib:4.7.0'
 
     implementation project(':shared')
     implementation project(':api')
-
-    compileOnly 'org.spigotmc:spigot-api:1.18-R0.1-SNAPSHOT'
     compileOnly 'com.comphenix.protocol:ProtocolLib:4.8.0-SNAPSHOT'
 }
 
-configurations {
-    remapped
-}
-
-artifacts {
-    remapped(tasks.productionMappedJar) {
-        builtBy tasks.productionMappedJar
+tasks {
+    build {
+        dependsOn(reobfJar)
     }
 }

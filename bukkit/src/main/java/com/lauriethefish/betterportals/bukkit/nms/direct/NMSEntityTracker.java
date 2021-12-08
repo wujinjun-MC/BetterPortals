@@ -28,8 +28,8 @@ import net.minecraft.server.network.ServerPlayerConnection;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_17_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_18_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
@@ -153,8 +153,7 @@ public class NMSEntityTracker implements IEntityTracker {
      * @return Modified packet, if the packet is unmodified it will be the same instance as <code>p</code>, otherwise it will be a new instance.
      */
     private @Nullable Packet<?> modifyPacket(Packet<?> p) {
-        if(p instanceof ClientboundAnimatePacket) {
-            ClientboundAnimatePacket packet = (ClientboundAnimatePacket) p;
+        if(p instanceof ClientboundAnimatePacket packet) {
             PacketContainer container = getContainer(ClientboundAnimatePacket.class);
 
             container.getIntegers()
@@ -163,25 +162,23 @@ public class NMSEntityTracker implements IEntityTracker {
 
             return getPacket(container);
         }
-        if(p instanceof ClientboundTakeItemEntityPacket) {
-            ClientboundTakeItemEntityPacket packet = (ClientboundTakeItemEntityPacket) p;
+        if(p instanceof ClientboundTakeItemEntityPacket packet) {
 
-            IEntityTracker pickerUpperTracker = trackingManager.getTracker(portal, nmsEntity.level.getEntity(packet.getPlayerId()).getBukkitEntity());
+            IEntityTracker pickerUpperTracker = trackingManager.getTracker(portal, Objects.requireNonNull(nmsEntity.level.getEntity(packet.getPlayerId())).getBukkitEntity());
             if(pickerUpperTracker == null) {
                 return null;
             }
 
             return new ClientboundTakeItemEntityPacket(entityInfo.getEntityId(), pickerUpperTracker.getEntityInfo().getEntityId(), packet.getAmount());
         }
-        if(p instanceof ClientboundSetPassengersPacket) {
-            ClientboundSetPassengersPacket packet = (ClientboundSetPassengersPacket) p;
+        if(p instanceof ClientboundSetPassengersPacket packet) {
             if(packet.getVehicle() != nmsEntity.getId()) {
                 return null;
             }
 
             List<Integer> result = new ArrayList<>();
             for(int passengerId : packet.getPassengers()) {
-                IEntityTracker tracker = trackingManager.getTracker(portal, nmsEntity.level.getEntity(passengerId).getBukkitEntity());
+                IEntityTracker tracker = trackingManager.getTracker(portal, Objects.requireNonNull(nmsEntity.level.getEntity(passengerId)).getBukkitEntity());
                 if(tracker != null) {
                     result.add(tracker.getEntityInfo().getEntityId());
                 }
@@ -192,8 +189,7 @@ public class NMSEntityTracker implements IEntityTracker {
             container.getIntegerArrays().write(0, result.stream().mapToInt(i -> i).toArray());
             return getPacket(container);
         }
-        if(p instanceof ClientboundEntityEventPacket) {
-            ClientboundEntityEventPacket packet = (ClientboundEntityEventPacket) p;
+        if(p instanceof ClientboundEntityEventPacket packet) {
 
             PacketContainer container = getContainer(ClientboundEntityEventPacket.class);
             container.getIntegers().write(0, entityInfo.getEntityId());
@@ -201,8 +197,7 @@ public class NMSEntityTracker implements IEntityTracker {
 
             return getPacket(container);
         }
-        if(p instanceof ClientboundMoveEntityPacket) {
-            ClientboundMoveEntityPacket packet = (ClientboundMoveEntityPacket) p;
+        if(p instanceof ClientboundMoveEntityPacket packet) {
 
             byte xRot = packet.getxRot();
             byte yRot = packet.getyRot();
@@ -232,12 +227,11 @@ public class NMSEntityTracker implements IEntityTracker {
                 return new ClientboundMoveEntityPacket.Rot(entityInfo.getEntityId(), tYRot, tXRot, packet.isOnGround());
             }
         }
-        if(p instanceof ClientboundRemoveEntityPacket) {
-            return new ClientboundRemoveEntityPacket(entityInfo.getEntityId());
+        if(p instanceof ClientboundRemoveEntitiesPacket) {
+            return new ClientboundRemoveEntitiesPacket(entityInfo.getEntityId());
         }
-        if(p instanceof ClientboundRotateHeadPacket) {
+        if(p instanceof ClientboundRotateHeadPacket packet) {
             PacketContainer container = getContainer(ClientboundRotateHeadPacket.class);
-            ClientboundRotateHeadPacket packet = (ClientboundRotateHeadPacket) p;
             byte originalHeadRot = packet.getYHeadRot();
             byte transformedHeadRot = getTransformedLocationBytes(originalHeadRot, (byte) 0).getSecond();
 
@@ -251,8 +245,7 @@ public class NMSEntityTracker implements IEntityTracker {
             container.getModifier().write(1, ((ClientboundSetEntityDataPacket) p).getUnpackedData());
             return getPacket(container);
         }
-        if(p instanceof ClientboundSetEntityMotionPacket) {
-            ClientboundSetEntityMotionPacket packet = (ClientboundSetEntityMotionPacket) p;
+        if(p instanceof ClientboundSetEntityMotionPacket packet) {
             Vector motionVector = new Vector(
                     packet.getXa() / 8000.0,
                     packet.getYa() / 8000.0,
@@ -267,12 +260,10 @@ public class NMSEntityTracker implements IEntityTracker {
             ));
         }
 
-        if(p instanceof ClientboundSetEquipmentPacket) {
-            ClientboundSetEquipmentPacket packet = (ClientboundSetEquipmentPacket) p;
+        if(p instanceof ClientboundSetEquipmentPacket packet) {
             return new ClientboundSetEquipmentPacket(entityInfo.getEntityId(), packet.getSlots());
         }
-        if(p instanceof ClientboundTeleportEntityPacket) {
-            ClientboundTeleportEntityPacket packet = (ClientboundTeleportEntityPacket) p;
+        if(p instanceof ClientboundTeleportEntityPacket packet) {
             PacketContainer container = getContainer(ClientboundTeleportEntityPacket.class);
 
             Vector location = new Vector(packet.getX(), packet.getY(), packet.getZ());
@@ -297,8 +288,7 @@ public class NMSEntityTracker implements IEntityTracker {
             container.getBooleans().write(0, packet.isOnGround());
             return getPacket(container);
         }
-        if(p instanceof ClientboundUpdateMobEffectPacket) {
-            ClientboundUpdateMobEffectPacket packet = (ClientboundUpdateMobEffectPacket) p;
+        if(p instanceof ClientboundUpdateMobEffectPacket packet) {
             PacketContainer container = getContainer(ClientboundUpdateMobEffectPacket.class);
 
             byte flags = 0;
@@ -318,13 +308,10 @@ public class NMSEntityTracker implements IEntityTracker {
                     .write(2, flags);
             return getPacket(container);
         }
-        if(p instanceof ClientboundRemoveMobEffectPacket) {
-            ClientboundRemoveMobEffectPacket packet = (ClientboundRemoveMobEffectPacket) p;
+        if(p instanceof ClientboundRemoveMobEffectPacket packet) {
             return new ClientboundRemoveMobEffectPacket(entityInfo.getEntityId(), packet.getEffect());
         }
-        if(p instanceof ClientboundAddEntityPacket) {
-            ClientboundAddEntityPacket packet = (ClientboundAddEntityPacket) p;
-
+        if(p instanceof ClientboundAddEntityPacket packet) {
             Vector location = new Vector(
                     packet.getX(),
                     packet.getY(),
@@ -356,8 +343,7 @@ public class NMSEntityTracker implements IEntityTracker {
                 new Vec3(acceleration.getX(), acceleration.getY(), acceleration.getZ())
             );
         }
-        if(p instanceof ClientboundAddExperienceOrbPacket) {
-            ClientboundAddExperienceOrbPacket packet = (ClientboundAddExperienceOrbPacket) p;
+        if(p instanceof ClientboundAddExperienceOrbPacket packet) {
             PacketContainer container = getContainer(ClientboundAddExperienceOrbPacket.class);
 
             container.getIntegers()
@@ -378,8 +364,7 @@ public class NMSEntityTracker implements IEntityTracker {
 
             return getPacket(container);
         }
-        if(p instanceof ClientboundAddMobPacket) {
-            ClientboundAddMobPacket packet = (ClientboundAddMobPacket) p;
+        if(p instanceof ClientboundAddMobPacket packet) {
             Vector position = new Vector(
                     packet.getX(),
                     packet.getY(),
@@ -425,8 +410,7 @@ public class NMSEntityTracker implements IEntityTracker {
                     .write(2, position.getZ());
             return getPacket(container);
         }
-        if(p instanceof ClientboundAddPaintingPacket) {
-            ClientboundAddPaintingPacket packet = (ClientboundAddPaintingPacket) p;
+        if(p instanceof ClientboundAddPaintingPacket packet) {
             PacketContainer container = getContainer(ClientboundAddPaintingPacket.class);
 
             container.getIntegers()
@@ -446,8 +430,7 @@ public class NMSEntityTracker implements IEntityTracker {
             container.getDirections().write(0, direction);
             return getPacket(container);
         }
-        if(p instanceof ClientboundAddPlayerPacket) {
-            ClientboundAddPlayerPacket packet = (ClientboundAddPlayerPacket) p;
+        if(p instanceof ClientboundAddPlayerPacket packet) {
             PacketContainer container = getContainer(ClientboundAddPlayerPacket.class);
             container.getIntegers().write(0, entityInfo.getEntityId());
 
@@ -477,8 +460,7 @@ public class NMSEntityTracker implements IEntityTracker {
 
             return getPacket(container);
         }
-        if(p instanceof ClientboundUpdateAttributesPacket) {
-            ClientboundUpdateAttributesPacket packet = (ClientboundUpdateAttributesPacket) p;
+        if(p instanceof ClientboundUpdateAttributesPacket packet) {
             PacketContainer container = getContainer(ClientboundUpdateAttributesPacket.class);
             container.getIntegers().write(0, entityInfo.getEntityId());
             container.getAttributeCollectionModifier().write(0, packet.getValues().stream().map(WrappedAttribute::fromHandle).collect(Collectors.toList()));
@@ -494,21 +476,14 @@ public class NMSEntityTracker implements IEntityTracker {
     }
 
     private EnumWrappers.Direction nmsDirectionToWrapper(Direction direction) {
-        switch(direction) {
-            case NORTH:
-                return EnumWrappers.Direction.NORTH;
-            case SOUTH:
-                return EnumWrappers.Direction.SOUTH;
-            case EAST:
-                return EnumWrappers.Direction.EAST;
-            case WEST:
-                return EnumWrappers.Direction.WEST;
-            case UP:
-                return EnumWrappers.Direction.UP;
-            case DOWN:
-                return EnumWrappers.Direction.DOWN;
-        }
-        throw new RuntimeException("Unknown direction " + direction);
+        return switch (direction) {
+            case NORTH -> EnumWrappers.Direction.NORTH;
+            case SOUTH -> EnumWrappers.Direction.SOUTH;
+            case EAST -> EnumWrappers.Direction.EAST;
+            case WEST -> EnumWrappers.Direction.WEST;
+            case UP -> EnumWrappers.Direction.UP;
+            case DOWN -> EnumWrappers.Direction.DOWN;
+        };
     }
 
 
@@ -543,7 +518,7 @@ public class NMSEntityTracker implements IEntityTracker {
         }
 
         // Sends entity spawning packets, note that we need to make sure that they have been modified to get the correct entity ID and position
-        serverEntity.a(packet -> playerConnection.send(modifyPacket(packet)), serverPlayer);
+        serverEntity.sendPairingData(packet -> playerConnection.send(Objects.requireNonNull(modifyPacket(packet))), serverPlayer);
         nmsEntity.startSeenByPlayer(serverPlayer);
 
         // We also need to remove the player from the tab menu after it is spawned
@@ -570,7 +545,7 @@ public class NMSEntityTracker implements IEntityTracker {
 
             nmsEntity.stopSeenByPlayer(serverPlayer);
 
-            PacketContainer container = getContainer(ClientboundRemoveEntityPacket.class);
+            PacketContainer container = getContainer(ClientboundRemoveEntitiesPacket.class);
             if(container.getIntegers().size() > 0) {
                 container.getIntegers().write(0, entityInfo.getEntityId());
             }   else if(container.getIntLists().size() > 0) {
