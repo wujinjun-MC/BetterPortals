@@ -1,3 +1,7 @@
+plugins {
+    id 'net.minecrell.plugin-yml.bungee' version '0.5.1'
+}
+
 repositories {
     mavenCentral()
     maven { url = 'https://oss.sonatype.org/content/repositories/snapshots' }
@@ -8,4 +12,12 @@ dependencies {
     implementation 'org.bstats:bstats-bungeecord:2.2.1'
     implementation project(':shared')
     compileOnly 'net.md-5:bungeecord-api:1.18-R0.1-SNAPSHOT'
+}
+
+bungee {
+    main = 'com.lauriethefish.betterportals.bungee.BetterPortals'
+    author = 'lauriethefish@outlook.com'
+    version = project.version
+    name = 'BetterPortals'
+    description = 'Proxy side plugin for BetterPortals which helps to allow cross-server portals'
 }
