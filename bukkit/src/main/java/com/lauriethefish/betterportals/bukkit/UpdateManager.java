@@ -61,7 +61,7 @@ public class UpdateManager {
         connection.setConnectTimeout(WRITE_TIMEOUT);
         connection.addRequestProperty("User-Agent", USER_AGENT);
 
-        JsonObject obj = new JsonParser().parse(new InputStreamReader(connection.getInputStream())).getAsJsonObject();
+        JsonObject obj = JsonParser.parseReader(new InputStreamReader(connection.getInputStream())).getAsJsonObject();
         latestVersionStr = obj.get("name").getAsString();
         latestVersionId = obj.get("id").getAsInt();
     }
