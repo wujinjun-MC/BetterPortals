@@ -14,6 +14,8 @@ def getImplementationConfigurations(parentProject) {
     return parentProject.configurations.implementation
 }
 
+archivesBaseName = "${rootProject.name}"
+
 tasks.build.dependsOn tasks.shadowJar
 shadowJar {
     configurations = [getImplementationConfigurations(project), getImplementationConfigurations(project(':bukkit'))]
@@ -35,4 +37,3 @@ shadowJar {
 
     minimize()
 }
-

@@ -7,12 +7,6 @@ allprojects {
 
     group = "com.lauriethefish.betterportals"
 
-    if (project.file("commitversion.enable").exists()) {
-        version = gradle.ext.versionName + '-' + "git rev-parse --verify --short HEAD".execute().text.trim().toLowerCase()
-    } else {
-       version = gradle.ext.versionName
-    }
-
     // Optional, just for showing name
     afterEvaluate {
         println("Evaluating project ${project.group}:${archivesBaseName}:${version}")
@@ -50,6 +44,15 @@ allprojects {
     }
 }
 
+jar.enabled = false
+build.enabled = false
+
 subprojects {
+    if (project.parent.file("commitversion.enable").exists()) {
+        version = gradle.ext.versionName + '-' + "git rev-parse --verify --short HEAD".execute().text.trim().toLowerCase()
+    } else {
+        version = gradle.ext.versionName
+    }
+
     archivesBaseName = "${rootProject.name}-${project.name}"
 }
