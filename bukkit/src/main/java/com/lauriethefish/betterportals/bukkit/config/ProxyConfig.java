@@ -41,7 +41,24 @@ public class ProxyConfig {
 
         reconnectionDelay = section.getInt("reconnectionDelay");
 
-        overrideServerName = section.getString("overrideServerName");
+        overrideServerName = section.getString("serverName");
+        if(overrideServerName != null && overrideServerName.isEmpty()) {
+            overrideServerName = null;
+        }
+
+        String legacyOverrideOption = section.getString("overrideServerName");
+        if(legacyOverrideOption != null && legacyOverrideOption.isEmpty()) {
+            legacyOverrideOption = null;
+        }
+
+        if(legacyOverrideOption != null && overrideServerName == null) {
+            overrideServerName = legacyOverrideOption;
+        }   else if(overrideServerName == null)   {
+            // Previously we allowed finding the server name based on the IP of the connecting server, but this cannot be relied on
+            // The server may be in a docker container, or some other kind of network that causes the IP to be different from that in the bungeecord config
+            logger.warning("No server name set in the BP proxy config. It is highly recommended to set this value to the server name in the bungeecord config to avoid issues with the proxy determining which server is connecting.");
+            logger.info("You can set this by adding the server name in the field called 'serverName'");
+        }
 
         try {
             encryptionKey = UUID.fromString(Objects.requireNonNull(section.getString("key"), "Encryption key missing"));
