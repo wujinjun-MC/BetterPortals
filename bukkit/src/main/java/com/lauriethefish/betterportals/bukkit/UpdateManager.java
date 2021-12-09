@@ -85,6 +85,12 @@ public class UpdateManager {
 
         String currentVersion = pl.getDescription().getVersion();
 
+        if(currentVersion.split("-").length > 1) {
+            logger.info("Disabling update check - using a developer build");
+            logger.warning("NOTICE: Developer builds can be unstable - if you are not comfortable with bugs please switch back to the latest stable build");
+            return;
+        }
+
         if (!VersionUtil.isVersionGreaterOrEq(currentVersion, latestVersionStr)) {
             String downloadUrl = String.format(UPDATE_DOWNLOAD_URL_FORMAT, latestVersionId);
 
