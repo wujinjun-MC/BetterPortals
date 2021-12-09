@@ -30,6 +30,8 @@ jobs:
           FILE_DATA: ""
       - name: Build with Gradle
         run: ./gradlew clean build
+        env:
+          BP_DEVELOPER_BUILD: 1
       - uses: actions/upload-artifact@v2
         with:
           name: artifact

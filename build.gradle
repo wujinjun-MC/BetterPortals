@@ -48,7 +48,7 @@ jar.enabled = false
 build.enabled = false
 
 subprojects {
-    if (project.parent.file("commitversion.enable").exists()) {
+    if (System.getenv('BP_DEVELOPER_BUILD') == '1') {
         version = gradle.ext.versionName + '-' + "git rev-parse --verify --short HEAD".execute().text.trim().toLowerCase()
     } else {
         version = gradle.ext.versionName
