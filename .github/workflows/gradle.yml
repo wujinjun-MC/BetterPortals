@@ -24,10 +24,6 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ secrets.CACHE_SUFFIX }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-${{ secrets.CACHE_SUFFIX }}-
-      - uses: "finnp/create-file-action@master"
-        env:
-          FILE_NAME: "commitversion.enable"
-          FILE_DATA: ""
       - name: Build with Gradle
         run: ./gradlew clean build
         env:
