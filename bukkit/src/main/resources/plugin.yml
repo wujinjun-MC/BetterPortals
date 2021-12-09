@@ -11,8 +11,6 @@ commands:
     description: Main plugin command
     aliases:
       - bp
-  testStuff:
-    description: Tests stuff
 #  stresstest:
 #    description: Testing command used for performance testing
 
