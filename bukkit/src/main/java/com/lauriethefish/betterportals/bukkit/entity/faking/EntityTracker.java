@@ -149,13 +149,13 @@ public class EntityTracker implements IEntityTracker    {
         trackingPlayers.add(player);
         boolean sendingPlayerProfile = !EntityInfo.USING_ORIGINAL_ENTITY_UID && entityInfo.getEntity() instanceof Player;
         if(sendingPlayerProfile) {
-            packetManipulator.sendAddPlayerProfile(entityInfo, trackingPlayers);
+            packetManipulator.sendAddPlayerProfile(entityInfo, Collections.singleton(player));
         }
 
         packetManipulator.showEntity(entityInfo, player);
 
         if(sendingPlayerProfile) {
-            Bukkit.getScheduler().runTaskLater(pl, () -> packetManipulator.sendRemovePlayerProfile(entityInfo, trackingPlayers), fakePlayerTabListRemoveDelay);
+            Bukkit.getScheduler().runTaskLater(pl, () -> packetManipulator.sendRemovePlayerProfile(entityInfo, Collections.singleton(player)), fakePlayerTabListRemoveDelay);
         }
     }
 
