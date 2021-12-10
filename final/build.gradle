@@ -33,7 +33,6 @@ shadowJar {
     relocate 'com.google.j2objc', 'com.lauriethefish.betterportals.dependencies.com.google.j2objc'
     relocate 'com.google.inject', 'com.lauriethefish.betterportals.dependencies.com.google.inject'
     relocate 'com.google.errorprone', 'com.lauriethefish.betterportals.dependencies.com.google.errorprone'
-    relocate 'com.google.common', 'com.lauriethefish.betterportals.dependencies.com.google.common'
 
     minimize()
 }
