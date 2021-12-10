@@ -3,6 +3,7 @@ package com.lauriethefish.betterportals.bukkit.entity.faking;
 import com.lauriethefish.betterportals.bukkit.math.Matrix;
 import com.lauriethefish.betterportals.bukkit.math.PortalTransformations;
 import com.lauriethefish.betterportals.bukkit.nms.EntityUtil;
+import com.lauriethefish.betterportals.bukkit.util.VersionUtil;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
@@ -18,6 +19,8 @@ import java.util.UUID;
  */
 @Getter
 public class EntityInfo {
+    public static final boolean USING_ORIGINAL_ENTITY_UID = !VersionUtil.isMcVersionAtLeast("1.17.0");
+
     private static final Random entityIdGenerator = new Random();
 
     private final Entity entity;
@@ -37,10 +40,7 @@ public class EntityInfo {
         this.entity = entity;
         this.entityId = entityIdGenerator.nextInt() & Integer.MAX_VALUE;
 
-        // If the entity is a player, then we need to use the actual UUID in order to get the skin correct
-        // This means that the same player cannot be on screen multiple times, i.e. mirrors will not work for players
-        // TODO: Implement this in non-NMS tracking method
-        this.entityUniqueId = UUID.randomUUID();
+        this.entityUniqueId = USING_ORIGINAL_ENTITY_UID ? entity.getUniqueId() : UUID.randomUUID();
         this.translation = transformations.getDestinationToOrigin();
         this.rotation = transformations.getRotateToOrigin();
     }

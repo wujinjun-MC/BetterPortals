@@ -5,18 +5,13 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.StructureModifier;
-import com.comphenix.protocol.wrappers.BlockPosition;
-import com.comphenix.protocol.wrappers.EnumWrappers;
-import com.comphenix.protocol.wrappers.Pair;
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
-import com.google.inject.Inject;
+import com.comphenix.protocol.wrappers.*;
 import com.google.inject.Singleton;
 import com.lauriethefish.betterportals.bukkit.math.MathUtil;
 import com.lauriethefish.betterportals.bukkit.nms.AnimationType;
 import com.lauriethefish.betterportals.bukkit.nms.EntityUtil;
 import com.lauriethefish.betterportals.bukkit.nms.RotationUtil;
 import com.lauriethefish.betterportals.bukkit.util.VersionUtil;
-import com.lauriethefish.betterportals.shared.logging.Logger;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Hanging;
@@ -44,6 +39,7 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
         // Generate the packet that NMS would normally use to spawn the entity
         PacketContainer spawnPacket = EntityUtil.getRawEntitySpawnPacket(tracker.getEntity());
         if(spawnPacket == null) {return;}
+        spawnPacket.getUUIDs().write(0, tracker.getEntityUniqueId());
 
         // Use the rendered entity ID
         spawnPacket.getIntegers().write(0, tracker.getEntityId());
@@ -353,6 +349,48 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
         integers.write(1, tracker.getEntityId());
         integers.write(2, ((Item) pickedUp.getEntity()).getItemStack().getAmount());
 
+        sendPacket(packet, players);
+    }
+
+    private PlayerInfoData generatePlayerInfoData(EntityInfo tracker) {
+        // We make a new profile for our fake user, with our fake UUID and the original name
+        WrappedGameProfile profile = new WrappedGameProfile(tracker.getEntityUniqueId(), tracker.getEntity().getName());
+
+        Player trackingPlayer = (Player) tracker.getEntity();
+        WrappedGameProfile playerProfile = WrappedGameProfile.fromPlayer(trackingPlayer);
+
+        // We remove the existing textures (if any) and add the skin of the original player
+        profile.getProperties().removeAll("textures");
+        profile.getProperties().putAll("textures", playerProfile.getProperties().get("textures"));
+
+
+        return new PlayerInfoData(
+                profile,
+                trackingPlayer.getPing(),
+                EnumWrappers.NativeGameMode.fromBukkit(trackingPlayer.getGameMode()),
+                WrappedChatComponent.fromText(trackingPlayer.getName())
+        );
+    }
+
+    @Override
+    public void sendAddPlayerProfile(EntityInfo tracker, Collection<Player> players) {
+        PacketContainer packet = new PacketContainer(PacketType.Play.Server.PLAYER_INFO);
+        packet.getPlayerInfoAction().write(0, EnumWrappers.PlayerInfoAction.ADD_PLAYER);
+
+        List<PlayerInfoData> playerInfoDataList = new ArrayList<>();
+        playerInfoDataList.add(generatePlayerInfoData(tracker));
+        packet.getPlayerInfoDataLists().write(0, playerInfoDataList);
+        sendPacket(packet, players);
+    }
+
+    @Override
+    public void sendRemovePlayerProfile(EntityInfo tracker, Collection<Player> players) {
+        PacketContainer packet = new PacketContainer(PacketType.Play.Server.PLAYER_INFO);
+        packet.getPlayerInfoAction().write(0, EnumWrappers.PlayerInfoAction.REMOVE_PLAYER);
+
+        List<PlayerInfoData> playerInfoDataList = new ArrayList<>();
+        playerInfoDataList.add(generatePlayerInfoData(tracker));
+        packet.getPlayerInfoDataLists().write(0, playerInfoDataList);
         sendPacket(packet, players);
     }
 

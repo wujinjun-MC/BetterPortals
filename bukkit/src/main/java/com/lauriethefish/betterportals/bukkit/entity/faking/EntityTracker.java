@@ -8,21 +8,29 @@ import com.lauriethefish.betterportals.bukkit.nms.AnimationType;
 import com.lauriethefish.betterportals.bukkit.nms.EntityUtil;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 public class EntityTracker implements IEntityTracker    {
+    /**
+     * Delay in ticks between sending the player info for fake players to the client and removing it (it is removed to avoid showing them twice in the tab menu)
+     */
+    private static final int fakePlayerTabListRemoveDelay = 20;
+
     private final Entity entity;
     @Getter private final EntityInfo entityInfo;
     @Getter private final IPortal portal;
     private final IEntityPacketManipulator packetManipulator;
     private final EntityTrackingManager entityTrackingManager;
+    private final JavaPlugin pl;
 
     private final Set<Player> trackingPlayers = new HashSet<>();
 
@@ -37,7 +45,7 @@ public class EntityTracker implements IEntityTracker    {
     private int ticksSinceCreated = 0;
 
     @Inject
-    public EntityTracker(@Assisted Entity entity, @Assisted IPortal portal, IEntityPacketManipulator packetManipulator, EntityTrackingManager entityTrackingManager, RenderConfig renderConfig) {
+    public EntityTracker(@Assisted Entity entity, @Assisted IPortal portal, IEntityPacketManipulator packetManipulator, EntityTrackingManager entityTrackingManager, RenderConfig renderConfig, JavaPlugin pl) {
         // Non-living entities don't have equipment
         this.equipmentWatcher = entity instanceof LivingEntity ? new EntityEquipmentWatcher((LivingEntity) entity) : null;
         this.entity = entity;
@@ -46,6 +54,7 @@ public class EntityTracker implements IEntityTracker    {
         this.entityInfo = new EntityInfo(portal.getTransformations(), entity);
         this.packetManipulator = packetManipulator;
         this.metadataUpdateInterval = renderConfig.getEntityMetadataUpdateInterval();
+        this.pl = pl;
     }
 
     public void update() {
@@ -138,7 +147,16 @@ public class EntityTracker implements IEntityTracker    {
         if(trackingPlayers.contains(player)) {throw new IllegalArgumentException("Player is already tracking this entity");}
 
         trackingPlayers.add(player);
+        boolean sendingPlayerProfile = !EntityInfo.USING_ORIGINAL_ENTITY_UID && entityInfo.getEntity() instanceof Player;
+        if(sendingPlayerProfile) {
+            packetManipulator.sendAddPlayerProfile(entityInfo, trackingPlayers);
+        }
+
         packetManipulator.showEntity(entityInfo, player);
+
+        if(sendingPlayerProfile) {
+            Bukkit.getScheduler().runTaskLater(pl, () -> packetManipulator.sendRemovePlayerProfile(entityInfo, trackingPlayers), fakePlayerTabListRemoveDelay);
+        }
     }
 
     public void removeTracking(@NotNull Player player, boolean sendPackets) {

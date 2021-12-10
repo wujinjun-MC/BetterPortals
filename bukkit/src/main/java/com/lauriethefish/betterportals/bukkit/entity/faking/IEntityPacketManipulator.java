@@ -132,4 +132,20 @@ public interface IEntityPacketManipulator {
      * @param players Players to send the packet to
      */
     void sendEntityPickupItem(EntityInfo tracker, EntityInfo pickedUp, Collection<Player> players);
+
+    /**
+     * Sends a player profile packet to add the tracker's player to the client's view.
+     * Will use the skin, name and latency of the player that the tracker is replicating, but will change the UUID to match that of the tracker
+     * @param tracker The player being shown
+     * @param players Players to send the packet to
+     */
+    void sendAddPlayerProfile(EntityInfo tracker, Collection<Player> players);
+
+
+    /**
+     * Sends a remove player profile packet to remove the tracker's player from the client's view
+     * @param tracker The player being removed
+     * @param players Players to send the packet to
+     */
+    void sendRemovePlayerProfile(EntityInfo tracker, Collection<Player> players);
 }
