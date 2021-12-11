@@ -47,6 +47,7 @@ public class UpdateManager {
      * Saves it to {@link UpdateManager#latestVersionStr} and {@link UpdateManager#latestVersionId}.
      * @throws IOException If the HTTPS request failed.
      */
+    @SuppressWarnings("deprecation")
     private void fetchLatestVersion() throws IOException {
         URL url;
         try {
@@ -61,7 +62,8 @@ public class UpdateManager {
         connection.setConnectTimeout(WRITE_TIMEOUT);
         connection.addRequestProperty("User-Agent", USER_AGENT);
 
-        JsonObject obj = JsonParser.parseReader(new InputStreamReader(connection.getInputStream())).getAsJsonObject();
+        JsonParser parser = new JsonParser();
+        JsonObject obj = parser.parse(new InputStreamReader(connection.getInputStream())).getAsJsonObject();
         latestVersionStr = obj.get("name").getAsString();
         latestVersionId = obj.get("id").getAsInt();
     }
