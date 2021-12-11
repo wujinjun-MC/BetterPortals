@@ -118,7 +118,7 @@ public class ClientHandler implements IClientHandler {
         send(response);
 
         if(result == HandshakeResponse.Result.SUCCESS) {
-            logger.fine("Successfully registered with server %s", serverInfo);
+            logger.fine("Successfully registered with server %s", serverInfo.getName());
             logger.fine("Plugin version: %s. Game version: %s.", handshake.getPluginVersion(), handshake.getGameVersion());
             portalServer.registerServer(this, serverInfo);
             this.serverInfo = serverInfo;
