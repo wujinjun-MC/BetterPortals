@@ -30,8 +30,6 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * A bukkit implementation of a flood fill block map.
- * Works across versions, so is used as a fall-back from the NMS version.
- * TODO: Fallback is yet to be implemented
  */
 public class BukkitBlockMap extends FloodFillBlockMap {
     private final IBlockRotator blockRotator;
