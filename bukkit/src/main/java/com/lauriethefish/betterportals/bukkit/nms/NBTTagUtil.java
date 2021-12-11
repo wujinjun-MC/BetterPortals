@@ -41,7 +41,7 @@ public class NBTTagUtil {
             NBT_TAG_STRING = MinecraftReflectionUtil.findVersionedNMSClass("NBTTagString");
             NBT_TAG_COMPOUND = MinecraftReflectionUtil.findVersionedNMSClass("NBTTagCompound");
             ITEM_STACK = MinecraftReflectionUtil.findVersionedNMSClass("ItemStack");
-            NBT_BASE = ReflectionUtil.findClass("NBTBase");
+            NBT_BASE = MinecraftReflectionUtil.findVersionedNMSClass("NBTBase");
         }
 
         if (VersionUtil.isMcVersionAtLeast("1.18.0")) {

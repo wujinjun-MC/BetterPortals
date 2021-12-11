@@ -13,6 +13,7 @@ import com.lauriethefish.betterportals.bukkit.config.RenderConfig;
 import com.lauriethefish.betterportals.bukkit.math.PlaneIntersectionChecker;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.tasks.BlockUpdateFinisher;
+import com.lauriethefish.betterportals.bukkit.util.HeightUtil;
 import com.lauriethefish.betterportals.bukkit.util.MaterialUtil;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import org.bukkit.Material;
@@ -59,8 +60,8 @@ public class PlayerBlockView implements IPlayerBlockView   {
         this.shouldHidePortalBlocks = portal.isNetherPortal() && renderConfig.isPortalBlocksHidden();
 
         World viewWorld = player.getWorld();
-        minChunkY = viewWorld.getMinHeight() >> 4;
-        maxChunkY = viewWorld.getMaxHeight() >> 4;
+        minChunkY = HeightUtil.getMinHeight(viewWorld) >> 4;
+        maxChunkY = HeightUtil.getMaxHeight(viewWorld) >> 4;
     }
 
     // Called whenever the player moves

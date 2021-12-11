@@ -1,5 +1,6 @@
 package com.lauriethefish.betterportals.bukkit.config;
 
+import com.lauriethefish.betterportals.bukkit.util.HeightUtil;
 import com.lauriethefish.betterportals.bukkit.util.VersionUtil;
 import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import lombok.Getter;
@@ -20,19 +21,6 @@ import java.util.Objects;
  */
 @Getter
 public class WorldLink  {
-    private static final Method GET_MIN_HEIGHT;
-    private static final Method GET_MAX_HEIGHT;
-
-    static {
-        if(VersionUtil.isMcVersionAtLeast("1.18.0")) {
-            GET_MIN_HEIGHT = ReflectionUtil.findMethod(World.class, "getMinHeight");
-            GET_MAX_HEIGHT = ReflectionUtil.findMethod(World.class, "getMaxHeight");
-        }   else    {
-            GET_MIN_HEIGHT = null;
-            GET_MAX_HEIGHT = null;
-        }
-    }
-
     private final String originWorldName;
     private final String destWorldName;
 
@@ -67,18 +55,13 @@ public class WorldLink  {
     }
 
     public WorldLink(World originWorld, World destinationWorld, double coordinateRescalingFactor, int yMinSpace) {
-        this(originWorld, destinationWorld, coordinateRescalingFactor, getMinHeight(destinationWorld) + yMinSpace, getMaxHeight(destinationWorld) - yMinSpace);
+        this(originWorld, destinationWorld, coordinateRescalingFactor, HeightUtil.getMinHeight(destinationWorld) + yMinSpace, getMaxHeight(destinationWorld) - yMinSpace);
     }
 
     private static int getMaxHeight(World world) {
-        int actualMaxHeight = GET_MAX_HEIGHT == null ? 0 : (int) ReflectionUtil.invokeMethod(world, GET_MAX_HEIGHT);
-
-        return world.getEnvironment() == World.Environment.NETHER ? 128 : actualMaxHeight;
+        return world.getEnvironment() == World.Environment.NETHER ? 128 : HeightUtil.getMaxHeight(world);
     }
 
-    private static int getMinHeight(World world) {
-        return GET_MIN_HEIGHT == null ? 0 : (int) ReflectionUtil.invokeMethod(world, GET_MIN_HEIGHT);
-    }
 
     public boolean isValid()    {
         return originWorld != null && destinationWorld != null;
