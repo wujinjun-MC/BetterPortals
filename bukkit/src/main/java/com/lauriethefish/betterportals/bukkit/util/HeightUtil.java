@@ -20,7 +20,7 @@ public class HeightUtil {
     }
 
     public static int getMaxHeight(World world) {
-        return GET_MAX_HEIGHT == null ? 0 : (int) ReflectionUtil.invokeMethod(world, GET_MAX_HEIGHT);
+        return GET_MAX_HEIGHT == null ? 255 : (int) ReflectionUtil.invokeMethod(world, GET_MAX_HEIGHT);
     }
 
     public static int getMinHeight(World world) {
