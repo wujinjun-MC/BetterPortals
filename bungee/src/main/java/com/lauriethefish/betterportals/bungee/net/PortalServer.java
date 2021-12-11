@@ -86,7 +86,7 @@ public class PortalServer implements IPortalServer {
         logger.info("Shutting down portal server");
         isRunning = false;
         try {
-            // The socket close error will be caught since we set hasShutDown to true.
+            // The socket close error will be caught since we set isRunning to false.
             serverSocket.close();
             for(IClientHandler serverHandler : registeredServers.values()) {
                 serverHandler.shutDown();
