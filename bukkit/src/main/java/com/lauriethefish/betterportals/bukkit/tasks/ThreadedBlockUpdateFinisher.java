@@ -25,7 +25,9 @@ public class ThreadedBlockUpdateFinisher extends BlockUpdateFinisher implements 
 
     @Override
     public void stop() {
-        thread.interrupt();
+        if(thread != null) {
+            thread.interrupt();
+        }
         super.stop();
     }
 
