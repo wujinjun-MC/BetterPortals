@@ -37,16 +37,13 @@ public class SpawningEvents implements Listener {
     private static final Method GET_ENTITY_METHOD;
 
     static {
+        GET_BLOCKS_METHOD = ReflectionUtil.findMethod(PortalCreateEvent.class, "getBlocks");
         if(VersionUtil.isMcVersionAtLeast("1.14.0")) {
             GET_ENTITY_METHOD = ReflectionUtil.findMethod(PortalCreateEvent.class, "getEntity");
-            GET_BLOCKS_METHOD = null;
         }   else    {
-            GET_BLOCKS_METHOD = ReflectionUtil.findMethod(PortalCreateEvent.class, "getBlocks");
             GET_ENTITY_METHOD = null;
         }
     }
-
-    private static boolean methodsPrepared = false;
 
     private final IPortalSpawner portalSpawnChecker;
     private final IPortalManager portalManager;
