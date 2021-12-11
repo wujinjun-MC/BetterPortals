@@ -177,20 +177,33 @@ public class SpawningEvents implements Listener {
         if(VersionUtil.isMcVersionAtLeast("1.14.0")) {
             // Yay! convenient method exists in these versions
             Entity lighter = (Entity) ReflectionUtil.invokeMethod(event, GET_ENTITY_METHOD);
-            if(!(lighter instanceof Player)) {return;}
+            if(lighter instanceof Player) {
+                lighter.sendMessage(message);
+            }
 
-            lighter.sendMessage(message);
+            if(lighter != null) {
+                return;
+            }
+        }
+
+        // Loop through the nearby entities to find who to send the message to
+        List<?> blocks = (List<?>) ReflectionUtil.invokeMethod(event, GET_BLOCKS_METHOD);
+        Object firstBlock = blocks.get(0);
+
+        Location portalLocation;
+        if(firstBlock instanceof Block) {
+            portalLocation = ((Block) firstBlock).getLocation();
+        }   else if(firstBlock instanceof BlockState) {
+            portalLocation = ((BlockState) firstBlock).getLocation();
         }   else    {
-            // Loop through the nearby entities to find who to send the message to
-            List<?> blocks = (List<?>) ReflectionUtil.invokeMethod(event, GET_BLOCKS_METHOD);
+            return;
+        }
 
-            Location portalLocation = ((Block) blocks.get(0)).getLocation();
-            Collection<Entity> nearby = event.getWorld().getNearbyEntities(portalLocation, PORTAL_WARNING_SEND_RANGE, PORTAL_WARNING_SEND_RANGE, PORTAL_WARNING_SEND_RANGE);
+        Collection<Entity> nearby = event.getWorld().getNearbyEntities(portalLocation, PORTAL_WARNING_SEND_RANGE, PORTAL_WARNING_SEND_RANGE, PORTAL_WARNING_SEND_RANGE);
 
-            for(Entity entity : nearby) {
-                if(entity instanceof Player) {
-                    entity.sendMessage(message);
-                }
+        for(Entity entity : nearby) {
+            if(entity instanceof Player) {
+                entity.sendMessage(message);
             }
         }
     }
