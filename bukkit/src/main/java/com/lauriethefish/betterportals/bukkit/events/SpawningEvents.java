@@ -33,9 +33,19 @@ public class SpawningEvents implements Listener {
     // In 1.12 and 1.13 there's no way to get the entity that lit a portal, so we just send it to all players within a range.
     private static final double PORTAL_WARNING_SEND_RANGE = 10;
 
+    private static final Method GET_BLOCKS_METHOD;
+    private static final Method GET_ENTITY_METHOD;
 
-    private static Method GET_BLOCKS_METHOD = ReflectionUtil.findMethod(PortalCreateEvent.class, "getBlocks");
-    private static Method GET_ENTITY_METHOD = ReflectionUtil.findMethod(PortalCreateEvent.class, "getEntity");
+    static {
+        if(VersionUtil.isMcVersionAtLeast("1.14.0")) {
+            GET_ENTITY_METHOD = ReflectionUtil.findMethod(PortalCreateEvent.class, "getEntity");
+            GET_BLOCKS_METHOD = null;
+        }   else    {
+            GET_BLOCKS_METHOD = ReflectionUtil.findMethod(PortalCreateEvent.class, "getBlocks");
+            GET_ENTITY_METHOD = null;
+        }
+    }
+
     private static boolean methodsPrepared = false;
 
     private final IPortalSpawner portalSpawnChecker;
@@ -54,18 +64,7 @@ public class SpawningEvents implements Listener {
         this.messageConfig = messageConfig;
         this.logger = logger;
 
-        initReflection();
         eventRegistrar.register(this);
-    }
-
-    private static void initReflection() {
-        if(methodsPrepared) {
-            return;
-        }
-
-        GET_BLOCKS_METHOD = ReflectionUtil.findMethod(PortalCreateEvent.class, "getBlocks");
-        GET_ENTITY_METHOD = ReflectionUtil.findMethod(PortalCreateEvent.class, "getEntity");
-        methodsPrepared = true;
     }
 
     @EventHandler
