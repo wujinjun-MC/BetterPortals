@@ -41,6 +41,8 @@ public class PlayerData implements IPlayerData  {
     // A concurrent map is used so that removing a portal while updating portals doesn't cause an error
     private final Map<IPortal, IPlayerPortalView> portalViews = new ConcurrentHashMap<>();
 
+    private boolean viewsFrozen;
+
     @Inject
     public PlayerData(@Assisted Player player, IPlayerSelectionManager selection, IPortalManager portalManager, IPortalPredicateManager portalPredicateManager, BetterPortals pl, Logger logger, IPortalActivityManager portalActivityManager, PlayerPortalViewFactory playerPortalViewFactory) {
         this.player = player;
@@ -104,7 +106,10 @@ public class PlayerData implements IPlayerData  {
     @Override
     public void onUpdate() {
         Collection<IPortal> nowViewablePortals = updateViewablePortals();
-        updatePortalViews(nowViewablePortals);
+
+        if(!viewsFrozen) {
+            updatePortalViews(nowViewablePortals);
+        }
     }
 
     private void deactivateViews(boolean loggingOut) {
@@ -148,6 +153,11 @@ public class PlayerData implements IPlayerData  {
         }
 
 
+    }
+
+    @Override
+    public void freezePortalViews() {
+        viewsFrozen = true;
     }
 
     private void setViewing(IPortal portal) {

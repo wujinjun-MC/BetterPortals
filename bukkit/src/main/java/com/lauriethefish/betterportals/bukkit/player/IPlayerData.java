@@ -30,6 +30,11 @@ public interface IPlayerData {
     void savePermanentData();
 
     /**
+     * Stops scheduling portal view updates
+     */
+    void freezePortalViews();
+
+    /**
      * @return The player's current portal selection
      */
     @NotNull IPlayerSelectionManager getSelection();

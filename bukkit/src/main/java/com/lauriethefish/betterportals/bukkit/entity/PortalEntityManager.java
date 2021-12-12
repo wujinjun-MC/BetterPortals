@@ -7,6 +7,8 @@ import com.lauriethefish.betterportals.bukkit.config.RenderConfig;
 import com.lauriethefish.betterportals.bukkit.math.MathUtil;
 import com.lauriethefish.betterportals.bukkit.math.PortalTransformations;
 import com.lauriethefish.betterportals.bukkit.net.IPortalClient;
+import com.lauriethefish.betterportals.bukkit.player.IPlayerData;
+import com.lauriethefish.betterportals.bukkit.player.IPlayerDataManager;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.portal.predicate.IPortalPredicateManager;
 import com.lauriethefish.betterportals.shared.logging.Logger;
@@ -37,6 +39,7 @@ public class PortalEntityManager implements IPortalEntityManager {
     private final Set<Player> alreadyTeleporting = new HashSet<>();
     private final JavaPlugin pl;
     private final IEntityFinder entityFinder;
+    private final IPlayerDataManager playerDataManager;
 
     private final boolean requireDestination;
 
@@ -45,7 +48,7 @@ public class PortalEntityManager implements IPortalEntityManager {
 
     @Inject
     public PortalEntityManager(@Assisted IPortal portal, @Assisted boolean requireDestination, MiscConfig miscConfig, RenderConfig renderConfig, IPortalPredicateManager predicateManager, Logger logger, IPortalClient
-            portalClient, JavaPlugin pl, IEntityFinder entityFinder) {
+            portalClient, JavaPlugin pl, IEntityFinder entityFinder, IPlayerDataManager playerDataManager) {
         this.portal = portal;
         this.requireDestination = requireDestination;
         this.miscConfig = miscConfig;
@@ -55,6 +58,7 @@ public class PortalEntityManager implements IPortalEntityManager {
         this.portalClient = portalClient;
         this.pl = pl;
         this.entityFinder = entityFinder;
+        this.playerDataManager = playerDataManager;
     }
 
     @Override
@@ -208,6 +212,13 @@ public class PortalEntityManager implements IPortalEntityManager {
         }
 
         alreadyTeleporting.add(player);
+
+        IPlayerData playerData = playerDataManager.getPlayerData(player);
+        if(playerData == null) {
+            logger.warning("Player with unregistered data %s", player.getUniqueId());
+            return;
+        }
+        playerData.freezePortalViews();
 
         Location destPosition = portal.getTransformations().moveToDestination(player.getLocation());
         destPosition.setDirection(portal.getTransformations().rotateToDestination(player.getLocation().getDirection()));
