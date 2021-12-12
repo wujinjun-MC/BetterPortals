@@ -1,11 +1,10 @@
-package com.lauriethefish.betterportals.bungee.net;
+package com.lauriethefish.betterportals.proxy.net;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.lauriethefish.betterportals.bungee.Config;
+import com.lauriethefish.betterportals.proxy.IProxyConfig;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import com.lauriethefish.betterportals.shared.net.encryption.CipherManager;
-import net.md_5.bungee.api.config.ServerInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,8 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Singleton
 public class PortalServer implements IPortalServer {
     private final Logger logger;
-    private final Config config;
-    private final ServerHandlerFactory serverHandlerFactory;
+    private final IProxyConfig config;
+    private final IClientHandler.Factory serverHandlerFactory;
 
     private final Set<IClientHandler> connectedServers = new HashSet<>();
     private final Map<String, IClientHandler> registeredServers = new ConcurrentHashMap<>();
@@ -30,7 +29,7 @@ public class PortalServer implements IPortalServer {
     private volatile boolean isRunning = false;
 
     @Inject
-    public PortalServer(Logger logger, CipherManager cipherManager, Config config, ServerHandlerFactory serverHandlerFactory) throws Exception    {
+    public PortalServer(Logger logger, CipherManager cipherManager, IProxyConfig config, IClientHandler.Factory serverHandlerFactory) throws Exception    {
         this.logger = logger;
         this.config = config;
         this.serverHandlerFactory = serverHandlerFactory;
@@ -98,21 +97,21 @@ public class PortalServer implements IPortalServer {
     }
 
     @Override
-    public void registerServer(@NotNull IClientHandler serverHandler, @NotNull ServerInfo serverInfo) {
+    public void registerServer(@NotNull IClientHandler serverHandler, @NotNull String serverName) {
         if(!connectedServers.contains(serverHandler)) {
             throw new IllegalArgumentException("Attempted to register server that wasn't connected");
         }
 
-        registeredServers.put(serverInfo.getName(), serverHandler);
+        registeredServers.put(serverName, serverHandler);
     }
 
     @Override
     public void onServerDisconnect(@NotNull IClientHandler handler) {
         connectedServers.remove(handler);
-        ServerInfo serverInfo = handler.getServerInfo();
-        if(serverInfo != null) {
-            logger.finer("Server %s disconnected from the portal server", serverInfo.getName());
-            registeredServers.remove(serverInfo.getName());
+        String serverName = handler.getServerName();
+        if(serverName != null) {
+            logger.finer("Server %s disconnected from the portal server", serverName);
+            registeredServers.remove(serverName);
         }   else    {
             logger.finer("Unregistered server disconnected from the portal server");
         }

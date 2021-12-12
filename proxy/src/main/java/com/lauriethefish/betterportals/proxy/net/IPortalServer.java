@@ -1,6 +1,5 @@
-package com.lauriethefish.betterportals.bungee.net;
+package com.lauriethefish.betterportals.proxy.net;
 
-import net.md_5.bungee.api.config.ServerInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,9 +25,9 @@ public interface IPortalServer {
     /**
      * Registers the given server when the handshake has succeeded.
      * @param serverHandler The server to register
-     * @param serverInfo The {@link ServerInfo} that this server's address and port correspond to.
+     * @param serverName The name of the server to register
      */
-    void registerServer(@NotNull IClientHandler serverHandler, @NotNull ServerInfo serverInfo);
+    void registerServer(@NotNull IClientHandler serverHandler, @NotNull String serverName);
 
     /**
      * Unregisters the given client if it is registered.

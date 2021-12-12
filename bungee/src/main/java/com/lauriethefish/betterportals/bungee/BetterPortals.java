@@ -3,8 +3,8 @@ package com.lauriethefish.betterportals.bungee;
 import com.google.inject.Guice;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.lauriethefish.betterportals.bungee.net.IPortalServer;
-import com.lauriethefish.betterportals.bungee.net.PortalServer;
+import com.lauriethefish.betterportals.proxy.net.IPortalServer;
+import com.lauriethefish.betterportals.proxy.net.PortalServer;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import com.lauriethefish.betterportals.shared.net.DisconnectNotice;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -18,7 +18,6 @@ public class BetterPortals extends Plugin {
     @Override
     public void onEnable() {
         Injector injector = Guice.createInjector(new MainModule(this));
-        DisconnectNotice disconnectNotice = new DisconnectNotice(); // Purely to aid class loading during development, please don't remove this
 
         try {
             config.load();
