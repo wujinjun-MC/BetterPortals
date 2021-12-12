@@ -147,7 +147,9 @@ public class EntityTracker implements IEntityTracker    {
         if(trackingPlayers.contains(player)) {throw new IllegalArgumentException("Player is already tracking this entity");}
 
         trackingPlayers.add(player);
-        boolean sendingPlayerProfile = !EntityInfo.USING_ORIGINAL_ENTITY_UID && entityInfo.getEntity() instanceof Player;
+
+        // If the tracker's entity UID is different, and they are a player, we must send a player info packet to add their profile to the server
+        boolean sendingPlayerProfile = !entityInfo.getEntityUniqueId().equals(entityInfo.getEntity().getUniqueId()) && entityInfo.getEntity() instanceof Player;
         if(sendingPlayerProfile) {
             packetManipulator.sendAddPlayerProfile(entityInfo, Collections.singleton(player));
         }
