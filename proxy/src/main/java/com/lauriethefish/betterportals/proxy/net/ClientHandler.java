@@ -57,12 +57,14 @@ public class ClientHandler implements IClientHandler {
                     return;
                 } // An IOException gets thrown if another thread shuts down this connection
 
-                logger.warning("An IO error occurred while connected to %s", socket.getRemoteSocketAddress());
-                ex.printStackTrace();
+                if(ex.getCause() instanceof AEADBadTagException) {
+                    printEncryptionFailure();
+                }   else    {
+                    logger.warning("An IO error occurred while connected to %s", socket.getRemoteSocketAddress());
+                    ex.printStackTrace();
+                }
             }   catch(AEADBadTagException ex) {
-                logger.warning("Failed to initialise encryption with %s", socket.getRemoteSocketAddress());
-                logger.warning("Please make sure that your encryption key is valid!");
-                ex.printStackTrace();
+                printEncryptionFailure();
             }   catch(Exception ex) {
                 logger.warning("An error occurred while connected to %s", socket.getRemoteSocketAddress());
                 ex.printStackTrace();
@@ -70,6 +72,11 @@ public class ClientHandler implements IClientHandler {
                 disconnect();
             }
         }).start();
+    }
+
+    private void printEncryptionFailure() {
+        logger.warning("Failed to initialise encryption with %s", socket.getRemoteSocketAddress());
+        logger.warning("Please make sure that your encryption key is valid!");
     }
 
     /**
