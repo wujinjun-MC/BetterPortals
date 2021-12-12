@@ -34,6 +34,9 @@ public class TestPlayerData implements IPlayerData {
     public void savePermanentData() { }
 
     @Override
+    public void freezePortalViews() { }
+
+    @Override
     public @NotNull YamlConfiguration getPermanentData() { return null;}
 
     @Override
