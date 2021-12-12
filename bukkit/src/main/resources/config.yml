@@ -59,7 +59,7 @@ maxPortalSize:
 portalCollisionBox:
   x: 0.50
   y: 0.50
-  z: 0.25
+  z: 0.50
 
 # Worlds where the plugin will fall back to the vanilla portal logic
 disabledWorlds:
