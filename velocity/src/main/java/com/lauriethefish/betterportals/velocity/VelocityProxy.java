@@ -59,6 +59,6 @@ public class VelocityProxy implements IProxy {
             throw new IllegalArgumentException(String.format("No server existed with the UUID %s", destinationServer));
         }
 
-        player.get().createConnectionRequest(server.get());
+        player.get().createConnectionRequest(server.get()).fireAndForget();
     }
 }
