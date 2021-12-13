@@ -1,0 +1,10 @@
+{
+  "id": "better-portals",
+  "name": "BetterPortals",
+  "version": "${version}",
+  "authors": [
+    "lauriethefish@outlook.com"
+  ],
+  "dependencies": [],
+  "main": "com.lauriethefish.betterportals.velocity.BetterPortals"
+}
