@@ -90,7 +90,7 @@ public class ChunkPosition implements Cloneable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(x, z);
+        return Objects.hash(x, z, world);
     }
 
     @Override
