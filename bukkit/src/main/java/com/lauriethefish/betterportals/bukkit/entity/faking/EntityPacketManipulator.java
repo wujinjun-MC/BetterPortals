@@ -39,7 +39,10 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
         // Generate the packet that NMS would normally use to spawn the entity
         PacketContainer spawnPacket = EntityUtil.getRawEntitySpawnPacket(tracker.getEntity());
         if(spawnPacket == null) {return;}
-        spawnPacket.getUUIDs().write(0, tracker.getEntityUniqueId());
+
+        if(spawnPacket.getUUIDs().size() > 0) {
+            spawnPacket.getUUIDs().write(0, tracker.getEntityUniqueId());
+        }
 
         // Use the rendered entity ID
         spawnPacket.getIntegers().write(0, tracker.getEntityId());
