@@ -139,9 +139,9 @@ public class PortalTransformations {
     public PlaneIntersectionChecker createIntersectionChecker(Vector rayOrigin) {
         Vector planeSize = portalSize.clone().multiply(0.5); // The size for the intersection checker is a radius, so we half this since it's the size of the full portal window
         planeSize = originPos.getDirection().swapVector(planeSize); // Must be on the Z and Y, or Z and X if horizontal (portal's sizes always use the XZ, but we don't want this here)
-        planeSize.add(renderConfig.getCollisionBox()); // Expand the size slightly by the values in the config
 
-        // TODO: fix bug where the Z coordinate is used even though it shouldn't be
+        Vector collisionBoxOffset = originPos.getDirection().swapVector(renderConfig.getCollisionBox());
+        planeSize.add(collisionBoxOffset); // Expand the size slightly by the values in the config
 
         return new PlaneIntersectionChecker(
                 originPos.getVector(),
