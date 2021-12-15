@@ -16,10 +16,13 @@ import com.lauriethefish.betterportals.bukkit.nms.BlockDataUtil;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.util.MaterialUtil;
 import com.lauriethefish.betterportals.shared.logging.Logger;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.type.Light;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -64,6 +67,13 @@ public class BukkitBlockMap extends FloodFillBlockMap {
      */
     protected void searchFromBlock(IntVector start, List<IViewableBlockInfo> statesOutput, @Nullable IViewableBlockInfo firstBlockInfo) {
         WrappedBlockData backgroundData = getBackgroundData();
+
+        final int timeBetweenLightBlocks = 10;
+        int airCount = 0;
+
+        Light lightBlockData = (Light) Bukkit.createBlockData(Material.LIGHT);
+        lightBlockData.setLevel(10);
+        WrappedBlockData wrappedLightData = WrappedBlockData.createData(lightBlockData);
 
         // We don't use a Stack<T> or ArrayList<T> since those are much too slow
         int[] stack = new int[firstUpdate ? renderConfig.getTotalArrayLength() : 16];
@@ -141,9 +151,23 @@ public class BukkitBlockMap extends FloodFillBlockMap {
             // Don't bother adding blocks which are in line with the portal window, as these will never be visible anyway, and just serve to made the block map larger
             // We also only add this block to the viewable states if it doesn't already exist there (this is the case if the alreadyReachedMap's value is 1)
             // The above check is only important on incremental updates, since on the first update the block must never have been added to the block map - it's being checked for the first time
-            if (!isInLine && !canSkip && alreadyReachedMap[positionInt] < 2) {
-                alreadyReachedMap[positionInt] = 2; // Make sure that this block will not be added multiple times
-                statesOutput.add(blockInfo);
+
+            Material currentBlock = destData.getMaterial();
+
+            if(alreadyReachedMap[positionInt] < 2 && !isInLine) {
+                if(currentBlock.isAir() && !isEdge) {
+                    airCount++;
+                }
+
+                if(airCount == timeBetweenLightBlocks) {
+                    airCount = 0;
+                    blockInfo.setRenderedDestData(wrappedLightData);
+                    alreadyReachedMap[positionInt] = 2; // Make sure that this block will not be added multiple times
+                    statesOutput.add(blockInfo);
+                }   else if(!canSkip)    {
+                    alreadyReachedMap[positionInt] = 2; // Make sure that this block will not be added multiple times
+                    statesOutput.add(blockInfo);
+                }
             }
 
             // Stop when we reach the edge, as otherwise the flood-fill will continue forever
