@@ -1,0 +1,22 @@
+repositories {
+    maven {
+        name 'velocity'
+        url 'https://repo.velocitypowered.com/snapshots/'
+    }
+}
+
+task setVersion(type: Copy) {
+    from 'src/main/resources'
+    into 'build/resources/main'
+    expand(version: project.version)
+    filteringCharset = 'UTF-8'
+}
+
+tasks.jar.dependsOn setVersion
+
+dependencies {
+    compileOnly 'com.velocitypowered:velocity-api:3.0.0'
+
+    implementation project(':shared')
+    implementation project(':proxy')
+}

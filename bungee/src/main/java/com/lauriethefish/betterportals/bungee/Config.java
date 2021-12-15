@@ -2,6 +2,7 @@ package com.lauriethefish.betterportals.bungee;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.lauriethefish.betterportals.proxy.IProxyConfig;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import lombok.Getter;
 import net.md_5.bungee.api.plugin.Plugin;
@@ -23,7 +24,7 @@ import java.util.logging.Level;
  * This class handles loading and saving of the config file.
  */
 @Singleton
-public class Config {
+public class Config implements IProxyConfig {
     private final Plugin pl;
     private final Logger logger;
 

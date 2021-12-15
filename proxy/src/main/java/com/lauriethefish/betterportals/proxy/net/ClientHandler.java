@@ -1,17 +1,15 @@
-package com.lauriethefish.betterportals.bungee.net;
+package com.lauriethefish.betterportals.proxy.net;
 
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import com.lauriethefish.betterportals.proxy.IProxy;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import com.lauriethefish.betterportals.shared.net.*;
 import com.lauriethefish.betterportals.shared.net.encryption.EncryptedObjectStreamFactory;
 import com.lauriethefish.betterportals.shared.net.encryption.IEncryptedObjectStream;
 import com.lauriethefish.betterportals.shared.net.requests.Request;
 import lombok.Getter;
-import net.md_5.bungee.api.config.ServerInfo;
-import net.md_5.bungee.api.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import javax.crypto.AEADBadTagException;
 import java.io.IOException;
@@ -26,15 +24,16 @@ import java.util.function.Consumer;
 public class ClientHandler implements IClientHandler {
     private final IPortalServer portalServer;
     private final Logger logger;
-    private final Plugin pl;
     private final EncryptedObjectStreamFactory encryptedObjectStreamFactory;
     private final IRequestHandler requestHandler;
 
     private final Socket socket;
     private IEncryptedObjectStream objectStream;
 
-    @Getter private ServerInfo serverInfo = null;
+    @Getter private String serverName = null;
     @Getter private String gameVersion;
+
+    private final IProxy proxy;
 
     private volatile boolean isRunning = true;
 
@@ -42,13 +41,13 @@ public class ClientHandler implements IClientHandler {
     private final ConcurrentMap<Integer, Consumer<Response>> waitingRequests = new ConcurrentHashMap<>();
 
     @Inject
-    public ClientHandler(@Assisted Socket socket, IPortalServer portalServer, Logger logger, Plugin pl, EncryptedObjectStreamFactory encryptedObjectStreamFactory, IRequestHandler requestHandler) {
+    public ClientHandler(@Assisted Socket socket, IPortalServer portalServer, Logger logger, EncryptedObjectStreamFactory encryptedObjectStreamFactory, IRequestHandler requestHandler, IProxy proxy) {
         this.socket = socket;
         this.portalServer = portalServer;
         this.logger = logger;
-        this.pl = pl;
         this.encryptedObjectStreamFactory = encryptedObjectStreamFactory;
         this.requestHandler = requestHandler;
+        this.proxy = proxy;
 
         new Thread(() -> {
             try {
@@ -58,12 +57,14 @@ public class ClientHandler implements IClientHandler {
                     return;
                 } // An IOException gets thrown if another thread shuts down this connection
 
-                logger.warning("An IO error occurred while connected to %s", socket.getRemoteSocketAddress());
-                ex.printStackTrace();
+                if(ex.getCause() instanceof AEADBadTagException) {
+                    printEncryptionFailure();
+                }   else    {
+                    logger.warning("An IO error occurred while connected to %s", socket.getRemoteSocketAddress());
+                    ex.printStackTrace();
+                }
             }   catch(AEADBadTagException ex) {
-                logger.warning("Failed to initialise encryption with %s", socket.getRemoteSocketAddress());
-                logger.warning("Please make sure that your encryption key is valid!");
-                ex.printStackTrace();
+                printEncryptionFailure();
             }   catch(Exception ex) {
                 logger.warning("An error occurred while connected to %s", socket.getRemoteSocketAddress());
                 ex.printStackTrace();
@@ -71,6 +72,11 @@ public class ClientHandler implements IClientHandler {
                 disconnect();
             }
         }).start();
+    }
+
+    private void printEncryptionFailure() {
+        logger.warning("Failed to initialise encryption with %s", socket.getRemoteSocketAddress());
+        logger.warning("Please make sure that your encryption key is valid!");
     }
 
     /**
@@ -84,7 +90,7 @@ public class ClientHandler implements IClientHandler {
 
         // The plugin version needs to be the same, since the protocol may have changed
         HandshakeResponse.Result result = HandshakeResponse.Result.SUCCESS;
-        if(!pl.getDescription().getVersion().equals(handshake.getPluginVersion())) {
+        if(!proxy.getPluginVersion().equals(handshake.getPluginVersion())) {
             logger.warning("A server tried to register with a different plugin version (%s)", handshake.getPluginVersion());
             result = HandshakeResponse.Result.PLUGIN_VERSION_MISMATCH;
         }
@@ -92,24 +98,23 @@ public class ClientHandler implements IClientHandler {
         InetSocketAddress statedServerAddress = new InetSocketAddress(socket.getInetAddress(), handshake.getServerPort());
 
         // Find the bungeecord server that the connector is connecting from
-        ServerInfo serverInfo = null;
-        String statedServerName = handshake.getOverrideServerName();
-        if(statedServerName != null) {
-            logger.finer("Using manually stated server name %s", statedServerName);
-            serverInfo = pl.getProxy().getServerInfo(statedServerName);
+        String serverName = handshake.getOverrideServerName();
+        if(serverName != null) {
+            logger.finer("Using manually stated server name %s", serverName);
 
-            if(serverInfo == null) {
-                logger.warning("Server name %s was stated by a client, but no listed server existed with that name!", statedServerName);
+            if(!proxy.serverExists(serverName)) {
+                logger.warning("Server name %s was stated by a client, but no listed server existed with that name!", serverName);
+                serverName = null;
             }
         }
 
-        if(serverInfo == null) {
-            logger.fine("Finding server info from socket address and port");
-            serverInfo = findServer(statedServerAddress);
+        if(serverName == null) {
+            logger.warning("Finding server info from socket address and port, this behaviour is deprecated!");
+            serverName = proxy.findServer(statedServerAddress);
         }
 
-        if(serverInfo == null) {
-            logger.warning("A server tried to register that didn't exist in bungeecord");
+        if(serverName == null) {
+            logger.warning("A server tried to register that didn't exist on the proxy!");
             result = HandshakeResponse.Result.SERVER_NOT_REGISTERED;
         }
 
@@ -118,32 +123,15 @@ public class ClientHandler implements IClientHandler {
         send(response);
 
         if(result == HandshakeResponse.Result.SUCCESS) {
-            logger.fine("Successfully registered with server %s", serverInfo.getName());
+            logger.fine("Successfully registered with server %s", serverName);
             logger.fine("Plugin version: %s. Game version: %s.", handshake.getPluginVersion(), handshake.getGameVersion());
-            portalServer.registerServer(this, serverInfo);
-            this.serverInfo = serverInfo;
+            portalServer.registerServer(this, serverName);
+            this.serverName = serverName;
             this.gameVersion = handshake.getGameVersion();
             return true;
         }   else    {
             return false;
         }
-    }
-
-    /**
-     * Finds the bungeecord server with the address <code>clientAddress</code>.
-     * @param clientAddress The address to search for
-     * @return The server with this address, or null if there is none
-     */
-    @SuppressWarnings("deprecation")
-    private @Nullable ServerInfo findServer(InetSocketAddress clientAddress) {
-        for(ServerInfo server : pl.getProxy().getServers().values()) {
-            InetSocketAddress serverAddress = server.getAddress();
-            if(serverAddress.equals(clientAddress)) {
-                return server;
-            }
-        }
-
-        return null;
     }
 
     private void run() throws IOException, ClassNotFoundException, GeneralSecurityException    {
@@ -239,7 +227,7 @@ public class ClientHandler implements IClientHandler {
     }
 
     private void verifyCanSendRequests() {
-        if(serverInfo == null) {
+        if(serverName == null) {
             throw new IllegalStateException("Attempted to send request before handshake was finished");
         }
     }

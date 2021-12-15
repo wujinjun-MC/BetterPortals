@@ -6,4 +6,5 @@ package com.lauriethefish.betterportals;
 public class MinimisationEntryPoint {
     private static final Class<?> BUKKIT = com.lauriethefish.betterportals.bukkit.BetterPortals.class;
     private static final Class<?> BUNGEE = com.lauriethefish.betterportals.bungee.BetterPortals.class;
+    private static final Class<?> VELOCITY = com.lauriethefish.betterportals.velocity.BetterPortals.class;
 }

@@ -1,8 +1,8 @@
 package com.lauriethefish.betterportals.bungee;
 
 import com.google.inject.Inject;
-import com.lauriethefish.betterportals.bungee.net.IClientHandler;
-import com.lauriethefish.betterportals.bungee.net.IPortalServer;
+import com.lauriethefish.betterportals.proxy.net.IClientHandler;
+import com.lauriethefish.betterportals.proxy.net.IPortalServer;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import com.lauriethefish.betterportals.shared.net.RequestException;
 import com.lauriethefish.betterportals.shared.net.requests.PreviousServerPutRequest;

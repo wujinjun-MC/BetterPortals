@@ -1,11 +1,11 @@
-package com.lauriethefish.betterportals.bungee.net;
+package com.lauriethefish.betterportals.proxy.net;
 
 import com.lauriethefish.betterportals.shared.net.Response;
 import com.lauriethefish.betterportals.shared.net.requests.Request;
-import net.md_5.bungee.api.config.ServerInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.net.Socket;
 import java.util.function.Consumer;
 
 /**
@@ -18,9 +18,9 @@ public interface IClientHandler {
     @Nullable String getGameVersion();
 
     /**
-     * @return The bungeecord {@link ServerInfo} that this server handler represents, or null if the server hasn't completed the handshake
+     * @return The name of the server that this client is connected to
      */
-    @Nullable ServerInfo getServerInfo();
+    @Nullable String getServerName();
 
     /**
      * Safely shuts down the connection to the server by sending a disconnection notice. Called on portal server shutdown.
@@ -34,4 +34,8 @@ public interface IClientHandler {
      * @param onFinish Called with the response when it is received.
      */
     void sendRequest(@NotNull Request request, @NotNull Consumer<Response> onFinish);
+
+    interface Factory {
+        IClientHandler create(Socket socket);
+    }
 }

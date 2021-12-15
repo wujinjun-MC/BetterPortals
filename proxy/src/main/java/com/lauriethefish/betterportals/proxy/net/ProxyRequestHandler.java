@@ -1,7 +1,8 @@
-package com.lauriethefish.betterportals.bungee.net;
+package com.lauriethefish.betterportals.proxy.net;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import com.lauriethefish.betterportals.proxy.IProxy;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import com.lauriethefish.betterportals.shared.net.IRequestHandler;
 import com.lauriethefish.betterportals.shared.net.RequestException;
@@ -10,21 +11,22 @@ import com.lauriethefish.betterportals.shared.net.ServerNotFoundException;
 import com.lauriethefish.betterportals.shared.net.requests.RelayRequest;
 import com.lauriethefish.betterportals.shared.net.requests.Request;
 import com.lauriethefish.betterportals.shared.net.requests.TeleportRequest;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.UUID;
 import java.util.function.Consumer;
 
 @Singleton
 public class ProxyRequestHandler implements IRequestHandler {
     private final IPortalServer portalServer;
     private final Logger logger;
+    private final IProxy proxy;
 
     @Inject
-    public ProxyRequestHandler(IPortalServer portalServer, Logger logger) {
+    public ProxyRequestHandler(IPortalServer portalServer, Logger logger, IProxy proxy) {
         this.portalServer = portalServer;
         this.logger = logger;
+        this.proxy = proxy;
     }
 
     @Override
@@ -79,12 +81,13 @@ public class ProxyRequestHandler implements IRequestHandler {
                 response.checkForErrors();
                 logger.fine("No errors while setting to teleport on join, moving server!");
 
-                ProxiedPlayer player = ProxyServer.getInstance().getPlayer(request.getPlayerId());
-                if(player == null) {
-                    throw new RequestException(String.format("Unable to find player with UUID %s", request.getPlayerId()));
+                UUID playerId = request.getPlayerId();
+
+                if(!proxy.playerExists(playerId)) {
+                    throw new RequestException(String.format("No player with UUID %s exists", playerId));
                 }
 
-                player.connect(clientHandler.getServerInfo());
+                proxy.changePlayerServer(playerId, clientHandler.getServerName());
             }   catch(RequestException ex) {
                 onFinish.accept(response);
             }

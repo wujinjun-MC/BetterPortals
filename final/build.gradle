@@ -7,9 +7,10 @@ dependencies {
     implementation project(':bukkit')
     implementation project(':bungee')
     implementation project(':api')
+    implementation project(':velocity')
 }
 
-def getImplementationConfigurations(parentProject) {
+def static getImplementationConfigurations(parentProject) {
     parentProject.configurations.implementation.canBeResolved = true
     return parentProject.configurations.implementation
 }
@@ -21,8 +22,6 @@ shadowJar {
     configurations = [getImplementationConfigurations(project), getImplementationConfigurations(project(':bukkit'))]
 
     relocate 'org.bstats', 'com.lauriethefish.betterportals.dependencies.org.bstats'
-    relocate 'javax.annotation', 'com.lauriethefish.betterportals.dependencies.javax.annotation'
-    relocate 'javax.inject', 'com.lauriethefish.betterportals.dependencies.javax.inject'
     relocate 'org.aopalliance', 'com.lauriethefish.betterportals.dependencies.aopalliance'
     relocate 'org.checkerframework', 'com.lauriethefish.betterportals.dependencies.checkerframework'
     relocate 'org.intellij.lang.annotations', 'com.lauriethefish.betterportals.dependencies.intellij.lang.annotations'
