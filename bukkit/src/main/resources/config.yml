@@ -93,6 +93,11 @@ enableDefaultWorldConnections: true
 # 7 is a reasonable value to use if you want to try this out
 lightBlockInterval: -1
 
+# The light level to use on the light blocks specified above instead of the default value
+# By default this will be set based on the dimension (nether dimmer than overworld), on time of day (dark at night), and on Y level.
+# If in the overworld, the level will be set to darker if in a cave
+forceLightLevel: -1
+
 # Stores the links between worlds. By default, two links will be added, as said above
 # There are two links for the overworld and the nether - one for each way.
 # This is to allow one way links between dimensions

@@ -1,6 +1,7 @@
 package com.lauriethefish.betterportals.bukkit.block.lighting;
 
 import com.comphenix.protocol.wrappers.WrappedBlockData;
+import com.lauriethefish.betterportals.bukkit.config.RenderConfig;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -8,11 +9,23 @@ import org.bukkit.World;
 import org.bukkit.block.data.type.Light;
 import org.jetbrains.annotations.Nullable;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 
 @Singleton
 public class LightDataManger implements ILightDataManager   {
+    private final RenderConfig renderConfig;
+
+    @Inject
+    public LightDataManger(RenderConfig renderConfig) {
+        this.renderConfig = renderConfig;
+    }
+
     private int getLightLevel(IPortal portal) {
+        if(renderConfig.getForceLightLevel() >= 0) {
+            return renderConfig.getForceLightLevel();
+        }
+
         World destWorld = portal.getDestPos().getWorld();
         if(destWorld == null) {
             return -1;

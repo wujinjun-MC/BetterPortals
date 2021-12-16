@@ -53,6 +53,7 @@ public class RenderConfig {
     private int entityMetadataUpdateInterval;
 
     private int lightSimulationInterval;
+    private int forceLightLevel;
 
     @Inject
     public RenderConfig(Logger logger) {
@@ -84,6 +85,7 @@ public class RenderConfig {
         totalArrayLength = yMultip * (int) (maxY - minY + 1);
 
         lightSimulationInterval = file.getInt("lightBlockInterval");
+        forceLightLevel = file.getInt("forceLightLevel");
 
         halfFullSize = new IntVector((maxXZ - minXZ) / 2, (maxY - minY) / 2, (maxXZ - minXZ) / 2);
 
