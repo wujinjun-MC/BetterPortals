@@ -207,6 +207,8 @@ public class BukkitBlockMap extends FloodFillBlockMap {
         List<IViewableBlockInfo> newStates = new ArrayList<>();
 
         int statesLength = nonObscuredStates.size();
+
+        //noinspection ForLoopReplaceableByForEach
         for(int i = 0; i < statesLength; i++) { // We do not use foreach to avoid concurrent modifications
             BukkitBlockInfo blockInfo = (BukkitBlockInfo) nonObscuredStates.get(i);
 
