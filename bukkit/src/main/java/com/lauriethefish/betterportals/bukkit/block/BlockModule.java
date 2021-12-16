@@ -7,6 +7,9 @@ import com.lauriethefish.betterportals.bukkit.block.external.BlockChangeWatcher;
 import com.lauriethefish.betterportals.bukkit.block.external.ExternalBlockWatcherManager;
 import com.lauriethefish.betterportals.bukkit.block.external.IBlockChangeWatcher;
 import com.lauriethefish.betterportals.bukkit.block.external.IExternalBlockWatcherManager;
+import com.lauriethefish.betterportals.bukkit.block.lighting.DummyLightDataManager;
+import com.lauriethefish.betterportals.bukkit.block.lighting.ILightDataManager;
+import com.lauriethefish.betterportals.bukkit.block.lighting.LightDataManger;
 import com.lauriethefish.betterportals.bukkit.player.view.ViewFactory;
 import com.lauriethefish.betterportals.bukkit.player.view.block.IPlayerBlockView;
 import com.lauriethefish.betterportals.bukkit.player.view.block.PlayerBlockView;
@@ -34,6 +37,13 @@ public class BlockModule extends AbstractModule {
         );
 
         bind(IExternalBlockWatcherManager.class).to(ExternalBlockWatcherManager.class);
+
+        try {
+            Class.forName("org.bukkit.block.data.type.Light");
+            bind(ILightDataManager.class).to(LightDataManger.class);
+        } catch (ClassNotFoundException ignored) {
+            bind(ILightDataManager.class).to(DummyLightDataManager.class);
+        }
 
         // If using direct NMS, then alternative block map implementations are used
         if(!usingNms) {

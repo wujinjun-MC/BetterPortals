@@ -9,6 +9,7 @@ import com.lauriethefish.betterportals.bukkit.block.FloodFillBlockMap;
 import com.lauriethefish.betterportals.bukkit.block.IViewableBlockInfo;
 import com.lauriethefish.betterportals.bukkit.block.fetch.BlockDataFetcherFactory;
 import com.lauriethefish.betterportals.bukkit.block.fetch.IBlockDataFetcher;
+import com.lauriethefish.betterportals.bukkit.block.lighting.ILightDataManager;
 import com.lauriethefish.betterportals.bukkit.block.rotation.IBlockRotator;
 import com.lauriethefish.betterportals.bukkit.config.RenderConfig;
 import com.lauriethefish.betterportals.bukkit.math.Matrix;
@@ -16,13 +17,11 @@ import com.lauriethefish.betterportals.bukkit.nms.BlockDataUtil;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.util.MaterialUtil;
 import com.lauriethefish.betterportals.shared.logging.Logger;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.type.Light;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -41,13 +40,15 @@ public class BukkitBlockMap extends FloodFillBlockMap {
     private IBlockDataFetcher dataFetcher;
 
     private final World originWorld;
+    private final ILightDataManager lightDataManager;
 
     @Inject
-    public BukkitBlockMap(@Assisted IPortal portal, Logger logger, RenderConfig renderConfig, IBlockRotator blockRotator, BlockDataFetcherFactory dataFetcherFactory) {
+    public BukkitBlockMap(@Assisted IPortal portal, Logger logger, RenderConfig renderConfig, IBlockRotator blockRotator, BlockDataFetcherFactory dataFetcherFactory, ILightDataManager lightDataManager) {
         super(portal, logger, renderConfig);
         this.blockRotator = blockRotator;
         this.dataFetcherFactory = dataFetcherFactory;
         this.rotateDestToOrigin = portal.getTransformations().getRotateToOrigin();
+        this.lightDataManager = lightDataManager;
 
         this.originWorld = portal.getOriginPos().getWorld();
         logger.fine("Origin pos: %s, Dest pos: %s", portalOriginPos, portalDestPos);
@@ -70,12 +71,9 @@ public class BukkitBlockMap extends FloodFillBlockMap {
 
         final int timeBetweenLightBlocks = renderConfig.getLightSimulationInterval();
 
-        boolean enableLightBlocks = timeBetweenLightBlocks >= 1;
+        WrappedBlockData wrappedLightData = lightDataManager.getLightData(portal);
+        boolean enableLightBlocks = wrappedLightData != null && timeBetweenLightBlocks >= 1;
         int airCount = 0;
-
-        Light lightBlockData = (Light) Bukkit.createBlockData(Material.LIGHT);
-        lightBlockData.setLevel(10);
-        WrappedBlockData wrappedLightData = WrappedBlockData.createData(lightBlockData);
 
         // We don't use a Stack<T> or ArrayList<T> since those are much too slow
         int[] stack = new int[firstUpdate ? renderConfig.getTotalArrayLength() : 16];
