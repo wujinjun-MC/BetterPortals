@@ -90,7 +90,8 @@ enableDefaultWorldConnections: true
 # The interval to place light blocks replacing air blocks. These are used to avoid the destination of the portal being too dark
 # Set to -1 to disable (or 0)
 # This option does nothing on versions below 1.18
-lightBlockInterval: 7
+# 7 is a reasonable value to use if you want to try this out
+lightBlockInterval: -1
 
 # Stores the links between worlds. By default, two links will be added, as said above
 # There are two links for the overworld and the nether - one for each way.
