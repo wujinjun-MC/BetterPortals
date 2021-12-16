@@ -42,6 +42,8 @@ public class BukkitBlockMap extends FloodFillBlockMap {
     private final World originWorld;
     private final ILightDataManager lightDataManager;
 
+    private WrappedBlockData wrappedLightData;
+
     @Inject
     public BukkitBlockMap(@Assisted IPortal portal, Logger logger, RenderConfig renderConfig, IBlockRotator blockRotator, BlockDataFetcherFactory dataFetcherFactory, ILightDataManager lightDataManager) {
         super(portal, logger, renderConfig);
@@ -71,7 +73,10 @@ public class BukkitBlockMap extends FloodFillBlockMap {
 
         final int timeBetweenLightBlocks = renderConfig.getLightSimulationInterval();
 
-        WrappedBlockData wrappedLightData = lightDataManager.getLightData(portal);
+        if(wrappedLightData == null) {
+            wrappedLightData = lightDataManager.getLightData(portal);
+        }
+
         boolean enableLightBlocks = wrappedLightData != null && timeBetweenLightBlocks >= 1;
         int airCount = 0;
 
@@ -312,6 +317,7 @@ public class BukkitBlockMap extends FloodFillBlockMap {
     @Override
     public void reset() {
         dataFetcher = null;
+        wrappedLightData = null;
         super.reset();
     }
 }
