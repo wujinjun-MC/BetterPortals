@@ -68,7 +68,9 @@ public class BukkitBlockMap extends FloodFillBlockMap {
     protected void searchFromBlock(IntVector start, List<IViewableBlockInfo> statesOutput, @Nullable IViewableBlockInfo firstBlockInfo) {
         WrappedBlockData backgroundData = getBackgroundData();
 
-        final int timeBetweenLightBlocks = 10;
+        final int timeBetweenLightBlocks = renderConfig.getLightSimulationInterval();
+
+        boolean enableLightBlocks = timeBetweenLightBlocks >= 1;
         int airCount = 0;
 
         Light lightBlockData = (Light) Bukkit.createBlockData(Material.LIGHT);
@@ -154,17 +156,19 @@ public class BukkitBlockMap extends FloodFillBlockMap {
 
             Material currentBlock = destData.getMaterial();
 
-            if(alreadyReachedMap[positionInt] < 2 && !isInLine) {
-                if(currentBlock.isAir() && !isEdge) {
-                    airCount++;
+            if (alreadyReachedMap[positionInt] < 2 && !isInLine) {
+                if(enableLightBlocks) {
+                    if (currentBlock.isAir() && !isEdge) {
+                        airCount++;
+                    }
                 }
 
-                if(airCount == timeBetweenLightBlocks) {
+                if (enableLightBlocks && airCount == timeBetweenLightBlocks) {
                     airCount = 0;
                     blockInfo.setRenderedDestData(wrappedLightData);
                     alreadyReachedMap[positionInt] = 2; // Make sure that this block will not be added multiple times
                     statesOutput.add(blockInfo);
-                }   else if(!canSkip)    {
+                }   else if (!canSkip) {
                     alreadyReachedMap[positionInt] = 2; // Make sure that this block will not be added multiple times
                     statesOutput.add(blockInfo);
                 }

@@ -87,6 +87,11 @@ teleportCooldown: 2 # How long to wait before a player can go back after going t
 # Enables or disables the default world connections between the default overworld and nether worlds if they exist
 enableDefaultWorldConnections: true
 
+# The interval to place light blocks replacing air blocks. These are used to avoid the destination of the portal being too dark
+# Set to -1 to disable (or 0)
+# This option does nothing on versions below 1.18
+lightBlockInterval: 10
+
 # Stores the links between worlds. By default, two links will be added, as said above
 # There are two links for the overworld and the nether - one for each way.
 # This is to allow one way links between dimensions
