@@ -3,6 +3,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import javax.crypto.AEADBadTagException;
+import javax.crypto.Cipher;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Random;
@@ -27,8 +28,9 @@ public class EncryptionTests {
 
     @Test
     public void testEncryptAndDecrypt() throws GeneralSecurityException {
-        byte[] encrypted = cipherManager.createEncrypt().doFinal(data);
-        byte[] decrypted = cipherManager.createDecrypt().doFinal(encrypted);
+        Cipher cipher = cipherManager.createEncrypt();
+        byte[] encrypted = cipher.doFinal(data);
+        byte[] decrypted = cipherManager.createDecrypt(cipher.getIV()).doFinal(encrypted);
 
         for(int i = 0; i < data.length; i++) {
             assertEquals(data[i], decrypted[i]);
@@ -41,8 +43,9 @@ public class EncryptionTests {
             CipherManager invalidCipher = new CipherManager();
             invalidCipher.init(UUID.fromString("6f653d86-c69c-4d3c-95b3-38037eedddd7"));
 
-            byte[] encrypted = cipherManager.createEncrypt().doFinal(data);
-            invalidCipher.createDecrypt().doFinal(encrypted);
+            Cipher cipher = cipherManager.createEncrypt();
+            byte[] encrypted = cipher.doFinal(data);
+            invalidCipher.createDecrypt(cipher.getIV()).doFinal(encrypted);
         });
     }
 }
