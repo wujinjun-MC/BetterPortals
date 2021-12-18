@@ -3,6 +3,7 @@ package com.lauriethefish.betterportals.shared.net.encryption;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
+import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import java.io.*;
@@ -33,8 +34,11 @@ public class EncryptedObjectStream implements IEncryptedObjectStream    {
         byte[] data = new byte[length];
         inputStream.readFully(data);
 
+        byte[] nonce = new byte[CipherManager.GCM_NONCE_LENGTH];
+        inputStream.readFully(nonce);
+
         GZIPInputStream decompressionStream = new GZIPInputStream(new ByteArrayInputStream(data));
-        CipherInputStream decryptionStream = new CipherInputStream(decompressionStream, cipherManager.createDecrypt());
+        CipherInputStream decryptionStream = new CipherInputStream(decompressionStream, cipherManager.createDecrypt(nonce));
 
         return new ObjectInputStream(decryptionStream).readObject();
     }
@@ -43,7 +47,8 @@ public class EncryptedObjectStream implements IEncryptedObjectStream    {
     public void writeObject(Object obj) throws GeneralSecurityException, IOException {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         GZIPOutputStream compressionStream = new GZIPOutputStream(byteArrayOutputStream);
-        CipherOutputStream encryptionStream = new CipherOutputStream(compressionStream, cipherManager.createEncrypt());
+        Cipher cipher = cipherManager.createEncrypt();
+        CipherOutputStream encryptionStream = new CipherOutputStream(compressionStream, cipher);
 
         new ObjectOutputStream(encryptionStream).writeObject(obj);
         encryptionStream.close();
@@ -57,5 +62,6 @@ public class EncryptedObjectStream implements IEncryptedObjectStream    {
 
         outputStream.writeInt(data.length);
         outputStream.write(data);
+        outputStream.write(cipher.getIV());
     }
 }
