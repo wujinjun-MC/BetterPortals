@@ -2,6 +2,7 @@ package com.lauriethefish.betterportals.bukkit.nms;
 
 import com.lauriethefish.betterportals.bukkit.util.VersionUtil;
 import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +23,6 @@ public class NBTTagUtil {
     private static final Class<?> ITEM_STACK;
     private static final Class<?> NBT_BASE;
 
-    private static final Method HAS_TAG;
     private static final Method GET_TAG;
     private static final Method GET_STRING;
     private static final Method TAG_SET;
@@ -45,12 +45,10 @@ public class NBTTagUtil {
         }
 
         if (VersionUtil.isMcVersionAtLeast("1.18.0")) {
-            HAS_TAG = ReflectionUtil.findMethod(ITEM_STACK, "r");
             GET_TAG = ReflectionUtil.findMethod(ITEM_STACK, "t");
             TAG_SET = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "a", String.class, NBT_BASE);
             GET_STRING = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "l", String.class);
         } else {
-            HAS_TAG = ReflectionUtil.findMethod(ITEM_STACK, "hasTag");
             GET_TAG = ReflectionUtil.findMethod(ITEM_STACK, "getTag");
             TAG_SET = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "set", String.class, NBT_BASE);
             GET_STRING = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "getString", String.class);
@@ -73,7 +71,9 @@ public class NBTTagUtil {
         Object nmsItem = getNMSItemStack(item);
 
         // Get the NBT tag, or create one if the item doesn't have one
-        Object itemTag = ((boolean) ReflectionUtil.invokeMethod(nmsItem, HAS_TAG)) ? ReflectionUtil.invokeMethod(nmsItem, GET_TAG) : ReflectionUtil.invokeConstructor(TAG_COMPOUND_CTOR);
+        Object existingTag = ReflectionUtil.invokeMethod(nmsItem, GET_TAG);
+
+        Object itemTag = existingTag == null ? ReflectionUtil.invokeConstructor(TAG_COMPOUND_CTOR) : existingTag;
         Object stringValue = ReflectionUtil.invokeConstructor(STRING_TAG_CTOR, MARKER_VALUE);
 
         ReflectionUtil.invokeMethod(itemTag, TAG_SET, MARKER_PREFIX + name, stringValue); // Set the value
@@ -90,11 +90,12 @@ public class NBTTagUtil {
     public static boolean hasMarkerTag(@NotNull ItemStack item, @NotNull String name)	{
         Object nmsItem = getNMSItemStack(item);
 
-        if(!(boolean) ReflectionUtil.invokeMethod(nmsItem, HAS_TAG)) {return false;} // Return null if it has no NBT data
         Object itemTag = ReflectionUtil.invokeMethod(nmsItem, GET_TAG); // Otherwise, get the item's NBT tag
+        if(itemTag == null) {
+            return false;
+        }
 
         String value = (String) ReflectionUtil.invokeMethod(itemTag, GET_STRING, MARKER_PREFIX + name);
-
         return MARKER_VALUE.equals(value); // Return the value of the key
     }
 
