@@ -6,6 +6,8 @@ import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.lauriethefish.betterportals.api.IntVector;
 import com.lauriethefish.betterportals.bukkit.util.VersionUtil;
 import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.jetbrains.annotations.NotNull;
@@ -21,8 +23,10 @@ public class BlockDataUtil {
     private static final Method FROM_HANDLE;
     private static final Method GET_TILE_ENTITY;
     private static final Method GET_UPDATE_PACKET;
+    private static final BlockData DEFAULT_BLOCK_DATA;
 
     static {
+        DEFAULT_BLOCK_DATA = Bukkit.createBlockData(Material.AIR);
         boolean packageNamesMapped = VersionUtil.isMcVersionAtLeast("1.17.0");
 
         if(VersionUtil.isMcVersionAtLeast("1.13.0")) {
@@ -65,7 +69,9 @@ public class BlockDataUtil {
      */
     public static BlockData getByCombinedId(int combinedId) {
         Object nmsData = ReflectionUtil.invokeMethod(null, GET_FROM_COMBINED_ID, combinedId);
-        return (BlockData) ReflectionUtil.invokeMethod(null, FROM_HANDLE, nmsData);
+        BlockData data = (BlockData) ReflectionUtil.invokeMethod(null, FROM_HANDLE, nmsData);
+
+        return data == null ? DEFAULT_BLOCK_DATA : data;
     }
 
     /**
