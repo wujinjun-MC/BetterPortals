@@ -5,6 +5,7 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.StructureModifier;
+import com.comphenix.protocol.utility.MinecraftVersion;
 import com.comphenix.protocol.wrappers.*;
 import com.google.inject.Singleton;
 import com.lauriethefish.betterportals.bukkit.math.MathUtil;
@@ -133,8 +134,13 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
             }
 
             // Set the modified pitch and yaw
-            packet.getIntegers().write(4, RotationUtil.getPacketRotationInt(renderedPos.getYaw()));
-            packet.getIntegers().write(5, RotationUtil.getPacketRotationInt(renderedPos.getPitch()));
+            if (VersionUtil.isMcVersionAtLeast("1.19.0")) {
+                packet.getBytes().write(0, yaw);
+                packet.getBytes().write(1, pitch);
+            } else {
+                packet.getIntegers().write(4, RotationUtil.getPacketRotationInt(renderedPos.getYaw()));
+                packet.getIntegers().write(5, RotationUtil.getPacketRotationInt(renderedPos.getPitch()));
+            }
         }   else if(packetType == PacketType.Play.Server.SPAWN_ENTITY_LIVING) {
             packet.getBytes().write(0, yaw);
             packet.getBytes().write(1, pitch);
