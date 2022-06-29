@@ -16,7 +16,12 @@ public class ModernBlockRotator implements IBlockRotator    {
             BlockFace currentFace = rotatable.getRotation();
             BlockFace rotatedFace = BlockFaceUtil.rotateFace(currentFace, matrix);
             if(rotatedFace != null) {
-                rotatable.setRotation(rotatedFace);
+                try {
+                    rotatable.setRotation(rotatedFace);
+                } catch (IllegalArgumentException ignored) {
+                    rotatable.setRotation(currentFace);
+                }
+
                 return rotatable;
             }
         }
