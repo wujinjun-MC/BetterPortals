@@ -2,21 +2,17 @@ package com.lauriethefish.betterportals.bukkit.config;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.lauriethefish.betterportals.bukkit.BetterPortals;
 import com.lauriethefish.betterportals.bukkit.command.framework.CommandException;
+import com.lauriethefish.betterportals.bukkit.nms.NBTTagUtil;
 import com.lauriethefish.betterportals.bukkit.util.VersionUtil;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataContainer;
-import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -43,7 +39,7 @@ public class MessageConfig {
         HEX_COLOR_CODES_AVAILABLE = isAvailable;
     }
 
-    private static final NamespacedKey PORTAL_WAND_TAG = new NamespacedKey(JavaPlugin.getPlugin(BetterPortals.class), "portalWand");
+    private static final String PORTAL_WAND_TAG = "portalWand";
 
     private final Logger logger;
     private final Map<String, String> messageMap = new HashMap<>();
@@ -148,10 +144,9 @@ public class MessageConfig {
             assert meta != null;
             meta.setDisplayName(portalWandName);
 
-            PersistentDataContainer persistentDataContainer = meta.getPersistentDataContainer();
-            persistentDataContainer.set(PORTAL_WAND_TAG, PersistentDataType.BYTE, (byte) 0b1);
-
             portalWand.setItemMeta(meta);
+            // Portal wand checking is done with an NBT tag
+            portalWand = NBTTagUtil.addMarkerTag(portalWand, PORTAL_WAND_TAG);
         }
 
         return portalWand;
@@ -163,11 +158,7 @@ public class MessageConfig {
      * @return true if it is a valid portal wand, false otherwise
      */
     public boolean isPortalWand(ItemStack item) {
-        ItemMeta itemMeta = item.getItemMeta();
-        if (itemMeta == null) return false;
-
-        PersistentDataContainer persistentDataContainer = itemMeta.getPersistentDataContainer();
-        return persistentDataContainer.has(PORTAL_WAND_TAG, PersistentDataType.BYTE);
+        return NBTTagUtil.hasMarkerTag(item, PORTAL_WAND_TAG);
     }
 
     /**
