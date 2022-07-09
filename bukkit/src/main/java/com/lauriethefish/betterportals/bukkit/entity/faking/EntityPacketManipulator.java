@@ -15,10 +15,7 @@ import com.lauriethefish.betterportals.bukkit.nms.RotationUtil;
 import com.lauriethefish.betterportals.bukkit.util.VersionUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.entity.Hanging;
-import org.bukkit.entity.Item;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
@@ -103,8 +100,8 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
         // Calculate the correct byte yaw, pitch, and head rotation for the entity
         Location renderedPos = entityInfo.findRenderedLocation();
 
-        byte yaw = (byte) (int) (renderedPos.getYaw() * 256.0f / 360.0f);
-        byte pitch = (byte) (int) (renderedPos.getPitch() * 256.0f / 360.0f);
+        int yaw = RotationUtil.getPacketRotationInt(renderedPos.getYaw());
+        int pitch = RotationUtil.getPacketRotationInt(renderedPos.getPitch());
 
         PacketType packetType = packet.getType();
         if(packetType == PacketType.Play.Server.SPAWN_ENTITY_PAINTING) {
@@ -135,19 +132,19 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
 
             // Set the modified pitch and yaw
             if (VersionUtil.isMcVersionAtLeast("1.19.0")) {
-                packet.getBytes().write(0, yaw);
-                packet.getBytes().write(1, pitch);
+                packet.getBytes().write(0, (byte) pitch);
+                packet.getBytes().write(1, (byte) yaw);
             } else {
-                packet.getIntegers().write(4, RotationUtil.getPacketRotationInt(renderedPos.getYaw()));
-                packet.getIntegers().write(5, RotationUtil.getPacketRotationInt(renderedPos.getPitch()));
+                packet.getIntegers().write(4, pitch);
+                packet.getIntegers().write(5, yaw);
             }
         }   else if(packetType == PacketType.Play.Server.SPAWN_ENTITY_LIVING) {
-            packet.getBytes().write(0, yaw);
-            packet.getBytes().write(1, pitch);
-            packet.getBytes().write(2, yaw);
+            packet.getBytes().write(0, (byte) pitch);
+            packet.getBytes().write(1, (byte) yaw);
+            packet.getBytes().write(2, (byte) yaw);
         }   else if(packetType == PacketType.Play.Server.NAMED_ENTITY_SPAWN) {
-            packet.getBytes().write(0, yaw);
-            packet.getBytes().write(1, pitch);
+            packet.getBytes().write(0, (byte) yaw);
+            packet.getBytes().write(1, (byte) pitch);
         }
     }
 
