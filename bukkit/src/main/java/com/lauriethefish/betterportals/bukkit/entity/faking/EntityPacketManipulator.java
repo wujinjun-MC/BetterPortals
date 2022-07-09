@@ -181,6 +181,7 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
             integers.write(2, (int) (offset.getY() * 4096));
             integers.write(3, (int) (offset.getZ() * 4096));
         }
+        packet.getBooleans().write(0, tracker.getEntity().isOnGround());
 
         sendPacket(packet, players);
     }
@@ -210,9 +211,11 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
             integers.write(2, (int) (offset.getY() * 4096));
             integers.write(3, (int) (offset.getZ() * 4096));
         }
+        packet.getBooleans().write(0, tracker.getEntity().isOnGround());
 
         sendPacket(packet, players);
     }
+
 
     @Override
     public void sendEntityLook(EntityInfo tracker, Collection<Player> players) {
@@ -226,6 +229,7 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
         StructureModifier<Byte> bytes = packet.getBytes();
         bytes.write(0, (byte) RotationUtil.getPacketRotationInt(entityPos.getYaw()));
         bytes.write(1, (byte) RotationUtil.getPacketRotationInt(entityPos.getPitch()));
+        packet.getBooleans().write(0, tracker.getEntity().isOnGround());
 
         sendPacket(packet, players);
     }
