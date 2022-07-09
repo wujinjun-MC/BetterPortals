@@ -11,6 +11,7 @@ import com.lauriethefish.betterportals.shared.logging.Logger;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.metadata.MetadataValue;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -77,6 +78,10 @@ public class PlayerEntityView implements IPlayerEntityView  {
         // Start tracking newly replicated entities
         Set<Entity> nowReplicated = new HashSet<>();
         for(Entity entity : portal.getEntityList().getDestinationEntities()) {
+            if(isVanished(entity)) {
+                continue;
+            }
+
             Location originPos = portal.getTransformations().moveToOrigin(entity.getLocation());
 
             boolean shouldBeReplicated = intersectionChecker.checkIfIntersects(originPos.toVector());
@@ -99,6 +104,23 @@ public class PlayerEntityView implements IPlayerEntityView  {
             }
             return !isReplicated;
         });
+    }
+
+    /**
+     * Finds if the given entity is currently vanished
+     * @param entity The entity to check if vanished
+     * @return <code>true</code> if the entity is vanished, <code>false</code> otherwise.
+     */
+    private boolean isVanished(Entity entity) {
+        // Only players can be vanished
+        if(!(entity instanceof Player)) {return false;}
+
+        // Find the vanish metadata
+        // This is used by most vanish plugins
+        for(MetadataValue value : entity.getMetadata("vanished"))   {
+            if(value.asBoolean()) {return true;}
+        }
+        return false;
     }
 
     // Send packets to remove the entity from the player's view
