@@ -37,14 +37,18 @@ public class NBTTagUtil {
             NBT_TAG_COMPOUND = ReflectionUtil.findClass("net.minecraft.nbt.NBTTagCompound");
             ITEM_STACK = ReflectionUtil.findClass("net.minecraft.world.item.ItemStack");
             NBT_BASE = ReflectionUtil.findClass("net.minecraft.nbt.NBTBase");
-        }   else    {
+        } else {
             NBT_TAG_STRING = MinecraftReflectionUtil.findVersionedNMSClass("NBTTagString");
             NBT_TAG_COMPOUND = MinecraftReflectionUtil.findVersionedNMSClass("NBTTagCompound");
             ITEM_STACK = MinecraftReflectionUtil.findVersionedNMSClass("ItemStack");
             NBT_BASE = MinecraftReflectionUtil.findVersionedNMSClass("NBTBase");
         }
 
-        if (VersionUtil.isMcVersionAtLeast("1.18.0")) {
+        if (VersionUtil.isMcVersionAtLeast("1.19.0")) {
+            GET_TAG = ReflectionUtil.findMethod(ITEM_STACK, "u");
+            TAG_SET = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "a", String.class, NBT_BASE);
+            GET_STRING = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "l", String.class);
+        } else if (VersionUtil.isMcVersionAtLeast("1.18.0")) {
             GET_TAG = ReflectionUtil.findMethod(ITEM_STACK, "t");
             TAG_SET = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "a", String.class, NBT_BASE);
             GET_STRING = ReflectionUtil.findMethod(NBT_TAG_COMPOUND, "l", String.class);

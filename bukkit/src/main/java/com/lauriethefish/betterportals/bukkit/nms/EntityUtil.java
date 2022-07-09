@@ -5,6 +5,7 @@ import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import com.lauriethefish.betterportals.bukkit.util.VersionUtil;
 import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import org.bukkit.Location;
+import org.bukkit.entity.EnderDragonPart;
 import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
@@ -78,6 +79,8 @@ public class EntityUtil {
      * @return A container with the valid packet, or <code>null</code> since some entities can't be spawned with a packet.
      */
     public static @Nullable PacketContainer getRawEntitySpawnPacket(@NotNull Entity entity) {
+        if (entity instanceof EnderDragonPart) return null;
+
         Object nmsEntity = ReflectionUtil.invokeMethod(entity, GET_HANDLE);
         if(USE_DIRECT_ENTITY_PACKET) {
             return PacketContainer.fromPacket(ReflectionUtil.invokeMethod(nmsEntity, GET_ENTITY_SPAWN_PACKET));
