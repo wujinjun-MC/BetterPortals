@@ -4,7 +4,13 @@ import com.lauriethefish.betterportals.bukkit.math.Matrix;
 import org.bukkit.Axis;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.*;
+import org.bukkit.block.data.type.Fence;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ModernBlockRotator implements IBlockRotator    {
     @Override
@@ -61,6 +67,23 @@ public class ModernBlockRotator implements IBlockRotator    {
                 rail.setShape(rotatedShape);
                 return rail;
             }
+        }
+
+        if(data instanceof Fence) {
+            Fence fence = (Fence) data.clone();
+
+            List<BlockFace> newFaces = new ArrayList<>();
+            for(BlockFace face : fence.getFaces()) {
+                BlockFace rotated = BlockFaceUtil.rotateFace(face, matrix);
+                newFaces.add(rotated);
+                fence.setFace(face, false);
+            }
+
+            for(BlockFace face : newFaces) {
+                fence.setFace(face, true);
+            }
+
+            return fence;
         }
 
         return data;
