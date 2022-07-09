@@ -155,14 +155,16 @@ public class PlayerDataManager implements IPlayerDataManager, Listener   {
     @EventHandler
     public void onPlayerLeave(PlayerQuitEvent event) {
         logger.fine("Saving selection on leave");
-        loggedOutPlayerSelections.put(event.getPlayer().getUniqueId(), players.get(event.getPlayer()).getSelection());
+        IPlayerData playerData = players.get(event.getPlayer());
+        if(playerData == null) {
+            logger.warning("Player left with no registered data. This should not happen!");
+            return;
+        }
+
+        loggedOutPlayerSelections.put(event.getPlayer().getUniqueId(), playerData.getSelection());
 
         logger.fine("Unregistering player data on leave for player: %s", event.getPlayer().getUniqueId());
-        IPlayerData removedPlayer = players.remove(event.getPlayer());
-        if(removedPlayer == null) { // Remove the registered data, printing a warning if there wasn't one
-            logger.warning("Player left who had unregistered player data. This shouldn't happen");
-        }   else    {
-            removedPlayer.onLogout();
-        }
+        players.remove(event.getPlayer());
+        playerData.onLogout();
     }
 }
