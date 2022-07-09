@@ -17,6 +17,8 @@ public class BetterPortals extends Plugin {
 
     @Override
     public void onEnable() {
+        DisconnectNotice _forceClassLoad;
+
         Injector injector = Guice.createInjector(new MainModule(this));
 
         try {
