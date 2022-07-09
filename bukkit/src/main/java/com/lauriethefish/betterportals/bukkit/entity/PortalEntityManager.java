@@ -119,7 +119,7 @@ public class PortalEntityManager implements IPortalEntityManager {
                 }
             }
 
-            originEntities.put(entity, currentPosition);
+            entry.setValue(currentPosition);
         }
         toRemove.forEach(originEntities::remove);
     }
