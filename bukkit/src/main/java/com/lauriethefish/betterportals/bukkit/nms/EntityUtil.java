@@ -7,6 +7,7 @@ import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import org.bukkit.Location;
 import org.bukkit.entity.EnderDragonPart;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Marker;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -80,6 +81,7 @@ public class EntityUtil {
      */
     public static @Nullable PacketContainer getRawEntitySpawnPacket(@NotNull Entity entity) {
         if (entity instanceof EnderDragonPart) return null;
+        if (entity instanceof Marker) return null;
 
         Object nmsEntity = ReflectionUtil.invokeMethod(entity, GET_HANDLE);
         if(USE_DIRECT_ENTITY_PACKET) {
