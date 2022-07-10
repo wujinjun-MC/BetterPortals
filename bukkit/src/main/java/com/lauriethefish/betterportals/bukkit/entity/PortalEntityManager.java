@@ -142,6 +142,12 @@ public class PortalEntityManager implements IPortalEntityManager {
      * @return Whether it can teleport
      */
     private boolean checkCanTeleport(Entity entity) {
+        // Entities riding others do not get teleported by portals.
+        // Instead, the vehicle teleports through the portal, and takes its passengers with it.
+        if(entity.getVehicle() != null) {
+            return false;
+        }
+
         // Enforce teleportation predicates
         if(entity instanceof Player) {
             return predicateManager.canTeleport(portal, (Player) entity);
@@ -202,8 +208,22 @@ public class PortalEntityManager implements IPortalEntityManager {
 
         logger.fine("Teleporting entity with ID %d and of type %s to position %s", entity.getEntityId(), entity.getType(), destPos.toVector());
 
+        boolean handlePassengers = entity.getWorld() != destPos.getWorld();
+        List<Entity> passengers = entity.getPassengers();
+        if(handlePassengers) {
+            for(Entity passenger : passengers) {
+                entity.removePassenger(passenger);
+                teleportLocal(passenger);
+            }
+        }
+
+
         entity.teleport(destPos);
         entity.setVelocity(velocity);
+
+        if(handlePassengers) {
+            passengers.forEach(entity::addPassenger);
+        }
     }
 
     private void teleportCrossServer(Player player) {
