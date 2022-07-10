@@ -5,7 +5,6 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.reflect.StructureModifier;
-import com.comphenix.protocol.utility.MinecraftVersion;
 import com.comphenix.protocol.wrappers.*;
 import com.google.inject.Singleton;
 import com.lauriethefish.betterportals.bukkit.math.MathUtil;
@@ -31,6 +30,10 @@ import java.util.*;
 public class EntityPacketManipulator implements IEntityPacketManipulator {
     private static final boolean useHideEntityArray = !VersionUtil.isMcVersionAtLeast("1.17.0") && !VersionUtil.isMcVersionAtLeast("1.17.1");
     private static final boolean useHideEntityList = VersionUtil.isMcVersionAtLeast("1.17.1");
+    private static final int entityDataFieldIndex = VersionUtil.isMcVersionAtLeast("1.19.0") ? 4 : 6;
+    private static final boolean useNewEntityRotationFields = VersionUtil.isMcVersionAtLeast("1.19.0");
+    private static final boolean useShortEntityMovementFields = VersionUtil.isMcVersionAtLeast("1.14.0");
+    private static final boolean usePairedEntityEquipment = VersionUtil.isMcVersionAtLeast("1.16.0");
 
     @Override
     public void showEntity(EntityInfo tracker, Collection<Player> players) {
@@ -86,7 +89,7 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
     private void writePositionToSpawnPacket(PacketContainer packet, Vector position) {
         if(packet.getType() == PacketType.Play.Server.SPAWN_ENTITY_PAINTING) {
             packet.getBlockPositionModifier().write(0, new BlockPosition(position));
-        }   else {
+        }   else    {
             StructureModifier<Double> doubles = packet.getDoubles();
             doubles.write(0, position.getX());
             doubles.write(1, position.getY());
@@ -119,19 +122,19 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
             if(entityInfo.getEntity() instanceof Hanging) {
                 // Minecraft deals with this as the ID of the direction as an int for item frames
                 // RotationUtil has some convenient methods for dealing with this
-                EnumWrappers.Direction currentDirection = RotationUtil.getDirection(packet.getIntegers().read(6));
+                EnumWrappers.Direction currentDirection = RotationUtil.getDirection(packet.getIntegers().read(entityDataFieldIndex));
                 if(currentDirection != null) {
                     EnumWrappers.Direction rotated = RotationUtil.rotateBy(currentDirection, entityInfo.getRotation());
                     // Make sure to catch this - it should never happen unless something's gone very wrong
                     if (rotated == null) {
                         throw new IllegalStateException("Portal attempted to rotate a hanging entity to an invalid block direction");
                     }
-                    packet.getIntegers().write(6, RotationUtil.getId(rotated));
+                    packet.getIntegers().write(entityDataFieldIndex, RotationUtil.getId(rotated));
                 }
             }
 
             // Set the modified pitch and yaw
-            if (VersionUtil.isMcVersionAtLeast("1.19.0")) {
+            if (useNewEntityRotationFields) {
                 packet.getBytes().write(0, (byte) pitch);
                 packet.getBytes().write(1, (byte) yaw);
             } else {
@@ -170,7 +173,7 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
         packet.getIntegers().write(0, tracker.getEntityId());
 
         // We need to convert to the short location, since minecraft is weird and does it like this
-        if(VersionUtil.isMcVersionAtLeast("1.14.0")) {
+        if(useShortEntityMovementFields) {
             StructureModifier<Short> shorts = packet.getShorts();
             shorts.write(0, (short) (offset.getX() * 4096));
             shorts.write(1, (short) (offset.getY() * 4096));
@@ -200,7 +203,7 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
         bytes.write(1, (byte) RotationUtil.getPacketRotationInt(entityPos.getPitch()));
 
         // We need to convert to the short location, since minecraft is weird and does it like this
-        if(VersionUtil.isMcVersionAtLeast("1.14.0")) {
+        if(useShortEntityMovementFields) {
             StructureModifier<Short> shorts = packet.getShorts();
             shorts.write(0, (short) (offset.getX() * 4096));
             shorts.write(1, (short) (offset.getY() * 4096));
@@ -287,7 +290,7 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
 
     @Override
     public void sendEntityEquipment(EntityInfo tracker, Map<EnumWrappers.ItemSlot, ItemStack> changes, Collection<Player> players) {
-        if(VersionUtil.isMcVersionAtLeast("1.16.0")) {
+        if(usePairedEntityEquipment) {
             // Why minecraft, why not just use a map...
             List<Pair<EnumWrappers.ItemSlot, ItemStack>> wrappedChanges = new ArrayList<>();
             changes.forEach((slot, item) -> wrappedChanges.add(new Pair<>(slot, item == null ? new ItemStack(Material.AIR) : item)));
