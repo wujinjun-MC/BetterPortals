@@ -103,6 +103,11 @@ public class BukkitBlockMap extends FloodFillBlockMap {
             IntVector destPos = destRelPos.add(portalDestPos);
 
             BlockData destData = dataFetcher.getData(destPos);
+            if(destData == null) {
+                logger.warning("Fetched data was null even though the request to get the data had already succeeded. This shouldn't happen!");
+                return;
+            }
+
             boolean isOccluding = destData.getMaterial().isOccluding();
 
             Block originBlock = originPos.getBlock(originWorld);
