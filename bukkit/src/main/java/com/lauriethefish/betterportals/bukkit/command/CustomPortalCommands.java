@@ -7,7 +7,7 @@ import com.lauriethefish.betterportals.bukkit.command.framework.CommandTree;
 import com.lauriethefish.betterportals.bukkit.command.framework.annotations.*;
 import com.lauriethefish.betterportals.bukkit.config.MessageConfig;
 import com.lauriethefish.betterportals.bukkit.player.IPlayerData;
-import com.lauriethefish.betterportals.bukkit.player.IPlayerDataManager;
+import com.lauriethefish.betterportals.bukkit.player.PlayerData;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.portal.IPortalManager;
 import org.bukkit.Location;
@@ -23,14 +23,12 @@ public class CustomPortalCommands {
     private final IPortalManager portalManager;
     private final MessageConfig messageConfig;
     private final IPortal.Factory portalFactory;
-    private final IPlayerDataManager playerDataManager;
 
     @Inject
-    public CustomPortalCommands(CommandTree commandTree, IPortalManager portalManager, MessageConfig messageConfig, IPortal.Factory portalFactory, IPlayerDataManager playerDataManager) {
+    public CustomPortalCommands(CommandTree commandTree, IPortalManager portalManager, MessageConfig messageConfig, IPortal.Factory portalFactory) {
         this.portalManager = portalManager;
         this.messageConfig = messageConfig;
         this.portalFactory = portalFactory;
-        this.playerDataManager = playerDataManager;
 
         commandTree.registerCommands(this);
     }
@@ -254,10 +252,8 @@ public class CustomPortalCommands {
     @Aliases("setenablebpview")
     @Description("Sets whether or not the current player is able to see what's on the other side of a portal.")
     @Argument(name = "seethroughportal")
-    public boolean setSeeThroughPortal(Player player, boolean seeThroughPortal) {
-        IPlayerData playerData = playerDataManager.getPlayerData(player);
-
-        assert playerData != null;
+    public boolean setSeeThroughPortal(IPlayerData playerData, boolean seeThroughPortal) {
+        Player player = playerData.getPlayer();
         if (seeThroughPortal) {
             playerData.getPermanentData().set("seeThroughPortal", true);
             playerData.savePermanentData();
@@ -279,11 +275,8 @@ public class CustomPortalCommands {
     @RequiresPlayer
     @Aliases("togglevanillaview")
     @Description("Toggles whether or not the current player is able to see what's on the other side of a portal.")
-    public boolean toggleSeeThroughPortal(Player player) {
-        IPlayerData playerData = playerDataManager.getPlayerData(player);
-        assert playerData != null;
-
-        setSeeThroughPortal(player, !playerData.getPermanentData().getBoolean("seeThroughPortal"));
+    public boolean toggleSeeThroughPortal(PlayerData playerData) {
+        setSeeThroughPortal(playerData, !playerData.getPermanentData().getBoolean("seeThroughPortal"));
 
         return true;
     }
