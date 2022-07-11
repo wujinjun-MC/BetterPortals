@@ -7,7 +7,6 @@ import com.lauriethefish.betterportals.bukkit.command.framework.CommandTree;
 import com.lauriethefish.betterportals.bukkit.command.framework.annotations.*;
 import com.lauriethefish.betterportals.bukkit.config.MessageConfig;
 import com.lauriethefish.betterportals.bukkit.player.IPlayerData;
-import com.lauriethefish.betterportals.bukkit.player.PlayerData;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.portal.IPortalManager;
 import org.bukkit.Location;
@@ -275,7 +274,7 @@ public class CustomPortalCommands {
     @RequiresPlayer
     @Aliases("togglevanillaview")
     @Description("Toggles whether or not the current player is able to see what's on the other side of a portal.")
-    public boolean toggleSeeThroughPortal(PlayerData playerData) {
+    public boolean toggleSeeThroughPortal(IPlayerData playerData) {
         setSeeThroughPortal(playerData, !playerData.getPermanentData().getBoolean("seeThroughPortal"));
 
         return true;
