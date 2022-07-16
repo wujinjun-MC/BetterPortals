@@ -48,7 +48,6 @@ public class MainModule extends AbstractModule {
         bind(IChunkGenerationChecker.class).to(ModernChunkGenerationChecker.class);
 
         bind(BlockUpdateFinisher.class).to(ThreadedBlockUpdateFinisher.class);
-        bind(ICrashHandler.class).to(CrashHandler.class);
 
         bind(MetricsManager.class).asEagerSingleton();
 
