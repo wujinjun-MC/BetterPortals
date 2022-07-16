@@ -2,14 +2,13 @@ package com.lauriethefish.betterportals.bukkit.tasks;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.lauriethefish.betterportals.bukkit.ICrashHandler;
 import com.lauriethefish.betterportals.bukkit.block.external.IExternalBlockWatcherManager;
 import com.lauriethefish.betterportals.bukkit.entity.faking.EntityTrackingManager;
 import com.lauriethefish.betterportals.bukkit.net.ClientRequestHandler;
 import com.lauriethefish.betterportals.bukkit.player.IPlayerData;
 import com.lauriethefish.betterportals.bukkit.player.PlayerDataManager;
 import com.lauriethefish.betterportals.bukkit.portal.IPortalActivityManager;
-import com.lauriethefish.betterportals.bukkit.util.performance.OperationTimer;
+import com.lauriethefish.betterportals.shared.logging.Logger;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -18,23 +17,30 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 @Singleton
 public class MainUpdate implements Runnable {
+    private static final String ISSUES_URL = "https://github.com/Lauriethefish/BetterPortals/issues";
+
     private final JavaPlugin pl;
     private final PlayerDataManager playerDataManager;
     private final IPortalActivityManager activityManager;
     private final EntityTrackingManager entityTrackingManager;
-    private final ICrashHandler errorHandler;
     private final ClientRequestHandler requestHandler;
     private final IExternalBlockWatcherManager blockWatcherManager;
+    private final Logger logger;
 
     @Inject
-    public MainUpdate(JavaPlugin pl, PlayerDataManager playerDataManager, IPortalActivityManager activityManager, EntityTrackingManager entityTrackingManager, ICrashHandler errorHandler, ClientRequestHandler requestHandler, IExternalBlockWatcherManager blockWatcherManager) {
+    public MainUpdate(JavaPlugin pl,
+                      PlayerDataManager playerDataManager,
+                      IPortalActivityManager activityManager,
+                      EntityTrackingManager entityTrackingManager,
+                      ClientRequestHandler requestHandler,
+                      IExternalBlockWatcherManager blockWatcherManager, Logger logger) {
         this.pl = pl;
         this.playerDataManager = playerDataManager;
         this.activityManager = activityManager;
         this.entityTrackingManager = entityTrackingManager;
-        this.errorHandler = errorHandler;
         this.requestHandler = requestHandler;
         this.blockWatcherManager = blockWatcherManager;
+        this.logger = logger;
     }
 
     public void start() {
@@ -57,9 +63,9 @@ public class MainUpdate implements Runnable {
             blockWatcherManager.update();
 
         }   catch(RuntimeException ex) {
-            // An error during main update is bad news.
-            // Things are probably now in an invalid state, so we exit the plugin now.
-            errorHandler.processCriticalError(ex);
+            logger.severe("A critical error occurred during main update.");
+            logger.severe("Please create an issue at %s to get this fixed.", ISSUES_URL);
+            ex.printStackTrace();
         }
     }
 }
