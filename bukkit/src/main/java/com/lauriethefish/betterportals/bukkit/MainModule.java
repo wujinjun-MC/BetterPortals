@@ -3,6 +3,12 @@ package com.lauriethefish.betterportals.bukkit;
 import com.google.inject.AbstractModule;
 import com.google.inject.Module;
 import com.lauriethefish.betterportals.bukkit.block.BlockModule;
+import com.lauriethefish.betterportals.bukkit.block.rotation.IBlockRotator;
+import com.lauriethefish.betterportals.bukkit.block.rotation.ModernBlockRotator;
+import com.lauriethefish.betterportals.bukkit.chunk.chunkloading.IChunkLoader;
+import com.lauriethefish.betterportals.bukkit.chunk.chunkloading.ModernChunkLoader;
+import com.lauriethefish.betterportals.bukkit.chunk.generation.IChunkGenerationChecker;
+import com.lauriethefish.betterportals.bukkit.chunk.generation.ModernChunkGenerationChecker;
 import com.lauriethefish.betterportals.bukkit.command.CommandsModule;
 import com.lauriethefish.betterportals.bukkit.entity.EntityModule;
 import com.lauriethefish.betterportals.bukkit.events.EventsModule;
@@ -37,6 +43,9 @@ public class MainModule extends AbstractModule {
         bind(JavaPlugin.class).toInstance(pl);
         bind(BetterPortals.class).toInstance(pl);
         bind(Logger.class).toInstance(new OverrideLogger(pl.getLogger()));
+        bind(IChunkLoader.class).to(ModernChunkLoader.class);
+        bind(IBlockRotator.class).to(ModernBlockRotator.class);
+        bind(IChunkGenerationChecker.class).to(ModernChunkGenerationChecker.class);
 
         bind(BlockUpdateFinisher.class).to(ThreadedBlockUpdateFinisher.class);
         bind(ICrashHandler.class).to(CrashHandler.class);
@@ -50,7 +59,6 @@ public class MainModule extends AbstractModule {
         install(new NetworkModule());
         install(new PlayerModule());
         install(new EntityModule(EXPERIMENTAL_MODE));
-        install(new MinecraftVersionModule());
 
         if(EXPERIMENTAL_MODE) {
             install(createNmsModule());
