@@ -32,8 +32,6 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
     private static final boolean useHideEntityList = VersionUtil.isMcVersionAtLeast("1.17.1");
     private static final int entityDataFieldIndex = VersionUtil.isMcVersionAtLeast("1.19.0") ? 4 : 6;
     private static final boolean useNewEntityRotationFields = VersionUtil.isMcVersionAtLeast("1.19.0");
-    private static final boolean useShortEntityMovementFields = VersionUtil.isMcVersionAtLeast("1.14.0");
-    private static final boolean usePairedEntityEquipment = VersionUtil.isMcVersionAtLeast("1.16.0");
 
     @Override
     public void showEntity(EntityInfo tracker, Collection<Player> players) {
@@ -173,17 +171,10 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
         packet.getIntegers().write(0, tracker.getEntityId());
 
         // We need to convert to the short location, since minecraft is weird and does it like this
-        if(useShortEntityMovementFields) {
-            StructureModifier<Short> shorts = packet.getShorts();
-            shorts.write(0, (short) (offset.getX() * 4096));
-            shorts.write(1, (short) (offset.getY() * 4096));
-            shorts.write(2, (short) (offset.getZ() * 4096));
-        }   else    {
-            StructureModifier<Integer> integers = packet.getIntegers();
-            integers.write(1, (int) (offset.getX() * 4096));
-            integers.write(2, (int) (offset.getY() * 4096));
-            integers.write(3, (int) (offset.getZ() * 4096));
-        }
+        StructureModifier<Short> shorts = packet.getShorts();
+        shorts.write(0, (short) (offset.getX() * 4096));
+        shorts.write(1, (short) (offset.getY() * 4096));
+        shorts.write(2, (short) (offset.getZ() * 4096));
         packet.getBooleans().write(0, tracker.getEntity().isOnGround());
 
         sendPacket(packet, players);
@@ -203,17 +194,10 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
         bytes.write(1, (byte) RotationUtil.getPacketRotationInt(entityPos.getPitch()));
 
         // We need to convert to the short location, since minecraft is weird and does it like this
-        if(useShortEntityMovementFields) {
-            StructureModifier<Short> shorts = packet.getShorts();
-            shorts.write(0, (short) (offset.getX() * 4096));
-            shorts.write(1, (short) (offset.getY() * 4096));
-            shorts.write(2, (short) (offset.getZ() * 4096));
-        }   else    {
-            StructureModifier<Integer> integers = packet.getIntegers();
-            integers.write(1, (int) (offset.getX() * 4096));
-            integers.write(2, (int) (offset.getY() * 4096));
-            integers.write(3, (int) (offset.getZ() * 4096));
-        }
+        StructureModifier<Short> shorts = packet.getShorts();
+        shorts.write(0, (short) (offset.getX() * 4096));
+        shorts.write(1, (short) (offset.getY() * 4096));
+        shorts.write(2, (short) (offset.getZ() * 4096));
         packet.getBooleans().write(0, tracker.getEntity().isOnGround());
 
         sendPacket(packet, players);
@@ -290,25 +274,14 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
 
     @Override
     public void sendEntityEquipment(EntityInfo tracker, Map<EnumWrappers.ItemSlot, ItemStack> changes, Collection<Player> players) {
-        if(usePairedEntityEquipment) {
-            // Why minecraft, why not just use a map...
-            List<Pair<EnumWrappers.ItemSlot, ItemStack>> wrappedChanges = new ArrayList<>();
-            changes.forEach((slot, item) -> wrappedChanges.add(new Pair<>(slot, item == null ? new ItemStack(Material.AIR) : item)));
+        // Why minecraft, why not just use a map...
+        List<Pair<EnumWrappers.ItemSlot, ItemStack>> wrappedChanges = new ArrayList<>();
+        changes.forEach((slot, item) -> wrappedChanges.add(new Pair<>(slot, item == null ? new ItemStack(Material.AIR) : item)));
 
-            PacketContainer packet = new PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT);
-            packet.getIntegers().write(0, tracker.getEntityId());
-            packet.getSlotStackPairLists().write(0, wrappedChanges);
-            sendPacket(packet, players);
-        }   else    {
-            changes.forEach((slot, item) -> {
-                PacketContainer packet = new PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT);
-                packet.getIntegers().write(0, tracker.getEntityId());
-                packet.getItemSlots().write(0, slot);
-                packet.getItemModifier().write(0, item == null ? new ItemStack(Material.AIR) : item);
-
-                sendPacket(packet, players);
-            });
-        }
+        PacketContainer packet = new PacketContainer(PacketType.Play.Server.ENTITY_EQUIPMENT);
+        packet.getIntegers().write(0, tracker.getEntityId());
+        packet.getSlotStackPairLists().write(0, wrappedChanges);
+        sendPacket(packet, players);
     }
 
     @Override

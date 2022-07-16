@@ -19,8 +19,6 @@ import java.util.UUID;
  */
 @Getter
 public class EntityInfo {
-    public static final boolean USING_ORIGINAL_ENTITY_UID = !VersionUtil.isMcVersionAtLeast("1.17.0");
-
     private static final Random entityIdGenerator = new Random();
 
     private final Entity entity;
@@ -40,7 +38,7 @@ public class EntityInfo {
         this.entity = entity;
         this.entityId = entityIdGenerator.nextInt() & Integer.MAX_VALUE;
 
-        this.entityUniqueId = USING_ORIGINAL_ENTITY_UID ? entity.getUniqueId() : UUID.randomUUID();
+        this.entityUniqueId = UUID.randomUUID();
         this.translation = transformations.getDestinationToOrigin();
         this.rotation = transformations.getRotateToOrigin();
     }
@@ -66,7 +64,7 @@ public class EntityInfo {
         Location actualPos = entity.getLocation();
         Location atOrigin = translation.transform(actualPos.toVector()).toLocation(Objects.requireNonNull(actualPos.getWorld()));
 
-        atOrigin.setDirection(rotation.transform(EntityUtil.getActualEntityDirection(entity)));
+        atOrigin.setDirection(rotation.transform(actualPos.getDirection()));
         return atOrigin;
     }
 }

@@ -2,12 +2,10 @@ package com.lauriethefish.betterportals.bukkit.nms;
 
 import com.lauriethefish.betterportals.bukkit.util.VersionUtil;
 import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
 import java.lang.reflect.Method;
 
 /**
@@ -16,7 +14,7 @@ import java.lang.reflect.Method;
 public class NBTTagUtil {
     private static final String MARKER_PREFIX = "BetterPortals_marker_";
     private static final String MARKER_VALUE = "marked";
-    private static final Class<?> CRAFT_ITEM_STACK = MinecraftReflectionUtil.findCraftBukkitClass("inventory.CraftItemStack");
+    private static final Class<?> CRAFT_ITEM_STACK = CraftBukkitClassUtil.findCraftBukkitClass("inventory.CraftItemStack");
 
     private static final Class<?> NBT_TAG_STRING;
     private static final Class<?> NBT_TAG_COMPOUND;
@@ -32,17 +30,10 @@ public class NBTTagUtil {
     private static final Constructor<?> TAG_COMPOUND_CTOR;
 
     static  {
-        if(VersionUtil.isMcVersionAtLeast("1.17.0")) {
-            NBT_TAG_STRING = ReflectionUtil.findClass("net.minecraft.nbt.NBTTagString");
-            NBT_TAG_COMPOUND = ReflectionUtil.findClass("net.minecraft.nbt.NBTTagCompound");
-            ITEM_STACK = ReflectionUtil.findClass("net.minecraft.world.item.ItemStack");
-            NBT_BASE = ReflectionUtil.findClass("net.minecraft.nbt.NBTBase");
-        } else {
-            NBT_TAG_STRING = MinecraftReflectionUtil.findVersionedNMSClass("NBTTagString");
-            NBT_TAG_COMPOUND = MinecraftReflectionUtil.findVersionedNMSClass("NBTTagCompound");
-            ITEM_STACK = MinecraftReflectionUtil.findVersionedNMSClass("ItemStack");
-            NBT_BASE = MinecraftReflectionUtil.findVersionedNMSClass("NBTBase");
-        }
+        NBT_TAG_STRING = ReflectionUtil.findClass("net.minecraft.nbt.NBTTagString");
+        NBT_TAG_COMPOUND = ReflectionUtil.findClass("net.minecraft.nbt.NBTTagCompound");
+        ITEM_STACK = ReflectionUtil.findClass("net.minecraft.world.item.ItemStack");
+        NBT_BASE = ReflectionUtil.findClass("net.minecraft.nbt.NBTBase");
 
         if (VersionUtil.isMcVersionAtLeast("1.19.0")) {
             GET_TAG = ReflectionUtil.findMethod(ITEM_STACK, "u");

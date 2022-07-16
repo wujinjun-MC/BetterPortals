@@ -39,16 +39,12 @@ public class DimensionBlendManager implements IDimensionBlendManager    {
     }
 
     private @NotNull Material findFillInBlock(@NotNull Location destination) {
-        switch(Objects.requireNonNull(destination.getWorld(), "World of destination location cannot be null").getEnvironment()) {
-            case NETHER:
-                return Material.NETHERRACK;
-            case NORMAL:
-                return Material.STONE;
-            case THE_END:
-                return VersionUtil.isMcVersionAtLeast("1.13.0") ? Material.valueOf("END_STONE") : Material.valueOf("ENDER_STONE");
-            default:
-                return Material.AIR;
-        }
+        return switch (Objects.requireNonNull(destination.getWorld(), "World of destination location cannot be null").getEnvironment()) {
+            case NETHER -> Material.NETHERRACK;
+            case NORMAL -> Material.STONE;
+            case THE_END -> Material.END_STONE;
+            default -> Material.AIR;
+        };
     }
 
     @Override

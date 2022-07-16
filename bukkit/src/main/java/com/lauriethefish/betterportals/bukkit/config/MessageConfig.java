@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.lauriethefish.betterportals.bukkit.command.framework.CommandException;
 import com.lauriethefish.betterportals.bukkit.nms.NBTTagUtil;
-import com.lauriethefish.betterportals.bukkit.util.VersionUtil;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import lombok.Getter;
 import org.bukkit.ChatColor;
@@ -24,21 +23,6 @@ import java.util.Objects;
  */
 @Singleton
 public class MessageConfig {
-    private static final boolean HEX_COLOR_CODES_AVAILABLE;
-
-    static {
-        boolean isAvailable = false;
-
-        if(VersionUtil.isMcVersionAtLeast("1.16.0")) {
-            try {
-                Class.forName("net.md_5.bungee.api.ChatColor");
-                isAvailable = true;
-            }   catch(ClassNotFoundException ignored) {}
-        }
-
-        HEX_COLOR_CODES_AVAILABLE = isAvailable;
-    }
-
     private static final String PORTAL_WAND_TAG = "portalWand";
 
     private final Logger logger;
@@ -75,11 +59,7 @@ public class MessageConfig {
     private @NotNull String translateColorCodes(@NotNull String message) {
         message = ChatColor.translateAlternateColorCodes('&', message);
 
-        if (HEX_COLOR_CODES_AVAILABLE) {
-            return translateHexColors(message);
-        }   else    {
-            return message;
-        }
+        return translateHexColors(message);
     }
 
     /**

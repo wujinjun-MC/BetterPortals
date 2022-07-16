@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.lauriethefish.betterportals.bukkit.config.RenderConfig;
 import com.lauriethefish.betterportals.bukkit.nms.AnimationType;
-import com.lauriethefish.betterportals.bukkit.nms.EntityUtil;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import lombok.Getter;
 import org.bukkit.Bukkit;
@@ -113,7 +112,7 @@ public class EntityTracker implements IEntityTracker    {
     // Handles sending all movement and looking packets
     private void sendMovementUpdates() {
         Vector currentPosition = entity.getLocation().toVector();
-        Vector currentDirection = EntityUtil.getActualEntityDirection(entity);
+        Vector currentDirection = entity.getLocation().getDirection();
 
         boolean positionChanged = lastPosition != null && !currentPosition.equals(lastPosition);
         boolean rotationChanged = lastDirection != null && !currentDirection.equals(lastDirection);

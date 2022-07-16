@@ -148,20 +148,12 @@ public class MaterialUtil {
     private static final Set<Material> TILE_ENTITY_MATERIALS = new HashSet<>();
 
     static {
-        boolean isLegacy = !VersionUtil.isMcVersionAtLeast("1.13.0");
-        PORTAL_MATERIAL = isLegacy ? Material.valueOf("PORTAL") : Material.valueOf("NETHER_PORTAL");
-
-        if(isLegacy) {
-            PORTAL_EDGE_DATA = WrappedBlockData.createData(Material.valueOf("CONCRETE"), (byte) 15);
-        }   else    {
-            PORTAL_EDGE_DATA = WrappedBlockData.createData(Material.valueOf("BLACK_CONCRETE"));
-        }
+        PORTAL_MATERIAL = Material.NETHER_PORTAL;
+        PORTAL_EDGE_DATA = WrappedBlockData.createData(Material.valueOf("BLACK_CONCRETE"));
 
         AIR_MATERIALS.add(Material.AIR);
-        if(!isLegacy) {
-            AIR_MATERIALS.add(Material.valueOf("CAVE_AIR"));
-            AIR_MATERIALS.add(Material.valueOf("VOID_AIR"));
-        }
+        AIR_MATERIALS.add(Material.valueOf("CAVE_AIR"));
+        AIR_MATERIALS.add(Material.valueOf("VOID_AIR"));
 
         for(String str : TILE_ENTITY_MATERIALS_STRING) {
             try {
