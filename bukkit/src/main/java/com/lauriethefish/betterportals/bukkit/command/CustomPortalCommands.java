@@ -132,6 +132,7 @@ public class CustomPortalCommands {
                     origin.getPortalSize(), true, UUID.randomUUID(), null, name, true);
             portalManager.registerPortal(reversePortal);
         }
+        sender.sendMessage(messageConfig.getChatMessage("portalCreated"));
 
         return true;
     }
