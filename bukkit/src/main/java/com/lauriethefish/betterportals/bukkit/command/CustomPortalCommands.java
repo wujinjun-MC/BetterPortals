@@ -16,10 +16,11 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.checkerframework.checker.units.qual.Area;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Singleton
@@ -49,6 +50,28 @@ public class CustomPortalCommands {
         }
 
         return portal;
+    }
+
+    @Command
+    @Path("betterportals/removebyname")
+    @Description("Removes all portals with the given name")
+    @Argument(name = "portalName")
+    @Aliases("deletename")
+    public boolean removePortalsByName(CommandSender sender, String portalName) throws CommandException {
+        List<IPortal> toRemove = portalManager
+                .getAllPortals()
+                .stream()
+                .filter(portal -> portalName.equals(portal.getName()))
+                .collect(Collectors.toList());
+
+
+        if(toRemove.size() == 0) {
+            throw new CommandException(messageConfig.getErrorMessage("noPortalsWithName").replace("{name}", portalName));
+        }   else    {
+            toRemove.forEach(portalManager::removePortal);
+            sender.sendMessage(messageConfig.getChatMessage("portalsRemoved"));
+            return true;
+        }
     }
 
     @Command

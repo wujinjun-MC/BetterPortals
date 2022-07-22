@@ -153,6 +153,7 @@ chatMessages:
   mustMakeSelection: "You must make a selection first"
   invalidSelection: "Invalid selection! Portal selections must be on the two corners of a portal"
   coordinatesNotInLine: "The given corner coordinates (%d, %d, %d), (%d, %d, %d) are not aligned correctly to produce a flat portal (portals are not allowed on diagonals)"
+  portalCreated: "Portal created successfully"
   noWorldExistsWithGivenName: "No world exists called {name}"
   mustSelectBothSides: "You must select both sides of a portal first. For info, run /bp help"
   mustSelectOrigin: "You must select the origin of the portal on this server"
@@ -171,6 +172,7 @@ chatMessages:
   nameNetherPortal: "You can't set the name of a nether portal"
   seeThroughPortalDisabled: "All nether portals will now look like vanilla portals to you!"
   seeThroughPortalEnabled: "All eligible nether portals will now show you what's on the other side."
+  noPortalsWithName: "No portals existed with name {name}"
 
   # Printed if a player lights a portal in an unlinked world
   # To disable, just remove all the text inside the quotes
@@ -195,6 +197,7 @@ chatMessages:
   destPortalSet: "Destination portal set"
   portalsLinked: "Portals linked successfully"
   portalRemoved: "Portal removed"
+  portalsRemoved: "Portals removed"
   startedReconnection: "Started reconnecting to the proxy. See console for details."
   changedName: "Successfully changed the portal name"
   currentName: "The name for this portal is: {name}"
