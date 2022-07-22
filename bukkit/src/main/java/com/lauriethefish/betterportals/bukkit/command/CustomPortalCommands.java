@@ -1,6 +1,7 @@
 package com.lauriethefish.betterportals.bukkit.command;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import com.lauriethefish.betterportals.bukkit.command.framework.CommandException;
 import com.lauriethefish.betterportals.bukkit.command.framework.CommandTree;
@@ -9,9 +10,16 @@ import com.lauriethefish.betterportals.bukkit.config.MessageConfig;
 import com.lauriethefish.betterportals.bukkit.player.IPlayerData;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.portal.IPortalManager;
+import com.lauriethefish.betterportals.bukkit.portal.selection.IPortalSelection;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.checkerframework.checker.units.qual.Area;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.UUID;
 
 
 @Singleton
@@ -22,12 +30,14 @@ public class CustomPortalCommands {
     private final IPortalManager portalManager;
     private final MessageConfig messageConfig;
     private final IPortal.Factory portalFactory;
+    private final Provider<IPortalSelection> selectionProvider;
 
     @Inject
-    public CustomPortalCommands(CommandTree commandTree, IPortalManager portalManager, MessageConfig messageConfig, IPortal.Factory portalFactory) {
+    public CustomPortalCommands(CommandTree commandTree, IPortalManager portalManager, MessageConfig messageConfig, IPortal.Factory portalFactory, Provider<IPortalSelection> selectionProvider) {
         this.portalManager = portalManager;
         this.messageConfig = messageConfig;
         this.portalFactory = portalFactory;
+        this.selectionProvider = selectionProvider;
 
         commandTree.registerCommands(this);
     }
@@ -41,6 +51,85 @@ public class CustomPortalCommands {
         return portal;
     }
 
+    @Command
+    @Path("betterportals/createfromcoords")
+    @Description("Creates a portal from the coordinates of its corners without requiring a player")
+    @Argument(name = "originWorld")
+    @Argument(name = "originX1")
+    @Argument(name = "originY1")
+    @Argument(name = "originZ1")
+    @Argument(name = "originX2")
+    @Argument(name = "originY2")
+    @Argument(name = "originZ2")
+    @Argument(name = "destWorld")
+    @Argument(name = "destX1")
+    @Argument(name = "destY1")
+    @Argument(name = "destZ1")
+    @Argument(name = "destX2")
+    @Argument(name = "destY2")
+    @Argument(name = "destZ2")
+    @Argument(name = "twoWay?", defaultValue = "false")
+    @Argument(name = "invert?", defaultValue = "false")
+    @Argument(name = "name", defaultValue = " no name")
+    public boolean createFromCoordinates(CommandSender sender,
+                                         String originWorld,
+                                         int originX1, int originY1, int originZ1,
+                                         int originX2, int originY2, int originZ2,
+                                         String destWorld,
+                                         int destX1, int destY1, int destZ1,
+                                         int destX2, int destY2, int destZ2,
+                                         String twoWayStr,
+                                         String invertStr,
+                                         String name
+    ) throws CommandException {
+        if(" no name".equals(name)) {
+            name = null;
+        }
+        boolean twoWay = twoWayStr.equalsIgnoreCase("true") || twoWayStr.equalsIgnoreCase("twoWay") || twoWayStr.equalsIgnoreCase("dual");
+        boolean invert = invertStr.equalsIgnoreCase("true") || invertStr.equalsIgnoreCase("invert");
+
+        IPortalSelection origin = makeSelection(originWorld, originX1, originY1, originZ1, originX2, originY2, originZ2);
+        IPortalSelection dest = makeSelection(destWorld, destX1, destY1, destZ1, destX2, destY2, destZ2);
+
+        if(!origin.getPortalSize().equals(dest.getPortalSize())) {
+            throw new CommandException(messageConfig.getErrorMessage("differentSizes"));
+        }
+
+        if(invert) {
+            dest.invertDirection();
+        }
+
+        IPortal portal = portalFactory.create(origin.getPortalPosition(), dest.getPortalPosition(),
+                origin.getPortalSize(), true, UUID.randomUUID(), null, name, true);
+        portalManager.registerPortal(portal);
+
+        // Add another portal going back if we're in two way mode
+        if(twoWay) {
+            IPortal reversePortal = portalFactory.create(dest.getPortalPosition(), origin.getPortalPosition(),
+                    origin.getPortalSize(), true, UUID.randomUUID(), null, name, true);
+            portalManager.registerPortal(reversePortal);
+        }
+
+        return true;
+    }
+
+    private IPortalSelection makeSelection(String worldName, int x1, int y1, int z1, int x2, int y2, int z2) throws CommandException {
+        World world = Bukkit.getWorld(worldName);
+        if(world == null) {
+            throw new CommandException(messageConfig.getErrorMessage("noWorldExistsWithGivenName").replace("{name}", worldName));
+        }
+
+        IPortalSelection selection = selectionProvider.get();
+        selection.setPositionA(new Location(world, x1, y1, z1));
+        selection.setPositionB(new Location(world, x2, y2, z2));
+
+        if(!selection.isValid()) {
+            throw new CommandException(String.format(messageConfig.getErrorMessage("coordinatesNotInLine"),
+                    x1, y1, z1, x2, y2, z2));
+        }
+
+        return selection;
+    }
     @Command
     @Path("betterportals/remove")
     @RequiresPermissions("betterportals.remove")
