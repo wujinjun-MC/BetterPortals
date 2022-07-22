@@ -24,7 +24,6 @@ public class PlayerPortalView implements IPlayerPortalView  {
 
     private Location previousPosition = null;
     private int ticksSinceStarted = 0;
-    private int lastUpdate = 0;
 
     @Inject
     public PlayerPortalView(@Assisted Player player, @Assisted IPortal viewedPortal, ViewFactory viewFactory, Logger logger, RenderConfig renderConfig, MiscConfig miscConfig) {
@@ -55,16 +54,13 @@ public class PlayerPortalView implements IPlayerPortalView  {
     @Override
     public void update() {
         // Only compare the coordinates, not the looking direction
-        boolean moved = previousPosition == null || player.getLocation().distance(previousPosition) > 0.23;
+        boolean moved = previousPosition == null || !player.getLocation().toVector().equals(previousPosition.toVector());
 
         // We refresh the block view every N ticks so that if the client doesn't change some of the blocks, they will be resent
         if(ticksSinceStarted % renderConfig.getBlockStateRefreshInterval() == 0) {
             blockView.update(true);
         }   else if(moved) { // Otherwise, an update only happens when we move to save on performance
-            player.sendMessage("Movement update: " + (ticksSinceStarted - lastUpdate));
             blockView.update(false);
-            previousPosition = player.getLocation();
-            lastUpdate = ticksSinceStarted;
         }
 
         // This must be called every tick, since entities can move and they might be visible now
@@ -73,6 +69,7 @@ public class PlayerPortalView implements IPlayerPortalView  {
         }
 
         ticksSinceStarted++;
+        previousPosition = player.getLocation();
     }
 
     @Override
