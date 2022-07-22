@@ -5,8 +5,8 @@ import com.google.inject.Singleton;
 import com.lauriethefish.betterportals.bukkit.config.ProxyConfig;
 import com.lauriethefish.betterportals.bukkit.events.IEventRegistrar;
 import com.lauriethefish.betterportals.bukkit.net.requests.GetSelectionRequest;
-import com.lauriethefish.betterportals.bukkit.player.selection.IPlayerSelectionManager;
-import com.lauriethefish.betterportals.bukkit.player.selection.IPortalSelection;
+import com.lauriethefish.betterportals.bukkit.portal.selection.ISelectionManager;
+import com.lauriethefish.betterportals.bukkit.portal.selection.IPortalSelection;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import com.lauriethefish.betterportals.shared.net.requests.TeleportRequest;
 import org.bukkit.Bukkit;
@@ -35,7 +35,7 @@ public class PlayerDataManager implements IPlayerDataManager, Listener   {
     /**
      * Used to retain selections throughout logouts.
      */
-    private final Map<UUID, IPlayerSelectionManager> loggedOutPlayerSelections = new HashMap<>();
+    private final Map<UUID, ISelectionManager> loggedOutPlayerSelections = new HashMap<>();
 
     @Inject
     public PlayerDataManager(IEventRegistrar eventRegistrar, Logger logger, IPlayerData.Factory playerDataFactory, ProxyConfig proxyConfig) {
@@ -90,7 +90,7 @@ public class PlayerDataManager implements IPlayerDataManager, Listener   {
         if(player != null) {
             return players.get(player).getSelection().getDestSelection();
         }   else    {
-            IPlayerSelectionManager selection = loggedOutPlayerSelections.get(uniqueId);
+            ISelectionManager selection = loggedOutPlayerSelections.get(uniqueId);
             if(selection == null) {
                 if(proxyConfig.isWarnOnMissingSelection()) {
                     logger.warning("No selection found for player with unique ID %s. (selection check triggered by server switch, selection must be mirrored to the destination server). Is UUID forwarding disabled?", uniqueId);
@@ -116,7 +116,7 @@ public class PlayerDataManager implements IPlayerDataManager, Listener   {
             processTeleportOnJoin(event.getPlayer(), teleportOnJoin);
         }
 
-        IPlayerSelectionManager selectionManager = loggedOutPlayerSelections.get(playerId);
+        ISelectionManager selectionManager = loggedOutPlayerSelections.get(playerId);
         if(selectionManager != null) {
             logger.fine("Restoring selection on join");
             playerData.setSelection(selectionManager);

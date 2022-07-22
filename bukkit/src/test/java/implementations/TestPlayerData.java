@@ -3,7 +3,7 @@ package implementations;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.lauriethefish.betterportals.bukkit.player.IPlayerData;
-import com.lauriethefish.betterportals.bukkit.player.selection.IPlayerSelectionManager;
+import com.lauriethefish.betterportals.bukkit.portal.selection.ISelectionManager;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import lombok.Getter;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -28,7 +28,7 @@ public class TestPlayerData implements IPlayerData {
     }
 
     @Override
-    public @NotNull IPlayerSelectionManager getSelection() {return null;}
+    public @NotNull ISelectionManager getSelection() {return null;}
 
     @Override
     public void savePermanentData() { }
@@ -40,7 +40,7 @@ public class TestPlayerData implements IPlayerData {
     public @NotNull YamlConfiguration getPermanentData() { return null;}
 
     @Override
-    public void setSelection(@NotNull IPlayerSelectionManager selection) { }
+    public void setSelection(@NotNull ISelectionManager selection) { }
 
     @Override
     public void onUpdate() {

@@ -1,4 +1,4 @@
-package com.lauriethefish.betterportals.bukkit.player.selection;
+package com.lauriethefish.betterportals.bukkit.portal.selection;
 
 
 import com.google.inject.Inject;
@@ -14,7 +14,7 @@ import org.bukkit.util.Vector;
 
 import java.util.UUID;
 
-public class PlayerSelectionManager implements IPlayerSelectionManager  {
+public class SelectionManager implements ISelectionManager {
     private final MessageConfig messageConfig;
     @Getter private final IPortalSelection currentlySelecting;
     private final IPortal.Factory portalFactory;
@@ -26,7 +26,7 @@ public class PlayerSelectionManager implements IPlayerSelectionManager  {
     @Getter @Setter private GetSelectionRequest.ExternalSelectionInfo externalSelection;
 
     @Inject
-    public PlayerSelectionManager(MessageConfig messageConfig, IPortalSelection currentlySelecting, IPortal.Factory portalFactory, IPortalManager portalManager) {
+    public SelectionManager(MessageConfig messageConfig, IPortalSelection currentlySelecting, IPortal.Factory portalFactory, IPortalManager portalManager) {
         this.messageConfig = messageConfig;
         this.currentlySelecting = currentlySelecting;
         this.portalFactory = portalFactory;

@@ -3,7 +3,7 @@ package com.lauriethefish.betterportals.bukkit.player;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import com.lauriethefish.betterportals.bukkit.BetterPortals;
-import com.lauriethefish.betterportals.bukkit.player.selection.IPlayerSelectionManager;
+import com.lauriethefish.betterportals.bukkit.portal.selection.ISelectionManager;
 import com.lauriethefish.betterportals.bukkit.player.view.IPlayerPortalView;
 import com.lauriethefish.betterportals.bukkit.player.view.PlayerPortalViewFactory;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
@@ -28,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PlayerData implements IPlayerData  {
     @Getter private final Player player;
     @Getter private final YamlConfiguration permanentData;
-    @Getter @Setter private IPlayerSelectionManager selection;
+    @Getter @Setter private ISelectionManager selection;
 
     private final BetterPortals pl;
     private final Logger logger;
@@ -44,7 +44,7 @@ public class PlayerData implements IPlayerData  {
     private boolean viewsFrozen;
 
     @Inject
-    public PlayerData(@Assisted Player player, IPlayerSelectionManager selection, IPortalManager portalManager, IPortalPredicateManager portalPredicateManager, BetterPortals pl, Logger logger, IPortalActivityManager portalActivityManager, PlayerPortalViewFactory playerPortalViewFactory) {
+    public PlayerData(@Assisted Player player, ISelectionManager selection, IPortalManager portalManager, IPortalPredicateManager portalPredicateManager, BetterPortals pl, Logger logger, IPortalActivityManager portalActivityManager, PlayerPortalViewFactory playerPortalViewFactory) {
         this.player = player;
         this.selection = selection;
         this.portalManager = portalManager;

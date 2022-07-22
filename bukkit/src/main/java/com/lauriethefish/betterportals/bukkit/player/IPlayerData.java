@@ -1,6 +1,6 @@
 package com.lauriethefish.betterportals.bukkit.player;
 
-import com.lauriethefish.betterportals.bukkit.player.selection.IPlayerSelectionManager;
+import com.lauriethefish.betterportals.bukkit.portal.selection.ISelectionManager;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -37,13 +37,13 @@ public interface IPlayerData {
     /**
      * @return The player's current portal selection
      */
-    @NotNull IPlayerSelectionManager getSelection();
+    @NotNull ISelectionManager getSelection();
 
     /**
      * Sets the player's current selection manager.
      * @param selection The selection manager to set
      */
-    void setSelection(@NotNull IPlayerSelectionManager selection);
+    void setSelection(@NotNull ISelectionManager selection);
 
     /**
      * Called every tick, updates the portal view.

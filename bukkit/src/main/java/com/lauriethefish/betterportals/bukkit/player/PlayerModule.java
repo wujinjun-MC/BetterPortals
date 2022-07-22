@@ -3,10 +3,10 @@ package com.lauriethefish.betterportals.bukkit.player;
 import com.google.inject.AbstractModule;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 import com.google.inject.name.Names;
-import com.lauriethefish.betterportals.bukkit.player.selection.IPlayerSelectionManager;
-import com.lauriethefish.betterportals.bukkit.player.selection.IPortalSelection;
-import com.lauriethefish.betterportals.bukkit.player.selection.PlayerSelectionManager;
-import com.lauriethefish.betterportals.bukkit.player.selection.PortalSelection;
+import com.lauriethefish.betterportals.bukkit.portal.selection.ISelectionManager;
+import com.lauriethefish.betterportals.bukkit.portal.selection.IPortalSelection;
+import com.lauriethefish.betterportals.bukkit.portal.selection.SelectionManager;
+import com.lauriethefish.betterportals.bukkit.portal.selection.PortalSelection;
 import com.lauriethefish.betterportals.bukkit.player.view.IPlayerPortalView;
 import com.lauriethefish.betterportals.bukkit.player.view.PlayerPortalView;
 import com.lauriethefish.betterportals.bukkit.player.view.PlayerPortalViewFactory;
@@ -35,7 +35,7 @@ public class PlayerModule extends AbstractModule {
         bind(double.class).annotatedWith(Names.named("blockSendUpdateDistance")).toInstance(blockSendUpdateDistance);
         bind(IPlayerDataManager.class).to(PlayerDataManager.class).asEagerSingleton();
 
-        bind(IPlayerSelectionManager.class).to(PlayerSelectionManager.class);
+        bind(ISelectionManager.class).to(SelectionManager.class);
         bind(IPortalSelection.class).to(PortalSelection.class);
     }
 }

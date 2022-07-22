@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.lauriethefish.betterportals.bukkit.config.MessageConfig;
 import com.lauriethefish.betterportals.bukkit.player.IPlayerData;
 import com.lauriethefish.betterportals.bukkit.player.IPlayerDataManager;
-import com.lauriethefish.betterportals.bukkit.player.selection.IPortalSelection;
+import com.lauriethefish.betterportals.bukkit.portal.selection.IPortalSelection;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

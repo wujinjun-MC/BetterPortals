@@ -10,7 +10,7 @@ import com.lauriethefish.betterportals.bukkit.net.requests.GetBlockDataChangesRe
 import com.lauriethefish.betterportals.bukkit.net.requests.GetSelectionRequest;
 import com.lauriethefish.betterportals.bukkit.net.requests.TestForwardedRequest;
 import com.lauriethefish.betterportals.bukkit.player.IPlayerDataManager;
-import com.lauriethefish.betterportals.bukkit.player.selection.IPortalSelection;
+import com.lauriethefish.betterportals.bukkit.portal.selection.IPortalSelection;
 import com.lauriethefish.betterportals.bukkit.util.VersionUtil;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import com.lauriethefish.betterportals.shared.net.IRequestHandler;

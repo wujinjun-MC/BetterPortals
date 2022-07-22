@@ -1,7 +1,7 @@
 package com.lauriethefish.betterportals.bukkit.player;
 
 import com.lauriethefish.betterportals.bukkit.net.requests.GetSelectionRequest;
-import com.lauriethefish.betterportals.bukkit.player.selection.IPortalSelection;
+import com.lauriethefish.betterportals.bukkit.portal.selection.IPortalSelection;
 import com.lauriethefish.betterportals.shared.net.requests.TeleportRequest;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

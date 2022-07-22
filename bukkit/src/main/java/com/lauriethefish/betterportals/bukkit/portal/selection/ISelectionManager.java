@@ -1,4 +1,4 @@
-package com.lauriethefish.betterportals.bukkit.player.selection;
+package com.lauriethefish.betterportals.bukkit.portal.selection;
 
 import com.lauriethefish.betterportals.bukkit.command.framework.CommandException;
 import com.lauriethefish.betterportals.bukkit.net.requests.GetSelectionRequest;
@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 // Stores the selection of both sides of a portal by a player
-public interface IPlayerSelectionManager {
+public interface ISelectionManager {
     @NotNull IPortalSelection getCurrentlySelecting();
     @Nullable IPortalSelection getOriginSelection();
     @Nullable IPortalSelection getDestSelection();

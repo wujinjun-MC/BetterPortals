@@ -1,4 +1,4 @@
-package com.lauriethefish.betterportals.bukkit.player.selection;
+package com.lauriethefish.betterportals.bukkit.portal.selection;
 
 import com.google.inject.Inject;
 import com.lauriethefish.betterportals.api.PortalDirection;
