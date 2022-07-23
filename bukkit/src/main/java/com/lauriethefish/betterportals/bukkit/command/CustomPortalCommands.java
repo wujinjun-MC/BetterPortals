@@ -84,7 +84,6 @@ public class CustomPortalCommands {
         for (String coordinateToConvert : new String[] {X, Y, Z}) {
 
             // If it is just a ~ or a ^, then give it a zero at the end to fix conversions
-            System.out.println(coordinateToConvert.replace("~", "").replace("^", "").length());
             if (coordinateToConvert.replace("~", "").replace("^", "").length() == 0) {
                 coordinateToConvert += '0';
             }
