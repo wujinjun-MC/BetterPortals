@@ -108,6 +108,7 @@ public class CustomPortalCommands {
                 // Y is handled like standard local coordinate
                 if (coordinateType == 1) {
                     normalizedLocation.setY( playerLocation.getBlockY() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                    continue;
                 }
 
                 // Get the direction the player is facing
