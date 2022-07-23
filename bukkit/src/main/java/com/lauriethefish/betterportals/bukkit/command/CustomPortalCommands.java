@@ -145,6 +145,7 @@ public class CustomPortalCommands {
 
         return selection;
     }
+
     @Command
     @Path("betterportals/remove")
     @RequiresPermissions("betterportals.remove")
@@ -152,10 +153,8 @@ public class CustomPortalCommands {
     @Aliases({"delete", "del"})
     @Description("Removes the nearest portal within 20 blocks of the player")
     @Argument(name = "removeDestination?", defaultValue = "true")
-    public boolean deleteNearest(Player player, String removeDestination) throws CommandException {
+    public boolean deleteNearest(Player player, boolean removeDestination) throws CommandException {
         IPortal portal = getClosestPortal(player);
-
-        boolean boolKeepDestination = removeDestination.equalsIgnoreCase("false");
 
         // If the player doesn't own the portal, and doesn't have permission to remove portals that aren't theirs, don't remove
         if(!player.hasPermission("betterportals.remove.others") && !player.getUniqueId().equals(portal.getOwnerId())) {
@@ -164,7 +163,7 @@ public class CustomPortalCommands {
 
         portalManager.removePortal(portal);
         // We can't remove the destination on cross-server portals
-        if(!boolKeepDestination && !portal.isCrossServer()) {
+        if(removeDestination && !portal.isCrossServer()) {
             Location destPosition = portal.getDestPos().getLocation();
             portalManager.removePortalsAt(destPosition);
         }
