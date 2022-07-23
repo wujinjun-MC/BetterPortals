@@ -83,8 +83,13 @@ public class CustomPortalCommands {
         // Iterate through coordinates (X, Y, Z)
         for (String coordinateToConvert : new String[] {X, Y, Z}) {
 
+            // If it is just a ~ or a ^, then give it a zero at the end to fix conversions
+            if (coordinateToConvert == "~" | coordinateToConvert == "^") {
+                coordinateToConvert += "0";
+            }
+
             // Local Coordinate
-            if (coordinateToConvert.charAt(0) == '~') {    
+            if (coordinateToConvert.charAt(0) == '~') {
                 // Basically just add the coordinate to the respective player location depending on whether it is X, Y or Z
                 switch (coordinateType) {
                     case 0:
