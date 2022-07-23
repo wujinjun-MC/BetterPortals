@@ -74,6 +74,106 @@ public class CustomPortalCommands {
         }
     }
 
+    // Oh for the love of god please don't run this command on the behalf of an entity just please don't I beg you why would you even do that?
+    private Location normalizeLocalCoordinates(String X, String Y, String Z, String playerName) {
+        int coordinateType = 0; // 0: X, 1: Y, 2: Z
+        Location playerLocation = Bukkit.getPlayerExact(playerName).getLocation();
+        Location normalizedLocation = playerLocation.clone(); // Will store the converted location
+
+        // Iterate through coordinates (X, Y, Z)
+        for (String coordinateToConvert : new String[] {X, Y, Z}) {
+
+            // Local Coordinate
+            if (coordinateToConvert.charAt(0) == '~') {    
+                // Basically just add the coordinate to the respective player location depending on whether it is X, Y or Z
+                switch (coordinateType) {
+                    case 0:
+                        normalizedLocation.setX( (int) playerLocation.getX() + Integer.parseInt(coordinateToConvert.replace("~", "")) );
+                        break;
+                    case 1:
+                        normalizedLocation.setY( (int) playerLocation.getY() + Integer.parseInt(coordinateToConvert.replace("~", "")) );
+                        break;
+                    case 2:
+                        normalizedLocation.setZ( (int) playerLocation.getZ() + Integer.parseInt(coordinateToConvert.replace("~", "")) );
+                        break;
+                }
+
+            // Caret Notation Local Coordinate
+            } else if (coordinateToConvert.charAt(0) == '^') {
+                // Y is handled like standard local coordinate
+                if (coordinateType == 1) {
+                    normalizedLocation.setY( (int) playerLocation.getY() + Integer.parseInt(coordinateToConvert.replace("~", "")) );
+                    continue;
+                }
+
+                // Get the direction the player is facing
+                float playerYaw = playerLocation.getYaw();
+
+                /**
+                 * This code basically:
+                 * - Checks the direction the player is facing
+                 * - Adds to the corresponding coordinate depending on that
+                 * 
+                 * Note that Y is ommited as it is handled above
+                 */
+                if ((playerYaw >= 0 && playerYaw < 45) || playerYaw >= 315 && playerYaw <= 365) {
+                    // Facing +z
+                    switch (coordinateType) {
+                        case 0:
+                            normalizedLocation.setX( (int) playerLocation.getX() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                        case 2:
+                            normalizedLocation.setZ( (int) playerLocation.getZ() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                    }
+                } else if (playerYaw >= 45 && playerYaw < 135) {
+                    // Facing -x
+                    switch (coordinateType) {
+                        case 0:
+                            normalizedLocation.setZ( (int) playerLocation.getZ() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                        case 2:
+                            normalizedLocation.setX( (int) playerLocation.getX() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                    }
+                } else if (playerYaw >= 135 && playerYaw < 225) {
+                    // Facing -z
+                    switch (coordinateType) {
+                        case 0:
+                            normalizedLocation.setX( (int) playerLocation.getX() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                        case 2:
+                            normalizedLocation.setZ( (int) playerLocation.getZ() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                    }
+                } else if (playerYaw >= 135 && playerYaw < 315) {
+                    // Facing +x
+                    switch (coordinateType) {
+                        case 0:
+                            normalizedLocation.setZ( (int) playerLocation.getZ() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                        case 2:
+                            normalizedLocation.setX( (int) playerLocation.getX() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                    }
+                }
+
+            // Absolute coordinates
+            } else {
+                // Set the location to the coordinate
+                switch (coordinateType) {
+                    case 0:
+                        normalizedLocation.setX(Integer.parseInt(coordinateToConvert));
+                        break;
+                    case 1:
+                        normalizedLocation.setY(Integer.parseInt(coordinateToConvert));
+                        break;
+                    case 2:
+                        normalizedLocation.setZ(Integer.parseInt(coordinateToConvert));
+                        break;
+                }
+            }
+
+            // Increment the coordinate type in the order: X, Y, Z
+            coordinateType++;
+        }
+
+        // Return the new location
+        return normalizedLocation;
+    }
+
     @Command
     @Path("betterportals/createfromcoords")
     @Description("Creates a portal from the coordinates of its corners without requiring a player")
@@ -96,11 +196,11 @@ public class CustomPortalCommands {
     @Argument(name = "name", defaultValue = " no name")
     public boolean createFromCoordinates(CommandSender sender,
                                          String originWorld,
-                                         int originX1, int originY1, int originZ1,
-                                         int originX2, int originY2, int originZ2,
+                                         String originX1, String originY1, String originZ1,
+                                         String originX2, String originY2, String originZ2,
                                          String destWorld,
-                                         int destX1, int destY1, int destZ1,
-                                         int destX2, int destY2, int destZ2,
+                                         String destX1, String destY1, String destZ1,
+                                         String destX2, String destY2, String destZ2,
                                          String twoWayStr,
                                          String invertStr,
                                          String name
@@ -108,11 +208,19 @@ public class CustomPortalCommands {
         if(" no name".equals(name)) {
             name = null;
         }
+
+        // Normalize coordinates
+        Location origin1 = normalizeLocalCoordinates(originX1, originY1, originZ1, sender.getName());
+        Location origin2 = normalizeLocalCoordinates(originX2, originY2, originZ2, sender.getName());
+        Location dest1 = normalizeLocalCoordinates(destX1, destY1, destZ1, sender.getName());
+        Location dest2 = normalizeLocalCoordinates(destX2, destY2, destZ2, sender.getName());
+
+
         boolean twoWay = twoWayStr.equalsIgnoreCase("true") || twoWayStr.equalsIgnoreCase("twoWay") || twoWayStr.equalsIgnoreCase("dual");
         boolean invert = invertStr.equalsIgnoreCase("true") || invertStr.equalsIgnoreCase("invert");
 
-        IPortalSelection origin = makeSelection(originWorld, originX1, originY1, originZ1, originX2, originY2, originZ2);
-        IPortalSelection dest = makeSelection(destWorld, destX1, destY1, destZ1, destX2, destY2, destZ2);
+        IPortalSelection origin = makeSelection(originWorld, (int) origin1.getX(), (int) origin1.getY(), (int) origin1.getZ(), (int) origin2.getX(), (int) origin2.getY(), (int) origin2.getZ());
+        IPortalSelection dest = makeSelection(destWorld, (int) dest1.getX(), (int) dest1.getY(), (int) dest1.getZ(), (int) dest2.getX(), (int) dest2.getY(), (int) dest2.getZ());
 
         if(!origin.getPortalSize().equals(dest.getPortalSize())) {
             throw new CommandException(messageConfig.getErrorMessage("differentSizes"));
