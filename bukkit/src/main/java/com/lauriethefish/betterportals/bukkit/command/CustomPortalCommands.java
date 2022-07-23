@@ -74,7 +74,7 @@ public class CustomPortalCommands {
         }
     }
 
-    // Oh for the love of god please don't run this command on the behalf of an entity just please don't I beg you why would you even do that?
+    // Oh for the love of god please don't run this command on the behalf of an entity just please don't, why would you even do that?
     private Location normalizeLocalCoordinates(String X, String Y, String Z, String playerName) {
         int coordinateType = 0; // 0: X, 1: Y, 2: Z
         Location playerLocation = Bukkit.getPlayerExact(playerName).getLocation();
