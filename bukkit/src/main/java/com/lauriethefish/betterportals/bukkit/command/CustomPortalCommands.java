@@ -54,6 +54,7 @@ public class CustomPortalCommands {
 
     @Command
     @Path("betterportals/removebyname")
+    @RequiresPermissions("betterportals.remove")
     @Description("Removes all portals with the given name")
     @Argument(name = "portalName")
     @Aliases("deletename")
@@ -189,6 +190,7 @@ public class CustomPortalCommands {
 
     @Command
     @Path("betterportals/createfromcoords")
+    @RequiresPermissions("betterportals.createfromcoords")
     @Description("Creates a portal from the coordinates of its corners without requiring a player")
     @Argument(name = "originWorld")
     @Argument(name = "originX1")
