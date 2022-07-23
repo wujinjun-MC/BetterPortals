@@ -85,6 +85,7 @@ public class CustomPortalCommands {
 
             // If it is just a ~ or a ^, then give it a zero at the end to fix conversions
             if (coordinateToConvert == "~" | coordinateToConvert == "^") {
+                System.out.println("TOO SMALL: ADDING 0");
                 coordinateToConvert += "0";
             }
 
@@ -107,8 +108,7 @@ public class CustomPortalCommands {
             } else if (coordinateToConvert.charAt(0) == '^') {
                 // Y is handled like standard local coordinate
                 if (coordinateType == 1) {
-                    normalizedLocation.setY( (int) playerLocation.getY() + Integer.parseInt(coordinateToConvert.replace("~", "")) );
-                    continue;
+                    normalizedLocation.setY( (int) playerLocation.getY() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
                 }
 
                 // Get the direction the player is facing
@@ -126,32 +126,40 @@ public class CustomPortalCommands {
                     switch (coordinateType) {
                         case 0:
                             normalizedLocation.setX( (int) playerLocation.getX() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                            break;
                         case 2:
                             normalizedLocation.setZ( (int) playerLocation.getZ() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                            break;
                     }
                 } else if (playerYaw >= 45 && playerYaw < 135) {
                     // Facing -x
                     switch (coordinateType) {
                         case 0:
                             normalizedLocation.setZ( (int) playerLocation.getZ() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                            break;
                         case 2:
                             normalizedLocation.setX( (int) playerLocation.getX() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                            break;
                     }
                 } else if (playerYaw >= 135 && playerYaw < 225) {
                     // Facing -z
                     switch (coordinateType) {
                         case 0:
                             normalizedLocation.setX( (int) playerLocation.getX() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                            break;
                         case 2:
                             normalizedLocation.setZ( (int) playerLocation.getZ() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                            break;
                     }
                 } else if (playerYaw >= 135 && playerYaw < 315) {
                     // Facing +x
                     switch (coordinateType) {
                         case 0:
                             normalizedLocation.setZ( (int) playerLocation.getZ() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                            break;
                         case 2:
                             normalizedLocation.setX( (int) playerLocation.getX() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                            break;
                     }
                 }
 
