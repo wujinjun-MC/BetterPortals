@@ -84,9 +84,11 @@ public class CustomPortalCommands {
         for (String coordinateToConvert : new String[] {X, Y, Z}) {
 
             // If it is just a ~ or a ^, then give it a zero at the end to fix conversions
-            if (coordinateToConvert == "~" || coordinateToConvert == "^") {
+            System.out.println("Coordinate Length:");
+            System.out.println(coordinateToConvert.replace("~", "").replace("^", "").length());
+            if (coordinateToConvert.replace("~", "").replace("^", "").length() == 1) {
                 System.out.println("TOO SMALL: ADDING 0");
-                coordinateToConvert.concat("0");
+                coordinateToConvert += '0';
             }
 
             // Local Coordinate
