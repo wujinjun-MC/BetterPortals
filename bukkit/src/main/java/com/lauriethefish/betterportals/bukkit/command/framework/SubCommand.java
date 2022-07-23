@@ -7,8 +7,14 @@ import com.lauriethefish.betterportals.bukkit.player.IPlayerDataManager;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 import com.lauriethefish.betterportals.shared.util.ReflectionUtil;
 import lombok.Getter;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -105,29 +111,156 @@ public class SubCommand implements ICommand {
 
     private void generateUsage() {
         StringBuilder builder = new StringBuilder();
+        int argTypeIndex = 0;
         for(Argument argument : arguments) {
-            boolean required = argument.defaultValue().equals("");
-            // Use square brackets for optional arguments, comparator signs for required ones
-            if(required) {
-                builder.append(String.format(" <%s>", argument.name()));
+            if(argumentTypes[argTypeIndex].equals(Vector.class)) {
+                builder.append(String.format(" <%sX> <%sY> <%sZ>", argument.name(), argument.name(), argument.name()));
             }   else    {
-                builder.append(String.format(" [%s]", argument.name()));
+                boolean required = argument.defaultValue().equals("");
+                // Use square brackets for optional arguments, comparator signs for required ones
+                if(required) {
+                    builder.append(String.format(" <%s>", argument.name()));
+                }   else    {
+                    builder.append(String.format(" [%s]", argument.name()));
+                }
             }
+            argTypeIndex++;
         }
         // Avoid adding the colon for blank descriptions
         if(!description.isEmpty()) {
             builder.append(": ");
             builder.append(description);
         }
-        usage = builder.toString();
+        usage = builder.toString().trim();
+    }
+
+    private Vector parseVector(CommandSender sender, String x, String y, String z) throws CommandException {
+        logger.fine("Attempting to parse vector from %s, %s, %s", x, y, z);
+        try {
+            return normalizeLocalCoordinates(x, y, z, (sender instanceof Player player) ? player.getLocation() : null);
+        }   catch(NumberFormatException ignored) {
+            throw new CommandException(String.format(messageConfig.getErrorMessage("invalidCoordinates"), x, y, z));
+        }
+    }
+
+    private World parseWorld(CommandSender sender, String worldName) throws CommandException {
+        World world;
+        if(sender instanceof Player player && "<local>".equals(worldName)) {
+            world = player.getWorld();
+        }   else    {
+            world = Bukkit.getWorld(worldName);
+        }
+
+        if(world == null) {
+            throw new CommandException(messageConfig.getErrorMessage("noWorldExistsWithGivenName").replace("{name}", worldName));
+        }
+
+        return world;
+    }
+
+    private Vector normalizeLocalCoordinates(
+            @NotNull String x,
+            @NotNull String y,
+            @NotNull String z,
+            @Nullable Location playerLocation)
+        throws CommandException,
+            NumberFormatException {
+        int coordinateType = 0; // 0: X, 1: Y, 2: Z
+        Vector normalizedLocation = new Vector(0, 0, 0); // Will store the converted location
+
+        // Iterate through coordinates (X, Y, Z)
+        for (String coordinateToConvert : new String[] {x, y, z}) {
+
+            // If it is just a ~ or a ^, then give it a zero at the end to fix conversions
+            if (coordinateToConvert.replace("~", "").replace("^", "").length() == 0) {
+                coordinateToConvert += '0';
+            }
+
+            // Local Coordinate
+            if (coordinateToConvert.charAt(0) == '~') {
+                if(playerLocation == null) {
+                    throw new CommandException(messageConfig.getErrorMessage("cannotUseRelativeCoordinatesWithoutPlayer"));
+                }
+
+                // Basically just add the coordinate to the respective player location depending on whether it is X, Y or Z
+                switch (coordinateType) {
+                    case 0 -> normalizedLocation.setX(playerLocation.getBlockX() + Integer.parseInt(coordinateToConvert.replace("~", "")));
+                    case 1 -> normalizedLocation.setY(playerLocation.getBlockY() + Integer.parseInt(coordinateToConvert.replace("~", "")));
+                    case 2 -> normalizedLocation.setZ(playerLocation.getBlockZ() + Integer.parseInt(coordinateToConvert.replace("~", "")));
+                }
+
+                // Caret Notation Local Coordinate
+            } else if (coordinateToConvert.charAt(0) == '^') {
+                if(playerLocation == null) {
+                    throw new CommandException(messageConfig.getErrorMessage("cannotUseRelativeCoordinatesWithoutPlayer"));
+                }
+
+                // Y is handled like standard local coordinate
+                if (coordinateType == 1) {
+                    normalizedLocation.setY( playerLocation.getBlockY() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                    continue;
+                }
+
+                // Get the direction the player is facing
+                float playerYaw = Location.normalizeYaw(playerLocation.getYaw());
+
+                // This code basically:
+                // - Checks the direction the player is facing
+                // - Adds to the corresponding coordinate depending on that
+                //
+                // Note that Y is omitted as it is handled above
+                if (playerYaw >= -45 && playerYaw < 45) {
+                    // Facing +z
+                    switch (coordinateType) {
+                        case 0 -> normalizedLocation.setX(playerLocation.getBlockX() + Integer.parseInt(coordinateToConvert.replace("^", "")));
+                        case 2 -> normalizedLocation.setZ(playerLocation.getBlockZ() + Integer.parseInt(coordinateToConvert.replace("^", "")));
+                    }
+                } else if (playerYaw >= 45 && playerYaw < 135) {
+                    // Facing -x
+                    switch (coordinateType) {
+                        case 0 -> normalizedLocation.setZ(playerLocation.getBlockZ() + Integer.parseInt(coordinateToConvert.replace("^", "")));
+                        case 2 -> normalizedLocation.setX(playerLocation.getBlockX() - Integer.parseInt(coordinateToConvert.replace("^", "")));
+                    }
+                } else if ((playerYaw >= 135 && playerYaw <= 180) || (playerYaw >= -180 && playerYaw < -135)) {
+                    // Facing -z
+                    switch (coordinateType) {
+                        case 0 -> normalizedLocation.setX(playerLocation.getBlockX() - Integer.parseInt(coordinateToConvert.replace("^", "")));
+                        case 2 -> normalizedLocation.setZ(playerLocation.getBlockZ() - Integer.parseInt(coordinateToConvert.replace("^", "")));
+                    }
+                } else if (playerYaw >= -135 && playerYaw < -45) {
+                    // Facing +x
+                    switch (coordinateType) {
+                        case 0 -> normalizedLocation.setZ(playerLocation.getBlockZ() - Integer.parseInt(coordinateToConvert.replace("^", "")));
+                        case 2 -> normalizedLocation.setX(playerLocation.getBlockX() + Integer.parseInt(coordinateToConvert.replace("^", "")));
+                    }
+                }
+
+                // Absolute coordinates
+            } else {
+                // Set the location to the coordinate
+                switch (coordinateType) {
+                    case 0 -> normalizedLocation.setX(Integer.parseInt(coordinateToConvert));
+                    case 1 -> normalizedLocation.setY(Integer.parseInt(coordinateToConvert));
+                    case 2 -> normalizedLocation.setZ(Integer.parseInt(coordinateToConvert));
+                }
+            }
+
+            // Increment the coordinate type in the order: X, Y, Z
+            coordinateType++;
+        }
+
+        // Return the new location
+        return normalizedLocation;
     }
 
     // Attempts to parse an argument as various primitive types before attempting to call a static valueOf method on its class
-    private Object parseArgument(Class<?> type, String argument) throws CommandException {
+    private Object parseArgument(CommandSender sender, Class<?> type, String argument) throws CommandException {
         logger.fine("Attempting to parse string \"%s\" as type %s", argument, type.getName());
         try {
             if(type == String.class) {
                 return argument;
+            }   else if(type == World.class) {
+                return parseWorld(sender, argument);
             }   else if(type == int.class) {
                 return Integer.parseInt(argument);
             }   else if(type == short.class) {
@@ -207,18 +340,34 @@ public class SubCommand implements ICommand {
         }
 
 
-        int i = 0;
+        int argumentIdx = 0;
+        int argumentTypesIdx = 0;
         for(Argument argument : arguments) {
-            boolean wasEntered = i < args.length;
-            boolean isRequired = argument.defaultValue().equals("");
+            Class<?> argumentType = argumentTypes[argumentTypesIdx];
+            boolean isVector = argumentType.equals(Vector.class);
+            int argsRequired = isVector ? 3 : 1;
+
+            boolean wasEntered = argumentIdx + argsRequired - 1 < args.length;
+            boolean isRequired = isVector || argument.defaultValue().equals("");
             if(isRequired && !wasEntered) {
                 displayUsage(pathToCall);
             }
 
             // Attempt to parse each argument
-            String givenValue = wasEntered ? args[i] : argument.defaultValue();
-            parsedArgs.add(parseArgument(argumentTypes[i], givenValue));
-            i++;
+            if(isVector) {
+                parsedArgs.add(parseVector(
+                        sender,
+                        args[argumentIdx],
+                        args[argumentIdx + 1],
+                        args[argumentIdx + 2])
+                );
+            }   else    {
+                String givenValue = wasEntered ? args[argumentIdx] : argument.defaultValue();
+                parsedArgs.add(parseArgument(sender, argumentType, givenValue));
+            }
+
+            argumentIdx += argsRequired;
+            argumentTypesIdx++;
         }
 
         // Call the method, making sure to rethrow CommandExceptions

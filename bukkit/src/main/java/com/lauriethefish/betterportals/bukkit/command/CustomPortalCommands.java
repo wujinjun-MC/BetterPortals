@@ -11,11 +11,11 @@ import com.lauriethefish.betterportals.bukkit.player.IPlayerData;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.portal.IPortalManager;
 import com.lauriethefish.betterportals.bukkit.portal.selection.IPortalSelection;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -75,117 +75,26 @@ public class CustomPortalCommands {
         }
     }
 
-    // Oh for the love of god please don't run this command on the behalf of an entity just please don't, why would you even do that?
-    private Location normalizeLocalCoordinates(String X, String Y, String Z, String playerName) {
-        int coordinateType = 0; // 0: X, 1: Y, 2: Z
-        Location playerLocation = Bukkit.getPlayerExact(playerName).getLocation();
-        Location normalizedLocation = playerLocation.clone(); // Will store the converted location
-
-        // Iterate through coordinates (X, Y, Z)
-        for (String coordinateToConvert : new String[] {X, Y, Z}) {
-
-            // If it is just a ~ or a ^, then give it a zero at the end to fix conversions
-            if (coordinateToConvert.replace("~", "").replace("^", "").length() == 0) {
-                coordinateToConvert += '0';
-            }
-
-            // Local Coordinate
-            if (coordinateToConvert.charAt(0) == '~') {
-                // Basically just add the coordinate to the respective player location depending on whether it is X, Y or Z
-                switch (coordinateType) {
-                    case 0 -> normalizedLocation.setX(playerLocation.getBlockX() + Integer.parseInt(coordinateToConvert.replace("~", "")));
-                    case 1 -> normalizedLocation.setY(playerLocation.getBlockY() + Integer.parseInt(coordinateToConvert.replace("~", "")));
-                    case 2 -> normalizedLocation.setZ(playerLocation.getBlockZ() + Integer.parseInt(coordinateToConvert.replace("~", "")));
-                }
-
-            // Caret Notation Local Coordinate
-            } else if (coordinateToConvert.charAt(0) == '^') {
-                // Y is handled like standard local coordinate
-                if (coordinateType == 1) {
-                    normalizedLocation.setY( playerLocation.getBlockY() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
-                    continue;
-                }
-
-                // Get the direction the player is facing
-                float playerYaw = Location.normalizeYaw(playerLocation.getYaw());
-
-                // This code basically:
-                // - Checks the direction the player is facing
-                // - Adds to the corresponding coordinate depending on that
-                //
-                // Note that Y is ommited as it is handled above
-                if (playerYaw >= -45 && playerYaw < 45) {
-                    // Facing +z
-                    switch (coordinateType) {
-                        case 0 -> normalizedLocation.setX(playerLocation.getBlockX() + Integer.parseInt(coordinateToConvert.replace("^", "")));
-                        case 2 -> normalizedLocation.setZ(playerLocation.getBlockZ() + Integer.parseInt(coordinateToConvert.replace("^", "")));
-                    }
-                } else if (playerYaw >= 45 && playerYaw < 135) {
-                    // Facing -x
-                    switch (coordinateType) {
-                        case 0 -> normalizedLocation.setZ(playerLocation.getBlockZ() + Integer.parseInt(coordinateToConvert.replace("^", "")));
-                        case 2 -> normalizedLocation.setX(playerLocation.getBlockX() - Integer.parseInt(coordinateToConvert.replace("^", "")));
-                    }
-                } else if ((playerYaw >= 135 && playerYaw <= 180) || (playerYaw >= -180 && playerYaw < -135)) {
-                    // Facing -z
-                    switch (coordinateType) {
-                        case 0 -> normalizedLocation.setX(playerLocation.getBlockX() - Integer.parseInt(coordinateToConvert.replace("^", "")));
-                        case 2 -> normalizedLocation.setZ(playerLocation.getBlockZ() - Integer.parseInt(coordinateToConvert.replace("^", "")));
-                    }
-                } else if (playerYaw >= -135 && playerYaw < -45) {
-                    // Facing +x
-                    switch (coordinateType) {
-                        case 0 -> normalizedLocation.setZ(playerLocation.getBlockZ() - Integer.parseInt(coordinateToConvert.replace("^", "")));
-                        case 2 -> normalizedLocation.setX(playerLocation.getBlockX() + Integer.parseInt(coordinateToConvert.replace("^", "")));
-                    }
-                }
-
-            // Absolute coordinates
-            } else {
-                // Set the location to the coordinate
-                switch (coordinateType) {
-                    case 0 -> normalizedLocation.setX(Integer.parseInt(coordinateToConvert));
-                    case 1 -> normalizedLocation.setY(Integer.parseInt(coordinateToConvert));
-                    case 2 -> normalizedLocation.setZ(Integer.parseInt(coordinateToConvert));
-                }
-            }
-
-            // Increment the coordinate type in the order: X, Y, Z
-            coordinateType++;
-        }
-
-        // Return the new location
-        return normalizedLocation;
-    }
-
     @Command
     @Path("betterportals/createfromcoords")
     @RequiresPermissions("betterportals.createfromcoords")
     @Description("Creates a portal from the coordinates of its corners without requiring a player")
     @Argument(name = "originWorld")
-    @Argument(name = "originX1")
-    @Argument(name = "originY1")
-    @Argument(name = "originZ1")
-    @Argument(name = "originX2")
-    @Argument(name = "originY2")
-    @Argument(name = "originZ2")
+    @Argument(name = "originCorner1")
+    @Argument(name = "originCorner2")
     @Argument(name = "destWorld")
-    @Argument(name = "destX1")
-    @Argument(name = "destY1")
-    @Argument(name = "destZ1")
-    @Argument(name = "destX2")
-    @Argument(name = "destY2")
-    @Argument(name = "destZ2")
+    @Argument(name = "destCorner1")
+    @Argument(name = "destCorner2")
     @Argument(name = "twoWay?", defaultValue = "false")
     @Argument(name = "invert?", defaultValue = "false")
     @Argument(name = "name", defaultValue = " no name")
     public boolean createFromCoordinates(CommandSender sender,
-                                         String originWorld,
-                                         String originX1, String originY1, String originZ1,
-                                         String originX2, String originY2, String originZ2,
-                                         String destWorld,
-                                         String destX1, String destY1, String destZ1,
-                                         String destX2, String destY2, String destZ2,
+                                         World originWorld,
+                                         Vector originCorner1,
+                                         Vector originCorner2,
+                                         World destWorld,
+                                         Vector destCorner1,
+                                         Vector destCorner2,
                                          String twoWayStr,
                                          String invertStr,
                                          String name
@@ -194,28 +103,11 @@ public class CustomPortalCommands {
             name = null;
         }
 
-        // Normalize coordinates
-        Location origin1;
-        Location origin2;
-        Location dest1;
-        Location dest2;
-
-        try {
-            origin1 = normalizeLocalCoordinates(originX1, originY1, originZ1, sender.getName());
-            origin2 = normalizeLocalCoordinates(originX2, originY2, originZ2, sender.getName());
-            dest1 = normalizeLocalCoordinates(destX1, destY1, destZ1, sender.getName());
-            dest2 = normalizeLocalCoordinates(destX2, destY2, destZ2, sender.getName());
-        } catch (java.lang.NumberFormatException e) {
-            throw new CommandException(String.format(messageConfig.getErrorMessage("invalidCoordinates"),
-                    originX1, originY1, originZ1, originX2, originY2, originZ2, destX1, destY1, destZ1, destX2, destY2, destZ2));
-        }
-
-
         boolean twoWay = twoWayStr.equalsIgnoreCase("true") || twoWayStr.equalsIgnoreCase("twoWay") || twoWayStr.equalsIgnoreCase("dual");
         boolean invert = invertStr.equalsIgnoreCase("true") || invertStr.equalsIgnoreCase("invert");
 
-        IPortalSelection origin = makeSelection(originWorld, origin1.getBlockX(), origin1.getBlockY(), origin1.getBlockZ(), origin2.getBlockX(), origin2.getBlockY(), origin2.getBlockZ());
-        IPortalSelection dest = makeSelection(destWorld, dest1.getBlockX(), dest1.getBlockY(), dest1.getBlockZ(), dest2.getBlockX(), dest2.getBlockY(), dest2.getBlockZ());
+        IPortalSelection origin = makeSelection(originWorld, originCorner1, originCorner2);
+        IPortalSelection dest = makeSelection(destWorld, destCorner1, destCorner2);
 
         if(!origin.getPortalSize().equals(dest.getPortalSize())) {
             throw new CommandException(messageConfig.getErrorMessage("differentSizes"));
@@ -240,19 +132,15 @@ public class CustomPortalCommands {
         return true;
     }
 
-    private IPortalSelection makeSelection(String worldName, int x1, int y1, int z1, int x2, int y2, int z2) throws CommandException {
-        World world = Bukkit.getWorld(worldName);
-        if(world == null) {
-            throw new CommandException(messageConfig.getErrorMessage("noWorldExistsWithGivenName").replace("{name}", worldName));
-        }
-
+    private IPortalSelection makeSelection(World world, Vector corner1, Vector corner2) throws CommandException {
         IPortalSelection selection = selectionProvider.get();
-        selection.setPositionA(new Location(world, x1, y1, z1));
-        selection.setPositionB(new Location(world, x2, y2, z2));
+        selection.setPositionA(corner1.toLocation(world));
+        selection.setPositionB(corner2.toLocation(world));
 
         if(!selection.isValid()) {
             throw new CommandException(String.format(messageConfig.getErrorMessage("coordinatesNotInLine"),
-                    x1, y1, z1, x2, y2, z2));
+                    corner1.getBlockX(), corner1.getBlockY(), corner1.getBlockZ(),
+                    corner2.getBlockX(), corner2.getBlockY(), corner2.getBlockZ()));
         }
 
         return selection;
