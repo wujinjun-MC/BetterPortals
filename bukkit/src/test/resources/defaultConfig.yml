@@ -23,8 +23,11 @@ portalSaveInterval: 6000
 enableEntitySupport: true
 
 # If this is true, the below is always treated like it is 1
-checkForEntitiesEveryTick: true
-entityCheckInterval: 5 # How often the portal will check for surrounding entities
+checkForEntitiesEveryTick: false
+entityCheckInterval: 7 # How often the portal will check for surrounding entities
+
+# Interval for sending entity metadata updates in ticks (higher will improve performance, this is an expensive process, both for network bandwidth and CPU)
+entityMetadataUpdateInterval: 6
 
 # Setting this to true will allow you to see straight through a portal
 # NOTE: This generally makes it look a bit less convincing, since it's easier to see when the player's client doesn't quite keep up
@@ -56,7 +59,7 @@ maxPortalSize:
 portalCollisionBox:
   x: 0.50
   y: 0.50
-  z: 0.25
+  z: 0.50
 
 # Worlds where the plugin will fall back to the vanilla portal logic
 disabledWorlds:
@@ -72,7 +75,8 @@ waitTimeAfterSwitchingWorlds: 1
 # Overworld: white concrete
 # Nether: Red concrete
 # End: Black concrete
-worldBackgroundBlocks: {}
+worldBackgroundBlocks:
+  'example': STONE
 
 # Overrides all worldBackgroundBlocks if not empty
 backgroundBlock: ''
@@ -80,24 +84,38 @@ backgroundBlock: ''
 
 teleportCooldown: 2 # How long to wait before a player can go back after going through a portal (0 to disable)
 
-# Stores the links between worlds. By default this links the overworld and the nether with portals
+# Enables or disables the default world connections between the default overworld and nether worlds if they exist
+enableDefaultWorldConnections: true
+
+# The interval to place light blocks replacing air blocks. These are used to avoid the destination of the portal being too dark
+# Set to -1 to disable (or 0)
+# This option does nothing on versions below 1.18
+# 7 is a reasonable value to use if you want to try this out
+lightBlockInterval: -1
+
+# The light level to use on the light blocks specified above instead of the default value
+# By default this will be set based on the dimension (nether dimmer than overworld), on time of day (dark at night), and on Y level.
+# If in the overworld, the level will be set to darker if in a cave
+forceLightLevel: -1
+
+# Stores the links between worlds. By default, two links will be added, as said above
 # There are two links for the overworld and the nether - one for each way.
 # This is to allow one way links between dimensions
 # The x and z coordinates of the portals are multiplied by the coordinateRescalingFactor to spawn portals
 # The min and max spawn y limit where portals can spawn - for instance you should not be able to spawn portals above the nether ceiling
-worldConnections:
-  '0':
-    originWorld: 'world'
-    destinationWorld: 'world_nether'
-    minSpawnY: 5
-    maxSpawnY: 122
-    coordinateRescalingFactor: 0.125
-  '1':
-    originWorld: 'world_nether'
-    destinationWorld: 'world'
-    minSpawnY: 5
-    maxSpawnY: 250
-    coordinateRescalingFactor: 8.0
+worldConnections: {}
+  #'0':
+  #  originWorld: 'example'
+  #  destinationWorld: 'example_nether'
+  #  minSpawnY: 5 # Leave blank for automatically set to world size
+  #  maxSpawnY: 122 # Leave blank for automatically set to world size
+  #  coordinateRescalingFactor: 0.125
+  #'1':
+  #  originWorld: 'example_nether'
+  #  destinationWorld: 'example'
+  #  minSpawnY: 5 # Leave blank for automatically set to world size
+  #  maxSpawnY: 250 # Leave blank for automatically set to world size
+  #  coordinateRescalingFactor: 8.0
 
 # While a portal is finding a destination position, it checks the chunks over multiple ticks to avoid completely freezing the server
 # This specifies the amount of time allowed per-tick (in milliseconds)
@@ -110,6 +128,9 @@ proxy:
   proxyPort: 25510
   key: "" # A UUID used for encrypted communication with the proxy. You should set this to the UUID in the BetterPortals config on the bungee side.
   reconnectionDelay: 300 # Delay in ticks before attempting a reconnection to the proxy if disconnected (default 30 seconds) Set to -1 to disable.
+
+  # Change this to the name of this server in the bungeecord config.yml
+  serverName: ""
 
   # Whether to display a warning if a player's selection is missing upon switching between two servers which both have BetterPortals.
   # This shouldn't happen, unless UUID forwarding is disabled, in which case it makes sense to disable this warning message.
@@ -131,6 +152,10 @@ chatMessages:
   mustBePlayer: "You must be a player to use this command"
   mustMakeSelection: "You must make a selection first"
   invalidSelection: "Invalid selection! Portal selections must be on the two corners of a portal"
+  coordinatesNotInLine: "The given corner coordinates (%d, %d, %d), (%d, %d, %d) are not aligned correctly to produce a flat portal (portals are not allowed on diagonals)"
+  invalidCoordinates: "The given coordinates (%s, %s, %s), (%s, %s, %s), (%s, %s, %s), (%s, %s, %s) are invalid"
+  portalCreated: "Portal created successfully"
+  noWorldExistsWithGivenName: "No world exists called {name}"
   mustSelectBothSides: "You must select both sides of a portal first. For info, run /bp help"
   mustSelectOrigin: "You must select the origin of the portal on this server"
   wrongNumberOfArgs: "Wrong number of arguments. Run /bp help for help."
@@ -148,6 +173,7 @@ chatMessages:
   nameNetherPortal: "You can't set the name of a nether portal"
   seeThroughPortalDisabled: "All nether portals will now look like vanilla portals to you!"
   seeThroughPortalEnabled: "All eligible nether portals will now show you what's on the other side."
+  noPortalsWithName: "No portals existed with name {name}"
 
   # Printed if a player lights a portal in an unlinked world
   # To disable, just remove all the text inside the quotes
@@ -172,6 +198,7 @@ chatMessages:
   destPortalSet: "Destination portal set"
   portalsLinked: "Portals linked successfully"
   portalRemoved: "Portal removed"
+  portalsRemoved: "Portals removed"
   startedReconnection: "Started reconnecting to the proxy. See console for details."
   changedName: "Successfully changed the portal name"
   currentName: "The name for this portal is: {name}"

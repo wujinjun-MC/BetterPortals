@@ -182,13 +182,6 @@ public class CustomPortalCommands {
             coordinateType++;
         }
 
-        System.out.println("=====");
-        System.out.println(playerLocation.getYaw());
-        System.out.println(normalizedLocation.getBlockX());
-        System.out.println(normalizedLocation.getBlockY());
-        System.out.println(normalizedLocation.getBlockZ());
-        System.out.println("=====");
-
         // Return the new location
         return normalizedLocation;
     }
@@ -229,10 +222,20 @@ public class CustomPortalCommands {
         }
 
         // Normalize coordinates
-        Location origin1 = normalizeLocalCoordinates(originX1, originY1, originZ1, sender.getName());
-        Location origin2 = normalizeLocalCoordinates(originX2, originY2, originZ2, sender.getName());
-        Location dest1 = normalizeLocalCoordinates(destX1, destY1, destZ1, sender.getName());
-        Location dest2 = normalizeLocalCoordinates(destX2, destY2, destZ2, sender.getName());
+        Location origin1;
+        Location origin2;
+        Location dest1;
+        Location dest2;
+
+        try {
+            origin1 = normalizeLocalCoordinates(originX1, originY1, originZ1, sender.getName());
+            origin2 = normalizeLocalCoordinates(originX2, originY2, originZ2, sender.getName());
+            dest1 = normalizeLocalCoordinates(destX1, destY1, destZ1, sender.getName());
+            dest2 = normalizeLocalCoordinates(destX2, destY2, destZ2, sender.getName());
+        } catch (java.lang.NumberFormatException e) {
+            throw new CommandException(String.format(messageConfig.getErrorMessage("invalidCoordinates"),
+                    originX1, originY1, originZ1, originX2, originY2, originZ2, destX1, destY1, destZ1, destX2, destY2, destZ2));
+        }
 
 
         boolean twoWay = twoWayStr.equalsIgnoreCase("true") || twoWayStr.equalsIgnoreCase("twoWay") || twoWayStr.equalsIgnoreCase("dual");
@@ -288,8 +291,10 @@ public class CustomPortalCommands {
     @Aliases({"delete", "del"})
     @Description("Removes the nearest portal within 20 blocks of the player")
     @Argument(name = "removeDestination?", defaultValue = "true")
-    public boolean deleteNearest(Player player, boolean removeDestination) throws CommandException {
+    public boolean deleteNearest(Player player, String removeDestination) throws CommandException {
         IPortal portal = getClosestPortal(player);
+
+        Boolean boolKeepDestination = removeDestination.equalsIgnoreCase("false");
 
         // If the player doesn't own the portal, and doesn't have permission to remove portals that aren't theirs, don't remove
         if(!player.hasPermission("betterportals.remove.others") && !player.getUniqueId().equals(portal.getOwnerId())) {
@@ -298,7 +303,7 @@ public class CustomPortalCommands {
 
         portalManager.removePortal(portal);
         // We can't remove the destination on cross-server portals
-        if(removeDestination && !portal.isCrossServer()) {
+        if(!boolKeepDestination && !portal.isCrossServer()) {
             Location destPosition = portal.getDestPos().getLocation();
             portalManager.removePortalsAt(destPosition);
         }
