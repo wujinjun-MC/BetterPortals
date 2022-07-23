@@ -143,7 +143,7 @@ public class CustomPortalCommands {
                             normalizedLocation.setX( playerLocation.getBlockX() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
                             break;
                     }
-                } else if (playerYaw >= 135 && playerYaw < -135) {
+                } else if ((playerYaw >= 135 && playerYaw <= 180) || (playerYaw >= -180 && playerYaw < -135)) {
                     // Facing -z
                     switch (coordinateType) {
                         case 0:
