@@ -94,13 +94,13 @@ public class CustomPortalCommands {
                 // Basically just add the coordinate to the respective player location depending on whether it is X, Y or Z
                 switch (coordinateType) {
                     case 0:
-                        normalizedLocation.setX( (int) playerLocation.getX() + Integer.parseInt(coordinateToConvert.replace("~", "")) );
+                        normalizedLocation.setX( (int) playerLocation.getBlockX() + Integer.parseInt(coordinateToConvert.replace("~", "")) );
                         break;
                     case 1:
-                        normalizedLocation.setY( (int) playerLocation.getY() + Integer.parseInt(coordinateToConvert.replace("~", "")) );
+                        normalizedLocation.setY( (int) playerLocation.getBlockY() + Integer.parseInt(coordinateToConvert.replace("~", "")) );
                         break;
                     case 2:
-                        normalizedLocation.setZ( (int) playerLocation.getZ() + Integer.parseInt(coordinateToConvert.replace("~", "")) );
+                        normalizedLocation.setZ( (int) playerLocation.getBlockZ() + Integer.parseInt(coordinateToConvert.replace("~", "")) );
                         break;
                 }
 
@@ -108,7 +108,7 @@ public class CustomPortalCommands {
             } else if (coordinateToConvert.charAt(0) == '^') {
                 // Y is handled like standard local coordinate
                 if (coordinateType == 1) {
-                    normalizedLocation.setY( (int) playerLocation.getY() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                    normalizedLocation.setY( playerLocation.getBlockY() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
                 }
 
                 // Get the direction the player is facing
@@ -125,40 +125,40 @@ public class CustomPortalCommands {
                     // Facing +z
                     switch (coordinateType) {
                         case 0:
-                            normalizedLocation.setX( (int) playerLocation.getX() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                            normalizedLocation.setX( playerLocation.getBlockX() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
                             break;
                         case 2:
-                            normalizedLocation.setZ( (int) playerLocation.getZ() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                            normalizedLocation.setZ( playerLocation.getBlockZ() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
                             break;
                     }
                 } else if (playerYaw >= 45 && playerYaw < 135) {
                     // Facing -x
                     switch (coordinateType) {
                         case 0:
-                            normalizedLocation.setZ( (int) playerLocation.getZ() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                            normalizedLocation.setZ( playerLocation.getBlockZ() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
                             break;
                         case 2:
-                            normalizedLocation.setX( (int) playerLocation.getX() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                            normalizedLocation.setX( playerLocation.getBlockX() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
                             break;
                     }
                 } else if (playerYaw >= 135 && playerYaw < 225) {
                     // Facing -z
                     switch (coordinateType) {
                         case 0:
-                            normalizedLocation.setX( (int) playerLocation.getX() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                            normalizedLocation.setX( playerLocation.getBlockX() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
                             break;
                         case 2:
-                            normalizedLocation.setZ( (int) playerLocation.getZ() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                            normalizedLocation.setZ( playerLocation.getBlockZ() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
                             break;
                     }
                 } else if (playerYaw >= 135 && playerYaw < 315) {
                     // Facing +x
                     switch (coordinateType) {
                         case 0:
-                            normalizedLocation.setZ( (int) playerLocation.getZ() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                            normalizedLocation.setZ( playerLocation.getBlockZ() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
                             break;
                         case 2:
-                            normalizedLocation.setX( (int) playerLocation.getX() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
+                            normalizedLocation.setX( playerLocation.getBlockX() + Integer.parseInt(coordinateToConvert.replace("^", "")) );
                             break;
                     }
                 }
@@ -182,6 +182,13 @@ public class CustomPortalCommands {
             // Increment the coordinate type in the order: X, Y, Z
             coordinateType++;
         }
+
+        System.out.println("=====");
+        System.out.println(playerLocation.getYaw());
+        System.out.println(normalizedLocation.getBlockX());
+        System.out.println(normalizedLocation.getBlockY());
+        System.out.println(normalizedLocation.getBlockZ());
+        System.out.println("=====");
 
         // Return the new location
         return normalizedLocation;
@@ -232,8 +239,8 @@ public class CustomPortalCommands {
         boolean twoWay = twoWayStr.equalsIgnoreCase("true") || twoWayStr.equalsIgnoreCase("twoWay") || twoWayStr.equalsIgnoreCase("dual");
         boolean invert = invertStr.equalsIgnoreCase("true") || invertStr.equalsIgnoreCase("invert");
 
-        IPortalSelection origin = makeSelection(originWorld, (int) origin1.getX(), (int) origin1.getY(), (int) origin1.getZ(), (int) origin2.getX(), (int) origin2.getY(), (int) origin2.getZ());
-        IPortalSelection dest = makeSelection(destWorld, (int) dest1.getX(), (int) dest1.getY(), (int) dest1.getZ(), (int) dest2.getX(), (int) dest2.getY(), (int) dest2.getZ());
+        IPortalSelection origin = makeSelection(originWorld, origin1.getBlockX(), origin1.getBlockY(), origin1.getBlockZ(), origin2.getBlockX(), origin2.getBlockY(), origin2.getBlockZ());
+        IPortalSelection dest = makeSelection(destWorld, dest1.getBlockX(), dest1.getBlockY(), dest1.getBlockZ(), dest2.getBlockX(), dest2.getBlockY(), dest2.getBlockZ());
 
         if(!origin.getPortalSize().equals(dest.getPortalSize())) {
             throw new CommandException(messageConfig.getErrorMessage("differentSizes"));
