@@ -112,7 +112,7 @@ public class CustomPortalCommands {
                 }
 
                 // Get the direction the player is facing
-                float playerYaw = playerLocation.getYaw();
+                float playerYaw = Location.normalizeYaw(playerLocation.getYaw());
 
                 /**
                  * This code basically:
@@ -121,7 +121,7 @@ public class CustomPortalCommands {
                  * 
                  * Note that Y is ommited as it is handled above
                  */
-                if ((playerYaw >= 0 && playerYaw < 45) || playerYaw >= 315 && playerYaw <= 365) {
+                if (playerYaw >= -45 && playerYaw < 45) {
                     // Facing +z
                     switch (coordinateType) {
                         case 0:
@@ -141,7 +141,7 @@ public class CustomPortalCommands {
                             normalizedLocation.setX( playerLocation.getBlockX() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
                             break;
                     }
-                } else if (playerYaw >= 135 && playerYaw < 225) {
+                } else if (playerYaw >= 135 && playerYaw < -135) {
                     // Facing -z
                     switch (coordinateType) {
                         case 0:
@@ -151,7 +151,7 @@ public class CustomPortalCommands {
                             normalizedLocation.setZ( playerLocation.getBlockZ() - Integer.parseInt(coordinateToConvert.replace("^", "")) );
                             break;
                     }
-                } else if (playerYaw >= 135 && playerYaw < 315) {
+                } else if (playerYaw >= -135 && playerYaw < -45) {
                     // Facing +x
                     switch (coordinateType) {
                         case 0:
