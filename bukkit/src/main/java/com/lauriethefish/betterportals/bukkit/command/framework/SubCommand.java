@@ -270,7 +270,13 @@ public class SubCommand implements ICommand {
             }   else if(type == byte.class) {
                 return Byte.parseByte(argument);
             }   else if(type == boolean.class) {
-                return Boolean.parseBoolean(argument);
+                if(argument.equalsIgnoreCase("true") || argument.equalsIgnoreCase("yes")) {
+                    return true;
+                }
+                if(argument.equalsIgnoreCase("false") || argument.equalsIgnoreCase("no")) {
+                    return false;
+                }
+                throw new CommandException(messageConfig.getErrorMessage("invalidBoolean").replace("{arg}", argument));
             }   else if(type.isPrimitive()) {
                 throw new InvalidCommandException("Unknown primitive type on command argument");
             }   else    {

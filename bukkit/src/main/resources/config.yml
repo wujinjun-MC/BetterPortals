@@ -162,6 +162,7 @@ chatMessages:
   wrongNumberOfArgs: "Wrong number of arguments. Run /bp help for help."
   noCommands: "You don't have permission to use any sub-commands"
   invalidArgs: "One of your arguments was invalid. Run /bp help for help."
+  invalidBoolean: "Could not parse \"{arg}\" as a boolean argument. help: possible values are \"true\" or \"false\" and \"yes\" or \"no\""
   differentSizes: "The origin and destination portal must be of the same size"
   noPortalCloseEnough: "No portal close enough found"
   removeNotOwnedByPlayer: "You do not have permission to remove portals created by other people"
