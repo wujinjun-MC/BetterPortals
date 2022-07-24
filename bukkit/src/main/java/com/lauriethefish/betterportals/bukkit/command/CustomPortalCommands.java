@@ -11,11 +11,11 @@ import com.lauriethefish.betterportals.bukkit.player.IPlayerData;
 import com.lauriethefish.betterportals.bukkit.portal.IPortal;
 import com.lauriethefish.betterportals.bukkit.portal.IPortalManager;
 import com.lauriethefish.betterportals.bukkit.portal.selection.IPortalSelection;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -54,6 +54,7 @@ public class CustomPortalCommands {
 
     @Command
     @Path("betterportals/removebyname")
+    @RequiresPermissions("betterportals.remove")
     @Description("Removes all portals with the given name")
     @Argument(name = "portalName")
     @Aliases("deletename")
@@ -76,31 +77,24 @@ public class CustomPortalCommands {
 
     @Command
     @Path("betterportals/createfromcoords")
+    @RequiresPermissions("betterportals.createfromcoords")
     @Description("Creates a portal from the coordinates of its corners without requiring a player")
     @Argument(name = "originWorld")
-    @Argument(name = "originX1")
-    @Argument(name = "originY1")
-    @Argument(name = "originZ1")
-    @Argument(name = "originX2")
-    @Argument(name = "originY2")
-    @Argument(name = "originZ2")
+    @Argument(name = "originCorner1")
+    @Argument(name = "originCorner2")
     @Argument(name = "destWorld")
-    @Argument(name = "destX1")
-    @Argument(name = "destY1")
-    @Argument(name = "destZ1")
-    @Argument(name = "destX2")
-    @Argument(name = "destY2")
-    @Argument(name = "destZ2")
+    @Argument(name = "destCorner1")
+    @Argument(name = "destCorner2")
     @Argument(name = "twoWay?", defaultValue = "false")
     @Argument(name = "invert?", defaultValue = "false")
     @Argument(name = "name", defaultValue = " no name")
     public boolean createFromCoordinates(CommandSender sender,
-                                         String originWorld,
-                                         int originX1, int originY1, int originZ1,
-                                         int originX2, int originY2, int originZ2,
-                                         String destWorld,
-                                         int destX1, int destY1, int destZ1,
-                                         int destX2, int destY2, int destZ2,
+                                         World originWorld,
+                                         Vector originCorner1,
+                                         Vector originCorner2,
+                                         World destWorld,
+                                         Vector destCorner1,
+                                         Vector destCorner2,
                                          String twoWayStr,
                                          String invertStr,
                                          String name
@@ -108,11 +102,12 @@ public class CustomPortalCommands {
         if(" no name".equals(name)) {
             name = null;
         }
+
         boolean twoWay = twoWayStr.equalsIgnoreCase("true") || twoWayStr.equalsIgnoreCase("twoWay") || twoWayStr.equalsIgnoreCase("dual");
         boolean invert = invertStr.equalsIgnoreCase("true") || invertStr.equalsIgnoreCase("invert");
 
-        IPortalSelection origin = makeSelection(originWorld, originX1, originY1, originZ1, originX2, originY2, originZ2);
-        IPortalSelection dest = makeSelection(destWorld, destX1, destY1, destZ1, destX2, destY2, destZ2);
+        IPortalSelection origin = makeSelection(originWorld, originCorner1, originCorner2);
+        IPortalSelection dest = makeSelection(destWorld, destCorner1, destCorner2);
 
         if(!origin.getPortalSize().equals(dest.getPortalSize())) {
             throw new CommandException(messageConfig.getErrorMessage("differentSizes"));
@@ -137,23 +132,20 @@ public class CustomPortalCommands {
         return true;
     }
 
-    private IPortalSelection makeSelection(String worldName, int x1, int y1, int z1, int x2, int y2, int z2) throws CommandException {
-        World world = Bukkit.getWorld(worldName);
-        if(world == null) {
-            throw new CommandException(messageConfig.getErrorMessage("noWorldExistsWithGivenName").replace("{name}", worldName));
-        }
-
+    private IPortalSelection makeSelection(World world, Vector corner1, Vector corner2) throws CommandException {
         IPortalSelection selection = selectionProvider.get();
-        selection.setPositionA(new Location(world, x1, y1, z1));
-        selection.setPositionB(new Location(world, x2, y2, z2));
+        selection.setPositionA(corner1.toLocation(world));
+        selection.setPositionB(corner2.toLocation(world));
 
         if(!selection.isValid()) {
             throw new CommandException(String.format(messageConfig.getErrorMessage("coordinatesNotInLine"),
-                    x1, y1, z1, x2, y2, z2));
+                    corner1.getBlockX(), corner1.getBlockY(), corner1.getBlockZ(),
+                    corner2.getBlockX(), corner2.getBlockY(), corner2.getBlockZ()));
         }
 
         return selection;
     }
+
     @Command
     @Path("betterportals/remove")
     @RequiresPermissions("betterportals.remove")

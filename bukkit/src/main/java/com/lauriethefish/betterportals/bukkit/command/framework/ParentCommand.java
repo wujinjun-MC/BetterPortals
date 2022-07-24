@@ -105,7 +105,11 @@ public class ParentCommand implements ICommand  {
 
             String helpMessage = String.format("%s- %s%s", messageConfig.getMessageColor(), pathToCall, name);
             if(subCommand instanceof SubCommand) {
-                helpMessage += ((SubCommand) subCommand).getUsage();
+                String usage = ((SubCommand) subCommand).getUsage();
+                if(!usage.startsWith(":")) {
+                    helpMessage += " ";
+                }
+                helpMessage += usage;
             }
             sender.sendMessage(helpMessage);
         });

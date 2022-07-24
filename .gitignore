@@ -18,3 +18,5 @@ commitversion.enable
 !gradle/
 
 lombok.config
+*.class
+*bin/

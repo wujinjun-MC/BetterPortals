@@ -91,5 +91,9 @@ bukkit {
             description = ' Allows you to use /bp getname'
             setDefault('OP')
         }
+        'betterportals.createfromcoords' {
+            description = ' Allows you to use /bp createfromcoords'
+            setDefault('OP')
+        }
     }
 }
