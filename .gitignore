@@ -20,3 +20,5 @@ commitversion.enable
 lombok.config
 *.class
 *bin/
+
+.DS_Store

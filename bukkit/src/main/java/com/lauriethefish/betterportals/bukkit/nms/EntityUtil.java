@@ -38,8 +38,8 @@ public class EntityUtil {
 
         Class<?> NMS_PACKET = ReflectionUtil.findClass("net.minecraft.network.protocol.Packet");
 
-        int abstractMask = Modifier.ABSTRACT;
-        GET_ENTITY_SPAWN_PACKET = ReflectionUtil.findMethodByTypes(NMS_ENTITY, NMS_PACKET, abstractMask, abstractMask);
+        int mask = Modifier.PUBLIC;
+        GET_ENTITY_SPAWN_PACKET = ReflectionUtil.findMethodByTypes(NMS_ENTITY, NMS_PACKET, mask, mask);
     }
 
     /**
