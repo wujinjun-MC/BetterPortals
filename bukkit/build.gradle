@@ -1,8 +1,11 @@
 plugins {
-    id 'net.minecrell.plugin-yml.bukkit' version '0.5.2'
+    id 'net.minecrell.plugin-yml.bukkit' version '0.5.3'
 }
 
 repositories {
+    maven {
+        url = uri("https://repo.papermc.io/repository/maven-public/")
+    }
     mavenCentral()
     maven { url "https://repo.dmulloy2.net/nexus/repository/public/" }
     maven { url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
@@ -11,14 +14,12 @@ repositories {
 
 
 dependencies {
-    implementation 'org.bstats:bstats-bukkit:3.0.0'
-    testImplementation 'com.github.seeseemelk:MockBukkit-v1.17:1.13.0'
     testImplementation 'com.comphenix.protocol:ProtocolLib:5.0.0-SNAPSHOT'
 
     implementation project(':shared')
     implementation project(':api')
     compileOnly 'com.comphenix.protocol:ProtocolLib:5.0.0-SNAPSHOT'
-    compileOnly 'org.spigotmc:spigot-api:1.19.3-R0.1-SNAPSHOT'
+    compileOnly("io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT")
 }
 
 bukkit {
@@ -26,9 +27,7 @@ bukkit {
     name = 'BetterPortals'
     version = project.version
     description = 'Plugin which allows nether portals to be seen through, and allows custom portal creation'
-    website = 'https://www.spigotmc.org/resources/betterportals.75409/'
-    apiVersion = '1.13'
-    author = 'lauriethefish@outlook.com'
+    apiVersion = '1.19'
     depend = ['ProtocolLib']
     softDepend = ['Multiverse-Core', 'My_Worlds']
 
