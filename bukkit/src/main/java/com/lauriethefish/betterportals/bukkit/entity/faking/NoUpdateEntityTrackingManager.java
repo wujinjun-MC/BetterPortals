@@ -3,8 +3,8 @@ package com.lauriethefish.betterportals.bukkit.entity.faking;
 import com.lauriethefish.betterportals.bukkit.nms.AnimationType;
 import com.lauriethefish.betterportals.shared.logging.Logger;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 /**
  * A simpler entity tracking manager, which does not send the update events ({@link IEntityTracker#onPickup(EntityInfo)} and {@link IEntityTracker#onAnimation(AnimationType)}) to each entity tracker.

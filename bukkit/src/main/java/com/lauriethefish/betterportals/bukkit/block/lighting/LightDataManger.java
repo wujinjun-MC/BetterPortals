@@ -9,8 +9,8 @@ import org.bukkit.World;
 import org.bukkit.block.data.type.Light;
 import org.jetbrains.annotations.Nullable;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class LightDataManger implements ILightDataManager   {

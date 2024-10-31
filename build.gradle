@@ -19,28 +19,42 @@ allprojects {
     repositories {
         mavenCentral()
         maven { url 'https://jitpack.io' }
+        maven {
+            name = "papermc"
+            url = uri("https://repo.papermc.io/repository/maven-public/")
+        }
+        maven { url "https://repo.dmulloy2.net/repository/public/" }
     }
 
     compileJava.options.encoding = 'UTF-8'
 
     dependencies {
-        implementation 'com.google.inject:guice:5.1.0'
-        implementation 'com.google.inject.extensions:guice-assistedinject:5.1.0'
-        implementation 'org.jetbrains:annotations:24.0.1'
-        implementation 'com.google.code.findbugs:jsr305:3.0.2'
+        implementation 'com.google.inject:guice:7.0.0'
+        implementation 'com.google.inject.extensions:guice-assistedinject:7.0.0'
+        implementation 'org.jetbrains:annotations:26.0.1'
+        implementation 'com.github.spotbugs:spotbugs-annotations:4.8.6'
 
-        compileOnly 'org.projectlombok:lombok:1.18.26'
-        testImplementation 'org.projectlombok:lombok:1.18.26'
-        annotationProcessor 'org.projectlombok:lombok:1.18.26'
-        testAnnotationProcessor 'org.projectlombok:lombok:1.18.26'
+        compileOnly 'org.projectlombok:lombok:1.18.34'
+        testImplementation 'org.projectlombok:lombok:1.18.34'
+        annotationProcessor 'org.projectlombok:lombok:1.18.34'
+        testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.3'
     }
 
     tasks {
         compileJava {
-            options.release.set(17)
+            options.release.set(21)
         }
+    }
+
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+        sourceCompatibility = '21'
+        targetCompatibility = '21'
     }
 }
 

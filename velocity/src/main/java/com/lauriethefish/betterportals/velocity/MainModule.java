@@ -10,7 +10,7 @@ import com.velocitypowered.api.plugin.PluginContainer;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
 
-import javax.inject.Inject;
+import jakarta.inject.Inject;
 import java.nio.file.Path;
 import java.util.Optional;
 

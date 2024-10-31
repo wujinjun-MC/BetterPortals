@@ -4,7 +4,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Consumer;

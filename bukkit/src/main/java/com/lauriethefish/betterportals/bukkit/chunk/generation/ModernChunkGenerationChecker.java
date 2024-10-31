@@ -3,7 +3,7 @@ package com.lauriethefish.betterportals.bukkit.chunk.generation;
 import org.bukkit.World;
 import org.jetbrains.annotations.NotNull;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 
 @Singleton
 public class ModernChunkGenerationChecker implements IChunkGenerationChecker    {

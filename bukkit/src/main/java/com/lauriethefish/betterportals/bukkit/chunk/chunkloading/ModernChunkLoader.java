@@ -4,7 +4,7 @@ import com.lauriethefish.betterportals.bukkit.chunk.chunkpos.ChunkPosition;
 import org.bukkit.Chunk;
 import org.jetbrains.annotations.NotNull;
 
-import javax.inject.Singleton;
+import jakarta.inject.Singleton;
 import java.util.HashSet;
 import java.util.Set;
 

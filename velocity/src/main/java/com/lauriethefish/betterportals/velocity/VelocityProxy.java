@@ -7,9 +7,9 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
-import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Singleton;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.UUID;

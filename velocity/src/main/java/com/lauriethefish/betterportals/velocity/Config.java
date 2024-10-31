@@ -7,8 +7,8 @@ import com.moandjiezana.toml.Toml;
 import com.moandjiezana.toml.TomlWriter;
 import lombok.Getter;
 
-import javax.inject.Named;
-import javax.inject.Singleton;
+import jakarta.inject.Named;
+import jakarta.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
