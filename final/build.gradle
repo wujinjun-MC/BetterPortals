@@ -21,7 +21,6 @@ tasks.build.dependsOn tasks.shadowJar
 shadowJar {
     configurations = [getImplementationConfigurations(project), getImplementationConfigurations(project(':bukkit'))]
 
-    relocate 'org.bstats', 'com.lauriethefish.betterportals.dependencies.org.bstats'
     relocate 'org.aopalliance', 'com.lauriethefish.betterportals.dependencies.aopalliance'
     relocate 'org.checkerframework', 'com.lauriethefish.betterportals.dependencies.checkerframework'
     relocate 'org.intellij.lang.annotations', 'com.lauriethefish.betterportals.dependencies.intellij.lang.annotations'

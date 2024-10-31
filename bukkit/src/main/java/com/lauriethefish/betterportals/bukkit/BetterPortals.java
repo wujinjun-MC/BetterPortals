@@ -31,7 +31,6 @@ public class BetterPortals extends JavaPlugin {
     @Inject private CommandTree commandTree;
     @Inject private IPortalStorage portalStorage;
     @Inject private IPlayerDataManager playerDataManager;
-    @Inject private UpdateManager updateManager;
     @Inject private MiscConfig miscConfig;
     @Inject private ProxyConfig proxyConfig;
     @Inject private IPortalClient portalClient;
@@ -113,10 +112,6 @@ public class BetterPortals extends JavaPlugin {
             ex.printStackTrace();
             didEnableFail = true;
             return;
-        }
-
-        if(miscConfig.isUpdateCheckEnabled()) {
-            updateManager.checkForUpdates();
         }
     }
 
