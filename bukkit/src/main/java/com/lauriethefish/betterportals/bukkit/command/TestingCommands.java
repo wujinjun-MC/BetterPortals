@@ -100,7 +100,7 @@ public class TestingCommands {
     @Path("betterportals/test/smallTeleport")
     @RequiresPlayer
     public boolean testTeleport(Player player) {
-        player.teleport(player.getLocation().add(0.1, 0.0, 0.0));
+        player.teleportAsync(player.getLocation().add(0.1, 0.0, 0.0));
         return true;
     }
 

@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Singleton
 public class PortalManager implements IPortalManager    {
@@ -74,19 +75,12 @@ public class PortalManager implements IPortalManager    {
 
     @Override
     public @NotNull Collection<IPortal> findActivatablePortals(@NotNull Player player) {
-        List<IPortal> result = new ArrayList<>();
-
-        for(Set<IPortal> portalSet : portals.values()) {
-            for(IPortal portal : portalSet) {
-                // Test that the portal passes all predicates for activation
-                if(predicateManager.isActivatable(portal, player)) {
-                    result.add(portal);
-                }
-            }
-        }
-
-        return result;
+        return portals.values().stream() // Stream over the portal sets
+                .flatMap(Set::stream) // Flatten the sets into a single stream of portals
+                .filter(portal -> predicateManager.isActivatable(portal, player)) // Filter by the activatable predicate
+                .collect(Collectors.toList()); // Collect the results into a List
     }
+
 
     @Override
     public void registerPortal(@NotNull IPortal portal) {

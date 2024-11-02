@@ -294,25 +294,25 @@ public class EntityPacketManipulator implements IEntityPacketManipulator {
 
         packet.getIntegers().write(0, tracker.getEntityId());
 
-        WrappedDataWatcher dataWatcher = EntityUtil.getActualDataWatcher(tracker.getEntity()); // Use the Entity's actual data watcher, not ProtocolLib's method which gives us a dummy
-        if (MinecraftVersion.getCurrentVersion().isAtLeast(new MinecraftVersion("1.19.3"))) {
-            List<WrappedDataValue> wrappedDataValueList = dataWatcher.getWatchableObjects().stream()
-                    .filter(Objects::nonNull)
-                    .map(entry -> {
-                        WrappedDataWatcher.WrappedDataWatcherObject dataWatcherObject = entry.getWatcherObject();
-                        return new WrappedDataValue(
-                                dataWatcherObject.getIndex(),
-                                dataWatcherObject.getSerializer(),
-                                entry.getRawValue());
-                    })
-                    .toList();
-            packet.getDataValueCollectionModifier().write(0, wrappedDataValueList);
-        } else {
-            packet.getWatchableCollectionModifier().write(0, dataWatcher.getWatchableObjects());
-        }
+        WrappedDataWatcher dataWatcher = EntityUtil.getActualDataWatcher(tracker.getEntity()); // Get the entity's actual data watcher
 
-        sendPacket(packet, players);
+        // Convert the data watcher to a list of WrappedDataValues
+        List<WrappedDataValue> wrappedDataValueList = dataWatcher.getWatchableObjects().stream()
+                .filter(Objects::nonNull)
+                .map(entry -> {
+                    WrappedDataWatcher.WrappedDataWatcherObject dataWatcherObject = entry.getWatcherObject();
+                    return new WrappedDataValue(
+                            dataWatcherObject.getIndex(),
+                            dataWatcherObject.getSerializer(),
+                            entry.getRawValue());
+                })
+                .toList();
+
+        packet.getDataValueCollectionModifier().write(0, wrappedDataValueList); // Write the data values to the packet
+
+        sendPacket(packet, players); // Send the packet to the specified players
     }
+
 
     @Override
     public void sendEntityVelocity(EntityInfo tracker, Vector newVelocity, Collection<Player> players) {

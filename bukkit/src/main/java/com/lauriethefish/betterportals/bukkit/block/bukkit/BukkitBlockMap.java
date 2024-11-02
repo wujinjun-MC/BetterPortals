@@ -24,10 +24,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -57,39 +54,26 @@ public class BukkitBlockMap extends FloodFillBlockMap {
         logger.fine("Origin direction: %s, Dest Direction: %s", portal.getOriginPos().getDirection(), portal.getDestPos().getDirection());
     }
 
-    /**
-     * Starts a flood fill from <code>start</code> out to the edges of the viewed portal area.
-     * The fill stops when it reaches occluding blocks, as we don't need to render other blocks behind these.
-     * The origin data is also fetched, and this is placed in <code>statesOutput</code>
-     * <br>Some notes:
-     * - There used to be a check to see if the origin and destination states are the same, but this added too much complexity when checking for changes, so I decided to remove it.
-     * - That unfortunately reduces the performance of the threaded bit slightly, but I think it's worth it for the gains here.
-     * @param start Start position of the flood fill, at the origin
-     * @param statesOutput List to place the newly viewable states in
-     * @param firstBlockInfo Optional, used instead of adding a new block to the map for the first block. Useful for incremental updates
-     */
     protected void searchFromBlock(IntVector start, List<IViewableBlockInfo> statesOutput, @Nullable IViewableBlockInfo firstBlockInfo) {
         WrappedBlockData backgroundData = getBackgroundData();
 
         final int timeBetweenLightBlocks = renderConfig.getLightSimulationInterval();
 
-        if(wrappedLightData == null) {
+        if (wrappedLightData == null) {
             wrappedLightData = lightDataManager.getLightData(portal);
         }
 
         boolean enableLightBlocks = wrappedLightData != null && timeBetweenLightBlocks >= 1;
         int airCount = 0;
 
-        // We don't use a Stack<T> or ArrayList<T> since those are much too slow
-        int[] stack = new int[firstUpdate ? renderConfig.getTotalArrayLength() : 16];
-
+        // Preallocate stack with a reasonable size
+        int[] stack = new int[Math.max(16, renderConfig.getTotalArrayLength())]; // Adjusted to prevent frequent resizing
         stack[0] = getArrayMapIndex(start.subtract(centerPos));
         int stackPos = 0;
-        while(stackPos >= 0) {
-            int positionInt = stack[stackPos];
-            stackPos--;
 
-            // Convert our position integer into the origin relative coordinates
+        while (stackPos >= 0) {
+            int positionInt = stack[stackPos--];
+
             int relX = (positionInt % renderConfig.getZMultip());
             int relY = Math.floorDiv(positionInt, renderConfig.getYMultip());
             int relZ = Math.floorDiv(positionInt - relY * renderConfig.getYMultip(), renderConfig.getZMultip());
@@ -99,11 +83,11 @@ public class BukkitBlockMap extends FloodFillBlockMap {
             relZ -= renderConfig.getMaxXZ();
 
             IntVector originPos = new IntVector(relX + portalOriginPos.getX(), relY + portalOriginPos.getY(), relZ + portalOriginPos.getZ());
-            IntVector destRelPos =  rotateOriginToDest.transform(relX, relY, relZ);
+            IntVector destRelPos = rotateOriginToDest.transform(relX, relY, relZ);
             IntVector destPos = destRelPos.add(portalDestPos);
 
             BlockData destData = dataFetcher.getData(destPos);
-            if(destData == null) {
+            if (destData == null) {
                 logger.warning("Fetched data was null even though the request to get the data had already succeeded. This shouldn't happen!");
                 return;
             }
@@ -113,176 +97,162 @@ public class BukkitBlockMap extends FloodFillBlockMap {
             Block originBlock = originPos.getBlock(originWorld);
             BlockData originData = originBlock.getBlockData();
 
-            if(!portal.isCrossServer() && MaterialUtil.isTileEntity(destData.getMaterial())) {
-                logger.finer("Adding tile state to map . . .");
-                Block destBlock = destPos.getBlock(Objects.requireNonNull(portal.getDestPos().getWorld()));
-
-                PacketContainer updatePacket = BlockDataUtil.getUpdatePacket(destBlock.getState());
-                if(updatePacket != null) {
-                    BlockDataUtil.setTileEntityPosition(updatePacket, originPos);
-
-                    destTileStates.put(originPos, updatePacket);
-                }
-            }
-
-            if(MaterialUtil.isTileEntity(originBlock.getType()))  {
-                logger.finer("Adding tile state to map . . .");
-                PacketContainer updatePacket = BlockDataUtil.getUpdatePacket(originBlock.getState());
-                if(updatePacket != null) {
-                    originTileStates.put(originPos, updatePacket);
-                }
-            }
+            handleTileEntityUpdates(originBlock, originPos, originData, destData, destPos);
 
             // Use the existing first block if given, otherwise make a new block info
             BukkitBlockInfo blockInfo = firstBlockInfo == null ? new BukkitBlockInfo(originPos, originData, destData) : (BukkitBlockInfo) firstBlockInfo;
             boolean isEdge = renderConfig.isOutsideBounds(relX, relY, relZ);
 
-            // If we're on a block on the edge of the portal view, and it is not a fully occluding material, then we must set it to the portal background
-            // This avoids the real-world being visible through the edge of the projection
-            if(isEdge && !isOccluding) {
-                blockInfo.setRenderedDestData(backgroundData);
-            }   else    {
-                blockInfo.setRenderedDestData(WrappedBlockData.createData(blockRotator.rotateByMatrix(rotateDestToOrigin, destData)));
-            }
+            // Update rendered destination data
+            updateRenderedData(isEdge, isOccluding, blockInfo, backgroundData, destData);
 
-            // If the newly added block was not added previously (i.e. passed in via firstBlockInfo), then we need to add it to the non-obscured states
-            // This list is used for incremental updates later
-            if(firstBlockInfo == null) {
+            if (firstBlockInfo == null) {
                 nonObscuredStates.add(blockInfo);
             }
             firstBlockInfo = null;
 
-            // If we're not on an edge block, and the origin and destination block are the exact same, then we can skip this block
-            // This is because rendering it will do nothing - it's the same at both ends
-            boolean canSkip = destData.equals(originData) && firstUpdate && !isEdge;
+            boolean canSkip = shouldSkipBlock(destData, originData, firstUpdate, isEdge);
 
             boolean isInLine = isInLine(destRelPos);
 
-            // Don't bother adding blocks which are in line with the portal window, as these will never be visible anyway, and just serve to made the block map larger
-            // We also only add this block to the viewable states if it doesn't already exist there (this is the case if the alreadyReachedMap's value is 1)
-            // The above check is only important on incremental updates, since on the first update the block must never have been added to the block map - it's being checked for the first time
-
-            Material currentBlock = destData.getMaterial();
-
             if (alreadyReachedMap[positionInt] < 2 && !isInLine) {
-                if(enableLightBlocks) {
-                    if (currentBlock.isAir() && !isEdge) {
-                        airCount++;
+                if (enableLightBlocks && destData.getMaterial().isAir() && !isEdge) {
+                    airCount++;
+                    if (airCount == timeBetweenLightBlocks) {
+                        airCount = 0;
+                        blockInfo.setRenderedDestData(wrappedLightData);
+                        alreadyReachedMap[positionInt] = 2; // Avoid adding multiple times
+                        statesOutput.add(blockInfo);
                     }
-                }
-
-                if (enableLightBlocks && airCount == timeBetweenLightBlocks) {
-                    airCount = 0;
-                    blockInfo.setRenderedDestData(wrappedLightData);
-                    alreadyReachedMap[positionInt] = 2; // Make sure that this block will not be added multiple times
-                    statesOutput.add(blockInfo);
-                }   else if (!canSkip) {
-                    alreadyReachedMap[positionInt] = 2; // Make sure that this block will not be added multiple times
+                } else if (!canSkip) {
+                    alreadyReachedMap[positionInt] = 2; // Avoid adding multiple times
                     statesOutput.add(blockInfo);
                 }
             }
 
-            // Stop when we reach the edge, as otherwise the flood-fill will continue forever
-            // Also stop when we reach an occluding block, as displaying a block behind an occluding block is useless - it will never be seen anyway
-            if (isOccluding || isEdge) {continue;}
+            if (isOccluding || isEdge) continue;
 
-
-            // Resize the stack if there's a possibility there won't be enough room to fit our new items
-            if(!firstUpdate && (stack.length - (stackPos + 1) < 5)) {
-                int[] newStack = new int[stack.length * 2];
-                System.arraycopy(stack, 0, newStack, 0, stack.length);
-                stack = newStack;
+            // Avoid stack resizing if possible
+            if (!firstUpdate && stack.length - (stackPos + 1) < 5) {
+                stack = Arrays.copyOf(stack, stack.length * 2);
             }
 
-            // Continue for the surrounding blocks
-            for(int offset : renderConfig.getIntOffsets()) {
+            // Continue for surrounding blocks
+            for (int offset : renderConfig.getIntOffsets()) {
                 int newPos = positionInt + offset;
-                if(alreadyReachedMap[newPos] == 0) {
+                if (alreadyReachedMap[newPos] == 0) {
                     alreadyReachedMap[newPos] = 1;
-
-                    stackPos += 1;
-                    stack[stackPos] = newPos;
+                    stack[++stackPos] = newPos;
                 }
             }
         }
     }
 
-    /**
-     * Checks the origin and destination blocks for changes.
-     * At the origin, we only need to check the actually viewable blocks, since there is no need to re-flood-fill.
-     * At the destination, we must check all blocks that were reached by the flood-fill, then do a re-flood-fill for any that have changed to add blocks in a newly revealed cavern, for instance.
-     */
+    private void handleTileEntityUpdates(Block originBlock, IntVector originPos, BlockData originData, BlockData destData, IntVector destPos) {
+        // Handle tile entity updates for destination block if applicable
+        if (!portal.isCrossServer() && MaterialUtil.isTileEntity(destData.getMaterial())) {
+            logger.finer("Adding tile state to map . . .");
+            Block destBlock = destPos.getBlock(Objects.requireNonNull(portal.getDestPos().getWorld()));
+            PacketContainer updatePacket = BlockDataUtil.getUpdatePacket(destBlock.getState());
+            if (updatePacket != null) {
+                BlockDataUtil.setTileEntityPosition(updatePacket, originPos);
+                destTileStates.put(originPos, updatePacket);
+            }
+        }
+
+        // Handle tile entity updates for origin block if applicable
+        if (MaterialUtil.isTileEntity(originBlock.getType())) {
+            logger.finer("Adding tile state to map . . .");
+            PacketContainer updatePacket = BlockDataUtil.getUpdatePacket(originBlock.getState());
+            if (updatePacket != null) {
+                originTileStates.put(originPos, updatePacket);
+            }
+        }
+    }
+
+
+    private void updateRenderedData(boolean isEdge, boolean isOccluding, BukkitBlockInfo blockInfo, WrappedBlockData backgroundData, BlockData destData) {
+        if (isEdge && !isOccluding) {
+            blockInfo.setRenderedDestData(backgroundData);
+        } else {
+            blockInfo.setRenderedDestData(WrappedBlockData.createData(blockRotator.rotateByMatrix(rotateDestToOrigin, destData)));
+        }
+    }
+
+    private boolean shouldSkipBlock(BlockData destData, BlockData originData, boolean firstUpdate, boolean isEdge) {
+        return destData.equals(originData) && firstUpdate && !isEdge;
+    }
+
     @Override
     protected void checkForChanges() {
         List<IViewableBlockInfo> newStates = new ArrayList<>();
-
         int statesLength = nonObscuredStates.size();
 
-        //noinspection ForLoopReplaceableByForEach
-        for(int i = 0; i < statesLength; i++) { // We do not use foreach to avoid concurrent modifications
+        // Loop through non-obscured states
+        for (int i = 0; i < statesLength; i++) {
             BukkitBlockInfo blockInfo = (BukkitBlockInfo) nonObscuredStates.get(i);
+            IntVector originPos = blockInfo.getOriginPos();
+            IntVector destPos = rotateOriginToDest.transform(originPos.subtract(portalOriginPos)).add(portalDestPos);
 
-            IntVector destPos = rotateOriginToDest.transform(blockInfo.getOriginPos().subtract(portalOriginPos)).add(portalDestPos); // Avoid directly using the matrix to fix floating point precision issues
+            // Fetch destination block data once
             BlockData newDestData = dataFetcher.getData(destPos);
+            if (newDestData == null) continue; // Skip if data fetch failed
 
-
-            if(!newDestData.equals(blockInfo.getBaseDestData())) {
-                logger.finer("Destination block change");
-                blockInfo.setBaseDestData(newDestData); // Set the new base data, so that this update isn't detected next change check
-
-                // Re-floodfill from this block, as if this block has changed from occluding to non-occluding, it may have revealed some new blocks
-                // We pass in our existing blockInfo to avoid double-adding to the non obscured states
-                searchFromBlock(blockInfo.getOriginPos(), newStates, blockInfo);
+            // Check for changes at the destination block
+            if (!newDestData.equals(blockInfo.getBaseDestData())) {
+                logger.finer("Destination block change detected at " + destPos);
+                blockInfo.setBaseDestData(newDestData);
+                searchFromBlock(originPos, newStates, blockInfo); // Reflood fill if necessary
             }
 
-            if(!portal.isCrossServer()) {
-                if (MaterialUtil.isTileEntity(newDestData.getMaterial())) {
-                    Block destBlock = destPos.getBlock(Objects.requireNonNull(portal.getDestPos().getWorld()));
-
-                    PacketContainer updatePacket = BlockDataUtil.getUpdatePacket(destBlock.getState());
-                    if(updatePacket != null) {
-                        BlockDataUtil.setTileEntityPosition(updatePacket, blockInfo.getOriginPos());
-
-                        destTileStates.put(blockInfo.getOriginPos(), updatePacket);
-                    }
+            // Handle tile entity updates if not cross-server
+            if (!portal.isCrossServer() && MaterialUtil.isTileEntity(newDestData.getMaterial())) {
+                Block destBlock = destPos.getBlock(Objects.requireNonNull(portal.getDestPos().getWorld()));
+                PacketContainer updatePacket = BlockDataUtil.getUpdatePacket(destBlock.getState());
+                if (updatePacket != null) {
+                    BlockDataUtil.setTileEntityPosition(updatePacket, originPos);
+                    destTileStates.put(originPos, updatePacket);
                 }
             }
 
-            Block originBlock = blockInfo.getOriginPos().getBlock(originWorld);
+            // Fetch and compare origin block data
+            Block originBlock = originPos.getBlock(originWorld);
             BlockData newOriginData = originBlock.getBlockData();
-            if(MaterialUtil.isTileEntity(originBlock.getType()))  {
+
+            // Handle origin tile entity updates
+            if (MaterialUtil.isTileEntity(originBlock.getType())) {
                 PacketContainer updatePacket = BlockDataUtil.getUpdatePacket(originBlock.getState());
-                if(updatePacket != null) {
-                    originTileStates.put(blockInfo.getOriginPos(), updatePacket);
+                if (updatePacket != null) {
+                    originTileStates.put(originPos, updatePacket);
                 }
             }
 
-            if(!newOriginData.equals(blockInfo.getBaseOriginData())) {
-                // If the new origin data is different to the new dest data, then we might need to add this block to the viewable states
-                // This is because it will not have been added previously if the origin and destination data are the same
-                if(!newOriginData.equals(newDestData) && !portal.getOriginPos().isInLine(blockInfo.getOriginPos())) {
-                    int position = getArrayMapIndex(blockInfo.getOriginPos().subtract(portalOriginPos));
-                    // Only add this block as viewable if it is not already designated as viewable
-                    if(alreadyReachedMap[position] < 2) {
+            // Check for changes at the origin block
+            if (!newOriginData.equals(blockInfo.getBaseOriginData())) {
+                blockInfo.setOriginData(newOriginData);
+                if (!newOriginData.equals(newDestData) && !portal.getOriginPos().isInLine(originPos)) {
+                    int position = getArrayMapIndex(originPos.subtract(portalOriginPos));
+                    // Add to newStates if it's not already marked as viewable
+                    if (alreadyReachedMap[position] < 2) {
                         alreadyReachedMap[position] = 2;
                         newStates.add(blockInfo);
                     }
                 }
-
-                blockInfo.setOriginData(newOriginData);
             }
         }
 
-
+        // Update the tile state maps
         updateTileStateMap(originTileStates, originWorld, false);
-        if(!portal.isCrossServer()) {
+        if (!portal.isCrossServer()) {
             updateTileStateMap(destTileStates, portal.getDestPos().getWorld(), true);
         }
 
-        if(newStates.size() > 0) {
+        // Enqueue new states if any were found
+        if (!newStates.isEmpty()) {
             stateQueue.enqueueStates(newStates);
         }
     }
+
 
     private void updateTileStateMap(ConcurrentMap<IntVector, PacketContainer> map, World world, boolean isDestination) {
         for(Map.Entry<IntVector, PacketContainer> entry : map.entrySet()) {

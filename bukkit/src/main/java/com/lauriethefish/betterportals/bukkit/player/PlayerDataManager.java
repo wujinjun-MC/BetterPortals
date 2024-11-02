@@ -145,7 +145,7 @@ public class PlayerDataManager implements IPlayerDataManager, Listener   {
                 request.getDestVelZ()
         );
 
-        player.teleport(destinationPosition);
+        player.teleportAsync(destinationPosition);
         player.setVelocity(destinationVelocity);
 
         player.setFlying(request.isFlying());
