@@ -28,7 +28,7 @@ jobs:
         run: ./gradlew clean build
         env:
           BP_DEVELOPER_BUILD: 1
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: artifact
           path: final/build/libs/*all.jar
