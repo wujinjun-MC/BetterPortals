@@ -13,8 +13,6 @@ jobs:
         uses: actions/setup-java@v1.4.3
         with:
           java-version: '21'
-      - name: Verify JAVA_HOME
-        run: echo $JAVA_HOME
       - name: Change wrapper permissions
         run: chmod +x ./gradlew
       - name: Cache gradle data
